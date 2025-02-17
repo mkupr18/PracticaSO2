@@ -1,6 +1,5 @@
 // bloques.h
 
-
 #include <stdio.h>  //printf(), fprintf(), stderr, stdout, stdin
 #include <fcntl.h> //O_WRONLY, O_CREAT, O_TRUNC
 #include <sys/stat.h> //S_IRUSR, S_IWUSR
@@ -18,22 +17,22 @@
 
 
 #define BLACK      "\x1B[30m"
-#define RED           "\x1b[31m"
+#define RED        "\x1b[31m"
 #define GREEN      "\x1b[32m"
-#define YELLOW    "\x1b[33m"
-#define BLUE          "\x1b[34m"
-#define MAGENTA "\x1b[35m"
-#define CYAN          "\x1b[36m"
-#define WHITE        "\x1B[37m"
+#define YELLOW     "\x1b[33m"
+#define BLUE       "\x1b[34m"
+#define MAGENTA    "\x1b[35m"
+#define CYAN       "\x1b[36m"
+#define WHITE      "\x1B[37m"
 #define ORANGE     "\x1B[38;2;255;128;0m"
-#define ROSE          "\x1B[38;2;255;151;203m"
-#define LBLUE        "\x1B[38;2;53;149;240m"
+#define ROSE       "\x1B[38;2;255;151;203m"
+#define LBLUE      "\x1B[38;2;53;149;240m"
 #define LGREEN     "\x1B[38;2;17;245;120m"
-#define GRAY          "\x1B[38;2;176;174;174m"
-#define RESET        "\x1b[0m"
+#define GRAY       "\x1B[38;2;176;174;174m"
+#define RESET      "\x1b[0m"
 
 
-#define NEGRITA "\x1b[1m"
+#define NEGRITA    "\x1b[1m"
 
 
 int bmount(const char *camino);
@@ -43,3 +42,35 @@ int bread(unsigned int nbloque, void *buf);
 
 static int descriptor = 0;
 
+int bmount(const char *camino) {
+    if (descriptor > 0) {
+        close(descriptor); // Cierra si ya está abierto
+    }
+
+    // Abrimos descriptor
+    descriptor = open(camino, O_RDWR | O_CREAT, 0666);
+
+    // Si ha dado error
+    if (descriptor == -1) {
+        fprintf(stderr, RED "Error en bmount: %s\n" RESET, strerror(errno));
+        return FALLO;
+    }
+
+    // Devolvemos el descriptor en caso de que no haya fallo
+    return descriptor;
+}
+
+int bumount() {
+    // Devuelve un -1 si hay fallo
+    if (close(descriptor) == -1) {
+        // Mostramos por la pantalla que hay fallo
+        fprintf(stderr, RED "Error en bumount: %s\n" RESET, strerror(errno));
+        // Devovemos -1
+        return FALLO;
+    }
+
+    descriptor = 0; // Reiniciar descriptor
+
+    // Devolvemos 0
+    return EXITO;
+}
