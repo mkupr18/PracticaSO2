@@ -41,36 +41,3 @@ int bwrite(unsigned int nbloque, const void *buf);
 int bread(unsigned int nbloque, void *buf);
 
 static int descriptor = 0;
-
-int bmount(const char *camino) {
-    if (descriptor > 0) {
-        close(descriptor); // Cierra si ya está abierto
-    }
-
-    // Abrimos descriptor
-    descriptor = open(camino, O_RDWR | O_CREAT, 0666);
-
-    // Si ha dado error
-    if (descriptor == -1) {
-        fprintf(stderr, RED "Error en bmount: %s\n" RESET, strerror(errno));
-        return FALLO;
-    }
-
-    // Devolvemos el descriptor en caso de que no haya fallo
-    return descriptor;
-}
-
-int bumount() {
-    // Devuelve un -1 si hay fallo
-    if (close(descriptor) == -1) {
-        // Mostramos por la pantalla que hay fallo
-        fprintf(stderr, RED "Error en bumount: %s\n" RESET, strerror(errno));
-        // Devovemos -1
-        return FALLO;
-    }
-
-    descriptor = 0; // Reiniciar descriptor
-
-    // Devolvemos 0
-    return EXITO;
-}
