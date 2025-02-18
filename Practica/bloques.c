@@ -70,8 +70,8 @@ int bread(unsigned int nbloque, void *buf) {
 
     // Verificamos si la lectura fue exitosa
     if (bytes_leidos == -1) {
-        fprintf(stderr, RED "Error en breadt: %s\n" RESET, strerror(errno));
-        return FALLO; // Devolvemos -1 en caso de error
+        fprintf(stderr, RED "Error en bread: %s\n" RESET, strerror(errno));
+        return FALLO; 
     }
 
     // Devolvemos el número de bytes leídos o -1
