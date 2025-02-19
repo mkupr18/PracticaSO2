@@ -1,5 +1,7 @@
 #include "bloques.h"
 
+static int descriptor = 0;
+
 int bmount(const char *camino) {
     if (descriptor > 0) {
         close(descriptor); // Cierra si ya está abierto
