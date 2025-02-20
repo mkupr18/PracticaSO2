@@ -69,7 +69,7 @@ struct superbloque {
     /* Utilizar una variable de alineación si es necesario  para vuestra plataforma/compilador   */
     char padding[INODOSIZE - 2 * sizeof(unsigned char) - 4 * sizeof(time_t) - 18 * sizeof(unsigned int) - 6 * sizeof(unsigned char)];
     // Fijarse que también se resta lo que ocupen las variables de alineación utilizadas!!!
- }; 
+}; 
  
 
 
