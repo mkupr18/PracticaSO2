@@ -4,10 +4,10 @@ static int descriptor = 0;
 
 int bmount(const char *camino) {
     if (descriptor > 0) {
-        close(descriptor); // Cierra si ya está abierto
+        close(descriptor); // Lo cierra si ya está abierto
     }
 
-    // Abrimos descriptor
+    // Abrimos el descriptor
     descriptor = open(camino, O_RDWR | O_CREAT, 0666);
 
     // Si ha dado error
@@ -29,7 +29,7 @@ int bumount() {
         return FALLO;
     }
 
-    descriptor = 0; // Reiniciar descriptor
+    descriptor = 0; // Reiniciamos el descriptor
 
     // Devolvemos 0
     return EXITO;
@@ -68,7 +68,7 @@ int bread(unsigned int nbloque, void *buf) {
     }
 
     // Leemos el bloque del fichero
-    ssize_t bytes_leidos = read(descriptor, buf, BLOCKSIZE);
+    size_t bytes_leidos = read(descriptor, buf, BLOCKSIZE);
 
     // Verificamos si la lectura fue exitosa
     if (bytes_leidos == -1) {

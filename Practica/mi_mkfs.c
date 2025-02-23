@@ -1,5 +1,5 @@
-#include "bloques.h"
-//#include "ficheros_basico.h"
+//#include "bloques.h"
+#include "ficheros_basico.h"
 #include <string.h>
 
 int main(int argc, char **argv){
@@ -28,10 +28,11 @@ int main(int argc, char **argv){
 
     // Inicializamos el buffer con ceros
     unsigned char buffer[BLOCKSIZE];
+
     // Guardamos espacio
     memset(buffer, 0, BLOCKSIZE);
 
-    // Escribir nbloques de ceros en el dispositivo virtual
+    // Escribimos nbloques de ceros en el dispositivo virtual
     for (int i = 0; i < nbloques; i++) {
         if (bwrite(i, buffer) == FALLO) {
             perror("Error al escribir en el dispositivo virtual");
@@ -40,9 +41,34 @@ int main(int argc, char **argv){
         }
     }
 
+    // Calculamos el número de nodos heurísticamente
+    int ninodos = nbloques / 4;
+
+    // Inicializamos las estructuras del sistema de ficheros
+    if (initSB(nbloques, ninodos) == FALLO)
+    {
+        perror("Error al inicializar el superbloque");
+        bumount();
+        return FALLO;
+    }
+
+    if (initMB() == FALLO)
+    {
+        perror("Error al inicializar el mapa de bits");
+        bumount();
+        return FALLO;
+    }
+
+    if (initAI() == FALLO)
+    {
+        perror("Error al inicializar el array de inodos");
+        bumount();
+        return FALLO;
+    }
+
     printf("Dispositivo '%s' formateado con %d bloques de %d bytes.\n", nombre_dispositivo, nbloques, BLOCKSIZE);
 
-    // Desmontar el dispositivo virtual
+    // Desmontamos el dispositivo virtual
     if (bumount() == FALLO) {
         perror("Error al desmontar el dispositivo virtual");
         return FALLO;

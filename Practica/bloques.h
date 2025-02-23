@@ -11,9 +11,9 @@
 
 #define BLOCKSIZE 1024  // bytes
 
-
-#define EXITO 0         //para gestión errores
-#define FALLO -1        //para gestión errores
+// Para gestión errores
+#define EXITO 0
+#define FALLO -1
 
 
 #define BLACK      "\x1B[30m"
