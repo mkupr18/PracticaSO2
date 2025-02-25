@@ -7,7 +7,7 @@
 //#define tamMB = 13
 //#define tamAI = 3125
 // El tamaño total de metadatos = la suma de los tamaños = 3139
-#define INODOSIZE 1024   // bytes
+#define INODOSIZE 128   // bytes
 
 // Inicialización de las funciones
 int tamAI(unsigned int ninodos);

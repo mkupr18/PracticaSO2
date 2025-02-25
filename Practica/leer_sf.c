@@ -33,6 +33,9 @@ int main(int argc, char **argv) {
     printf("cantBloquesLibres = %d\n", SB.cantBloquesLibres);
     printf("cantInodosLibres = %d\n", SB.cantInodosLibres);
     printf("totBloques = %d\n", SB.totBloques);
+    printf("totInodos = %d\n", SB.totInodos);
+
+    
     // Mostrar tamaños de estructuras
     printf("\nsizeof struct superbloque: %lu\n", sizeof(struct superbloque));
     printf("sizeof struct inodo: %lu\n", sizeof(struct inodo));
