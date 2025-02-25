@@ -1,12 +1,13 @@
 #include "bloques.h"
+#include <limits.h>
 
 // Constantes
-#define posSB = 0
-#define tamSB = 1
+#define posSB  0
+#define tamSB  1
 //#define tamMB = 13
 //#define tamAI = 3125
 // El tamaño total de metadatos = la suma de los tamaños = 3139
-#define INODOSIZE = 1024   // bytes
+#define INODOSIZE 1024   // bytes
 
 // Inicialización de las funciones
 int tamAI(unsigned int ninodos);
@@ -14,7 +15,13 @@ int tamMB(unsigned int nbloques);
 int initSB(unsigned int nbloques, unsigned int ninodos);
 int initMB(); 
 int initAI();
-
+//int escribir_bit(unsigned int nbloque, unsigned int bit);
+//char leer_bit(unsigned int nbloque);
+//int reservar_bloque();
+//int liberar_bloque(unsigned int nbloque);
+//int escribir_inodo(unsigned int ninodo, struct inodo *inodo);
+//int leer_inodo(unsigned int ninodo, struct inodo *inodo);
+//int reservar_inodo(unsigned char tipo, unsigned char permisos);
 
 // 4 bytes cada uno y tenemos 12 -> 4*12 = 48 bytes
 struct superbloque {
