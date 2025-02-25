@@ -1,4 +1,5 @@
 #include "ficheros_basico.h"
+#include "bloques.h"
 #include <limits.h> // Para UINT_MAX
 #include <string.h> // Para memset
 
@@ -129,3 +130,74 @@ int initAI() {
 
     return EXITO;
 }
+
+
+int escribir_bit(unsigned int nbloque, unsigned int bit) {
+    unsigned char bufferMB[BLOCKSIZE]; //Buffer auxiliar que hacemos de Mapa de bit
+    unsigned char mascara = 128; // 10000000 en binario, servirá de mascara
+
+    // Calcula la posición del byte y bit en el mapa de bits
+    unsigned int posbyte = nbloque / 8;
+    unsigned int posbit = nbloque % 8;
+    unsigned int nbloqueMB = posbyte / BLOCKSIZE;
+    unsigned int nbloqueabs = SB.posPrimerBloqueMB + nbloqueMB;
+
+    // Leemos el mapa de bit y lo pasamos en nuestro auxiliar, para no modificar directamente en el principal para ahorar espacio
+    if (bread(nbloqueabs, bufferMB) == -1) {
+        perror(RED "Error leyendo el mapa de bits" RESET);
+        return -1;
+    }
+
+    // Ajustamos la posición dentro del bloque leído
+    posbyte = posbyte % BLOCKSIZE;
+
+    // Desplazaramos la máscara para situarla en el bit correspondiente
+    mascara >>= posbit;
+
+    // Modificamos segun el bit correspondiente que queramos poner
+    if (bit == 1) {
+        bufferMB[posbyte] |= mascara;  // Poner el bit a 1
+    } else { 
+        bufferMB[posbyte] &= ~mascara; // Poner el bit a 0
+    }
+
+    // Escribir el bloque actualizado de vuelta en el dispositivo
+    if (bwrite(nbloqueabs, bufferMB) == -1) {
+        perror(RED "Error escribiendo en el mapa de bits" RESET);
+        return -1;
+    }
+
+    return 0;
+}
+
+char leer_bit(unsigned int nbloque) {
+    unsigned char bufferMB[BLOCKSIZE];  //Buffer auxiliar que hacemos de Mapa de bit
+    unsigned char mascara = 128;  // 10000000 en binario, servirá de mascara
+
+    // Calcular la posición del byte y bit en el MB
+    unsigned int posbyte = nbloque / 8;
+    unsigned int posbit = nbloque % 8;
+    unsigned int nbloqueMB = posbyte / BLOCKSIZE;
+    unsigned int nbloqueabs = SB.posPrimerBloqueMB + nbloqueMB;
+
+    // Leemos el mapa de bit y lo pasamos en nuestro auxiliar, para no modificar directamente en el principal para ahorar espacio
+    if (bread(nbloqueabs, bufferMB) == -1) {
+        perror("Error leyendo el mapa de bits");
+        return -1;
+    }
+
+    // Ajustamos la posición dentro del bloque leído
+    posbyte = posbyte % BLOCKSIZE;
+
+    // Desplazamos la máscara hasta la posición del bit
+    mascara >>= posbit;
+
+    // Aplicamos el operador AND para extraer el bit
+    mascara &= bufferMB[posbyte];
+
+    // Desplazamos a la derecha para obtener el bit en la posición menos significativa
+    mascara >>= (7 - posbit);
+
+    return mascara;  // Devuelve 0 o 1 según el bit leído
+}
+
