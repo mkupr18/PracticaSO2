@@ -13,11 +13,14 @@ int tamMB(unsigned int nbloques){
 
 // Calcula el tamaño en bloques del array de inodos
 int tamAI(unsigned int ninodos){
-    int tam = (ninodos * INODOSIZE) / BLOCKSIZE;
+    // ninodos =nbloques/4;
+    int tam = (ninodos * INODOSIZE)/BLOCKSIZE;
+    printf("%d\n",ninodos);
     if ((ninodos % (BLOCKSIZE / INODOSIZE)) != 0)
     {
         tam++; // Añadimos un bloque si hay resto
     }
+    printf("%d\n",tam);
     return tam;
 }
 
@@ -47,12 +50,70 @@ int initSB(unsigned int nbloques, unsigned int ninodos){
 // bufferMB sera un array de [0...391] = 255 en binario, es decir todos 1s
 // bufferMB[392] = 1110 0000 o 224 en binario
 // Inicializa el mapa de bits, marcando como ocupados los bloques de metadatos
-int initMB(){
+int initMB() {
+    struct superbloque SB;
+    if (bread(posSB, &SB) == -1) {
+        return FALLO;
+    }
 
+    unsigned int tamMB_bloques = tamMB(SB.totBloques);
+    unsigned int bloquesOcupados = SB.posPrimerBloqueDatos;
+    unsigned int bytesOcupados = bloquesOcupados / 8;
+    unsigned int bitsRestantes = bloquesOcupados % 8;
 
+    unsigned char bufferMB[BLOCKSIZE];
+    memset(bufferMB, 255, BLOCKSIZE);
+
+    for (unsigned int i = 0; i < tamMB_bloques; i++) {
+        if (i < (bytesOcupados / BLOCKSIZE)) {
+            if (bwrite(SB.posPrimerBloqueMB + i, bufferMB) == -1) {
+                return FALLO;
+            }
+        } else {
+            memset(bufferMB, 0, BLOCKSIZE);
+            memcpy(bufferMB, bufferMB, bytesOcupados % BLOCKSIZE);
+            if (bitsRestantes > 0) {
+                bufferMB[bytesOcupados % BLOCKSIZE] = (unsigned char)(~(0xFF >> bitsRestantes));
+            }
+            if (bwrite(SB.posPrimerBloqueMB + i, bufferMB) == -1) {
+                return FALLO;
+            }
+            break;
+        }
+    }
+
+    SB.cantBloquesLibres -= bloquesOcupados;
+    return bwrite(posSB, &SB) == -1 ? FALLO : EXITO;
 }
 
-int initAI(){
 
+int initAI() {
+    struct superbloque SB;
+    if (bread(posSB, &SB) == -1) {
+        return FALLO;
+    }
 
+    struct inodo inodos[BLOCKSIZE / INODOSIZE];
+    unsigned int contInodos = SB.posPrimerInodoLibre + 1;
+
+    for (unsigned int i = SB.posPrimerBloqueAI; i <= SB.posUltimoBloqueAI; i++) {
+        memset(inodos, 0, BLOCKSIZE);
+
+        for (unsigned int j = 0; j < BLOCKSIZE / INODOSIZE; j++) {
+            inodos[j].tipo = 'l';
+            if (contInodos < SB.totInodos) {
+                inodos[j].punterosDirectos[0] = contInodos;
+                contInodos++;
+            } else {
+                inodos[j].punterosDirectos[0] = UINT_MAX;
+                break;
+            }
+        }
+
+        if (bwrite(i, inodos) == -1) {
+            return FALLO;
+        }
+    }
+
+    return EXITO;
 }
