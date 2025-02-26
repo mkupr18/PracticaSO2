@@ -201,3 +201,73 @@ char leer_bit(unsigned int nbloque) {
     return mascara;  // Devuelve 0 o 1 según el bit leído
 }
 
+int reservar_bloque() {
+    // Buffer para almacenar un bloque del mapa de bits
+    unsigned char bufferMB[BLOCKSIZE];
+    // Buffer auxiliar lleno de 1s para comparación
+    unsigned char bufferAux[BLOCKSIZE];
+    //reservamos espacio en la memoria dinamica
+    memset(bufferAux, 255, BLOCKSIZE);
+
+    int nbloqueMB, posbyte, posbit, nbloque;
+
+    // Recorremos los bloques del mapa de bits en busca de un bloque libre
+    for (nbloqueMB = 0; nbloqueMB < SB.totBloquesMB; nbloqueMB++) {
+        // Leemos el bloque del mapa de bits correspondiente
+        if (bread(SB.posPrimerBloqueMB + nbloqueMB, bufferMB) == -1) {
+            return -1; // Error en la lectura
+        }
+
+        // Comparamos con el buffer auxiliar para encontrar un bit en 0
+        if (memcmp(bufferMB, bufferAux, BLOCKSIZE) != 0) {
+            // Recorremos los bytes dentro del bloque del mapa de bits
+            for (posbyte = 0; posbyte < BLOCKSIZE; posbyte++) {
+                if (bufferMB[posbyte] != 255) { // Si el byte no es 255, hay al menos un bit en 0
+                    // Inicializamos la máscara para encontrar el bit libre
+                    unsigned char mascara = 128; // 10000000 en binario
+                    posbit = 0;
+
+                    // Recorremos los bits del byte hasta encontrar el primer 0
+                    while (bufferMB[posbyte] & mascara) {
+                        bufferMB[posbyte] <<= 1; // Desplazamos los bits a la izquierda
+                        posbit++;
+                    }
+
+                    // Calculamos el número de bloque físico correspondiente
+                    nbloque = (nbloqueMB * BLOCKSIZE * 8) + (posbyte * 8) + posbit;
+
+                    // Marcamos el bloque como ocupado en el mapa de bits
+                    escribir_bit(nbloque, 1);
+
+                    // Decrementamos el contador de bloques libres en el superbloque
+                    SB.cantBloquesLibres--;
+
+                    // Guardamos el superbloque actualizado
+                    bwrite(SB.posSB, &SB);
+
+                    // Limpiamos el contenido del nuevo bloque en la zona de datos
+                    memset(bufferMB, 0, BLOCKSIZE);
+                    bwrite(nbloque, bufferMB);
+
+                    // Devolvemos el número del bloque reservado
+                    return nbloque;
+                }
+            }
+        }
+    }
+    return -1; // No se encontraron bloques libres
+}
+
+int liberar_bloque(unsigned int nbloque) {
+    // Marcamos el bloque como libre en el mapa de bits
+    escribir_bit(nbloque, 0);
+
+    // Incrementamos la cantidad de bloques libres en el superbloque
+    SB.cantBloquesLibres++;
+
+    // Guardamos el superbloque actualizado
+    bwrite(SB.posSB, &SB);
+
+    // Devolvemos el número del bloque liberado
+    return nbloque;
+}
