@@ -191,7 +191,7 @@ char leer_bit(unsigned int nbloque) {
 
     // Leemos el mapa de bit y lo pasamos en nuestro auxiliar, para no modificar directamente en el principal para ahorar espacio
     if (bread(nbloqueabs, bufferMB) == -1) {
-        perror("Error leyendo el mapa de bits");
+        perror(RED "Error leyendo el mapa de bits" RESET);
         return -1;
     }
 
@@ -259,7 +259,7 @@ int reservar_bloque() {
                     SB.cantBloquesLibres--;
 
                     // Guardamos el superbloque actualizado
-                    //bwrite(SB.posSB, &SB);
+                    bwrite(posSB, &SB);
 
                     // Limpiamos el contenido del nuevo bloque en la zona de datos
                     memset(bufferMB, 0, BLOCKSIZE);
@@ -288,7 +288,7 @@ int liberar_bloque(unsigned int nbloque) {
     SB.cantBloquesLibres++;
 
     // Guardamos el superbloque actualizado
-    //bwrite(SB.posSB, &SB);
+    bwrite(posSB, &SB);
 
     // Devolvemos el número del bloque liberado
     return nbloque;
