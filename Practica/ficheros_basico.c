@@ -228,7 +228,7 @@ int reservar_bloque() {
     int nbloqueMB, posbyte, posbit, nbloque;
 
     // Recorremos los bloques del mapa de bits en busca de un bloque libre
-    for (nbloqueMB = 0; nbloqueMB < SB.totBloquesMB; nbloqueMB++) {
+    for (nbloqueMB = 0; nbloqueMB < SB.totBloques; nbloqueMB++) {
         // Leemos el bloque del mapa de bits correspondiente
         if (bread(SB.posPrimerBloqueMB + nbloqueMB, bufferMB) == -1) {
             return -1; // Error en la lectura
@@ -259,7 +259,7 @@ int reservar_bloque() {
                     SB.cantBloquesLibres--;
 
                     // Guardamos el superbloque actualizado
-                    bwrite(SB.posSB, &SB);
+                    //bwrite(SB.posSB, &SB);
 
                     // Limpiamos el contenido del nuevo bloque en la zona de datos
                     memset(bufferMB, 0, BLOCKSIZE);
@@ -288,7 +288,7 @@ int liberar_bloque(unsigned int nbloque) {
     SB.cantBloquesLibres++;
 
     // Guardamos el superbloque actualizado
-    bwrite(SB.posSB, &SB);
+    //bwrite(SB.posSB, &SB);
 
     // Devolvemos el número del bloque liberado
     return nbloque;
