@@ -211,6 +211,13 @@ char leer_bit(unsigned int nbloque) {
 }
 
 int reservar_bloque() {
+
+    struct superbloque SB;
+    // Leemos el superbloque para obtener información necesaria
+    if (bread(posSB, &SB) == -1) {
+        return FALLO;
+    }
+
     // Buffer para almacenar un bloque del mapa de bits
     unsigned char bufferMB[BLOCKSIZE];
     // Buffer auxiliar lleno de 1s para comparación
@@ -268,6 +275,12 @@ int reservar_bloque() {
 }
 
 int liberar_bloque(unsigned int nbloque) {
+    struct superbloque SB;
+    // Leemos el superbloque para obtener información necesaria
+    if (bread(posSB, &SB) == -1) {
+        return FALLO;
+    }
+
     // Marcamos el bloque como libre en el mapa de bits
     escribir_bit(nbloque, 0);
 
