@@ -15,12 +15,10 @@ int tamMB(unsigned int nbloques){
 // Calcula el tamaño en bloques del array de inodos
 int tamAI(unsigned int ninodos){
     int tam = (ninodos * INODOSIZE)/BLOCKSIZE;
-    printf("%d\n",ninodos);
     if ((ninodos % (BLOCKSIZE / INODOSIZE)) != 0)
     {
         tam++; // Añadimos un bloque si hay resto
     }
-    printf("%d\n",tam);
     return tam;
 }
 
@@ -133,6 +131,11 @@ int initAI() {
 
 
 int escribir_bit(unsigned int nbloque, unsigned int bit) {
+    struct superbloque SB;
+    // Leemos el superbloque para obtener información necesaria
+    if (bread(posSB, &SB) == -1) {
+        return FALLO;
+    }
     unsigned char bufferMB[BLOCKSIZE]; //Buffer auxiliar que hacemos de Mapa de bit
     unsigned char mascara = 128; // 10000000 en binario, servirá de mascara
 
@@ -171,6 +174,12 @@ int escribir_bit(unsigned int nbloque, unsigned int bit) {
 }
 
 char leer_bit(unsigned int nbloque) {
+    struct superbloque SB;
+    // Leemos el superbloque para obtener información necesaria
+    if (bread(posSB, &SB) == -1) {
+        return FALLO;
+    }
+
     unsigned char bufferMB[BLOCKSIZE];  //Buffer auxiliar que hacemos de Mapa de bit
     unsigned char mascara = 128;  // 10000000 en binario, servirá de mascara
 
