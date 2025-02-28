@@ -72,8 +72,10 @@ int initMB() {
             }
         } else {
             // Si estamos en un bloque parcialmente ocupado
+            unsigned char bufferAux[BLOCKSIZE];
             memset(bufferMB, 0, BLOCKSIZE);  // Inicializamos el buffer a 0
-            memcpy(bufferMB, bufferMB, bytesOcupados % BLOCKSIZE); // Copiamos bytes ocupados
+            memcpy(bufferAux,bufferMB, bytesOcupados % BLOCKSIZE);
+            memcpy(bufferMB, bufferAux, bytesOcupados % BLOCKSIZE); // Copiamos bytes ocupados
 
             // Marcar los bits restantes con 1
             if (bitsRestantes > 0) {
