@@ -67,6 +67,32 @@ int main(int argc, char **argv){
     }
 
     printf("Dispositivo '%s' formateado con %d bloques de %d bytes.\n", nombre_dispositivo, nbloques, BLOCKSIZE);
+    // Reservar el inodo para el directorio raíz
+    int inodo_raiz = reservar_inodo('d', 7);
+    if (inodo_raiz != 0) {
+        fprintf(stderr, "Error: No se pudo reservar el inodo para el directorio raíz\n");
+        bumount();
+        return FALLO;
+    }
+
+    // Actualizar el superbloque
+    struct superbloque SB;
+    if (bread(posSB, &SB) == FALLO) {
+        perror("Error al leer el superbloque");
+        bumount();
+        return FALLO;
+    }
+    SB.posPrimerInodoLibre = 1;  // Ahora el inodo 1 es el primer inodo libre
+    SB.cantInodosLibres--;       // Disminuye la cantidad de inodos libres
+
+    if (bwrite(posSB, &SB) == FALLO) {
+        perror("Error al escribir el superbloque actualizado");
+        bumount();
+        return FALLO;
+    }
+
+    printf("Directorio raíz creado en el inodo 0.\n");
+
 
     // Desmontamos el dispositivo virtual
     if (bumount() == FALLO) {
