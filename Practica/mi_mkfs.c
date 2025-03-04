@@ -93,7 +93,7 @@ int main(int argc, char **argv){
 
     printf("Directorio raíz creado en el inodo 0.\n");
 
-
+    
     // Desmontamos el dispositivo virtual
     if (bumount() == FALLO) {
         perror("Error al desmontar el dispositivo virtual");
