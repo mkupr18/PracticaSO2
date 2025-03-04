@@ -37,14 +37,8 @@ int initSB(unsigned int nbloques, unsigned int ninodos){
     SB.posUltimoBloqueDatos = nbloques - 1;
     SB.posInodoRaiz = 0;
     SB.posPrimerInodoLibre = 0;
-    printf("%d\n", nbloques);
-    printf("%d\n", SB.posPrimerBloqueDatos);
     SB.cantBloquesLibres = nbloques - SB.posPrimerBloqueDatos; // Restamos los metadatos
-    printf("%d\n", nbloques);
-
-    printf("%d\n", SB.cantBloquesLibres);
     SB.cantInodosLibres = ninodos;
-    printf("%d\n", SB.cantInodosLibres);
     SB.totBloques =  nbloques;
     SB.totInodos =  ninodos;
 
