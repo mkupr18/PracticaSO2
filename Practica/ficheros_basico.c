@@ -101,7 +101,7 @@ int initMB() {
         }
     }
     // Actualizamos la cantidad de bloques libres en el superbloque
-    SB.cantBloquesLibres -= bloquesOcupados;
+    // SB.cantBloquesLibres -= bloquesOcupados;
     return bwrite(posSB, &SB) == -1 ? FALLO : EXITO;
 }
 

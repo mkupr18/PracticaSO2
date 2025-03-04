@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
     struct superbloque SB;
     if (bread(posSB, &SB) == FALLO) {
         perror("Error al leer el superbloque");
-        //bumount();
+        bumount();
         return FALLO;
     }
 
