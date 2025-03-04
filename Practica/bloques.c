@@ -77,6 +77,6 @@ int bread(unsigned int nbloque, void *buf) {
     }
 
     // Devolvemos el número de bytes leídos o -1
-    return (int)bytes_leidos;
+    return bytes_leidos;
 }
 
