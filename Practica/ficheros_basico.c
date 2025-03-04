@@ -37,8 +37,14 @@ int initSB(unsigned int nbloques, unsigned int ninodos){
     SB.posUltimoBloqueDatos = nbloques - 1;
     SB.posInodoRaiz = 0;
     SB.posPrimerInodoLibre = 0;
-    SB.cantBloquesLibres = nbloques - (SB.posPrimerBloqueDatos); // Restamos los metadatos
+    printf("%d\n", nbloques);
+    printf("%d\n", SB.posPrimerBloqueDatos);
+    SB.cantBloquesLibres = nbloques - SB.posPrimerBloqueDatos; // Restamos los metadatos
+    printf("%d\n", nbloques);
+
+    printf("%d\n", SB.cantBloquesLibres);
     SB.cantInodosLibres = ninodos;
+    printf("%d\n", SB.cantInodosLibres);
     SB.totBloques =  nbloques;
     SB.totInodos =  ninodos;
 
@@ -48,10 +54,14 @@ int initSB(unsigned int nbloques, unsigned int ninodos){
 // Inicializa el mapa de bits, marcando como ocupados con 1 los bloques de metadatos
 int initMB() {
     struct superbloque SB;
+    // Buffer para el mapa de bits
+    unsigned char bufferMB[BLOCKSIZE];
     // Leemos el superbloque para obtener información necesaria
     if (bread(posSB, &SB) == -1) {
         return FALLO;
     }
+
+    memset(bufferMB,0,BLOCKSIZE);
     // Obtenemos el tamaño de mapa de bits en bloques
     unsigned int tamMB_bloques = tamMB(SB.totBloques);
     // Obtenemos el tamaño de bloques ocupados por meta datos
@@ -60,11 +70,12 @@ int initMB() {
     unsigned int bytesOcupados = bloquesOcupados / 8;
     // Obtenemos cuántos bits restantes están ocupados
     unsigned int bitsRestantes = bloquesOcupados % 8;
-    // Buffer para el mapa de bits
-    unsigned char bufferMB[BLOCKSIZE];
+
+    
 
     // Inicializamos el buffer con todos los bits a 1 (255 en decimal = 11111111 en binario)
-    memset(bufferMB, 255, BLOCKSIZE);
+    
+    memset(bufferMB, 255, bytesOcupados);
     // Recorremos cada bloque del mapa de bits e escribir el bloque completo con bits a 1
     for (unsigned int i = 0; i < tamMB_bloques; i++) {
         if (i < (bytesOcupados / BLOCKSIZE)) {
