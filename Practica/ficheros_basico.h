@@ -8,6 +8,11 @@
 //#define tamAI = 3125
 // El tamaño total de metadatos = la suma de los tamaños = 3139
 #define INODOSIZE 128   // bytes
+#define NPUNTEROS (BLOCKSIZE / sizeof(unsigned int)) // 256 punteros por bloque
+#define DIRECTOS 12
+#define INDIRECTOS0 (NPUNTEROS + DIRECTOS)                            // 268
+#define INDIRECTOS1 (NPUNTEROS * NPUNTEROS + INDIRECTOS0)             // 65.804
+#define INDIRECTOS2 (NPUNTEROS * NPUNTEROS * NPUNTEROS + INDIRECTOS1) // 16.843.020
 
 // Inicialización de las funciones
 int tamAI(unsigned int ninodos);
@@ -19,6 +24,9 @@ int escribir_bit(unsigned int nbloque, unsigned int bit);
 char leer_bit(unsigned int nbloque);
 int reservar_bloque();
 int liberar_bloque(unsigned int nbloque);
+int obtener_nRangoBL(struct inodo *inodo, unsigned int nblogico, unsigned int *ptr);
+int obtener_indice(unsigned int nblogico, int nivel_punteros);
+//int traducir_bloque_inodo(unsigned int ninodo, unsigned int nblogico, unsigned char reservar);
 
 int reservar_inodo(unsigned char tipo, unsigned char permisos);
 
