@@ -83,7 +83,7 @@ int main(int argc, char **argv){
         return FALLO;
     }
     SB.posPrimerInodoLibre = 1;  // Ahora el inodo 1 es el primer inodo libre
-    SB.cantInodosLibres--;       // Disminuye la cantidad de inodos libres
+    
 
     if (bwrite(posSB, &SB) == FALLO) {
         perror("Error al escribir el superbloque actualizado");
@@ -93,7 +93,7 @@ int main(int argc, char **argv){
 
     printf("Directorio raíz creado en el inodo 0.\n");
 
-
+    
     // Desmontamos el dispositivo virtual
     if (bumount() == FALLO) {
         perror("Error al desmontar el dispositivo virtual");
