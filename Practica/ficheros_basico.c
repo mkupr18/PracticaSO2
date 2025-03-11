@@ -402,5 +402,124 @@ int reservar_inodo(unsigned char tipo, unsigned char permisos)
     return posInodoReservado; // Devolvemos la posición del inodo reservado
 }
 
+// Determina el nivel de punteros en el que se encuentra el bloque lógico y devuelve el puntero correspondiente
+int obtener_nRangoBL(struct inodo *inodo, unsigned int nblogico, unsigned int *ptr)
+{
+    if (nblogico < DIRECTOS)
+    { // Bloques directos
+        *ptr = inodo->punterosDirectos[nblogico];
+        return 0;
+    }
+    else if (nblogico < INDIRECTOS0)
+    { // Indirecto simple
+        *ptr = inodo->punterosIndirectos[0];
+        return 1;
+    }
+    else if (nblogico < INDIRECTOS1)
+    { // Indirecto doble
+        *ptr = inodo->punterosIndirectos[1];
+        return 2;
+    }
+    else if (nblogico < INDIRECTOS2)
+    { // Indirecto triple
+        *ptr = inodo->punterosIndirectos[2];
+        return 3;
+    }
+    *ptr = 0;
+    return -1; // Error: bloque lógico fuera de rango
+}
 
+// Calcula el índice dentro del bloque de punteros dependiendo del nivel de punteros
+int obtener_indice(unsigned int nblogico, int nivel_punteros)
+{
+    if (nblogico < DIRECTOS)
+        return nblogico; // Bloques directos
+    if (nblogico < INDIRECTOS0)
+        return nblogico - DIRECTOS; // Indirecto simple
+    if (nblogico < INDIRECTOS1)
+    {
+        if (nivel_punteros == 2)
+            return (nblogico - INDIRECTOS0) / NPUNTEROS; // Índice en indirecto doble
+        if (nivel_punteros == 1)
+            return (nblogico - INDIRECTOS0) % NPUNTEROS; // Índice en bloque de datos
+    }
+    if (nblogico < INDIRECTOS2)
+    {
+        if (nivel_punteros == 3)
+            return (nblogico - INDIRECTOS1) / (NPUNTEROS * NPUNTEROS); // Índice en indirecto triple
+        if (nivel_punteros == 2)
+            return ((nblogico - INDIRECTOS1) % (NPUNTEROS * NPUNTEROS)) / NPUNTEROS;
+        if (nivel_punteros == 1)
+            return ((nblogico - INDIRECTOS1) % (NPUNTEROS * NPUNTEROS)) % NPUNTEROS;
+    }
+    return -1; // Error: fuera de rango
+}
 
+// Traduce un bloque lógico a su correspondiente bloque físico, reservándolo si es necesario
+int traducir_bloque_inodo(unsigned int ninodo, unsigned int nblogico, unsigned char reservar)
+{
+    struct inodo inodo;
+    if (leer_inodo(ninodo, &inodo) == -1)
+        return -1;
+
+    unsigned int ptr, ptr_ant;
+    int nRangoBL = obtener_nRangoBL(&inodo, nblogico, &ptr); // Obtener el nivel de punteros
+    int nivel_punteros = nRangoBL;
+
+    unsigned int buffer[NPUNTEROS]; // Buffer para bloques de punteros
+    int indice;
+
+    // Descendemos por los niveles de punteros
+    while (nivel_punteros > 0)
+    {
+        if (ptr == 0) // Si el puntero no está asignado
+        { 
+            if (reservar == 0) // No reserva si no se solicita
+                return -1;           
+            ptr = reservar_bloque(); // Reserva un nuevo bloque
+            inodo.numBloquesOcupados++;
+            inodo.ctime = time(NULL);
+            if (nivel_punteros == nRangoBL)
+            {
+                inodo.punterosIndirectos[nRangoBL - 1] = ptr;
+            }
+            else
+            {
+                buffer[indice] = ptr;
+                bwrite(ptr_ant, buffer);
+            }
+            memset(buffer, 0, BLOCKSIZE); // Limpia el buffer
+        }
+        else
+        {
+            bread(ptr, buffer); // Leemos el bloque de punteros
+        }
+
+        indice = obtener_indice(nblogico, nivel_punteros); // Obtenemos el índice dentro del bloque
+        ptr_ant = ptr;
+        ptr = buffer[indice];
+        nivel_punteros--;
+    }
+
+    // Último nivel
+    if (ptr == 0)
+    {
+        if (reservar == 0)
+            return -1;
+        ptr = reservar_bloque(); // Reserva el bloque de datos
+        inodo.numBloquesOcupados++;
+        inodo.ctime = time(NULL);
+        if (nRangoBL == 0)
+        {
+            inodo.punterosDirectos[nblogico] = ptr;
+        }
+        else
+        {
+            buffer[indice] = ptr;
+            bwrite(ptr_ant, buffer);
+        }
+    }
+
+    escribir_inodo(ninodo, &inodo); // Guardamos los cambios en el inodo
+    return ptr;
+}
