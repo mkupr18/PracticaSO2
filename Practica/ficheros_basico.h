@@ -19,8 +19,7 @@ int escribir_bit(unsigned int nbloque, unsigned int bit);
 char leer_bit(unsigned int nbloque);
 int reservar_bloque();
 int liberar_bloque(unsigned int nbloque);
-//int escribir_inodo(unsigned int ninodo, struct inodo *inodo);
-//int leer_inodo(unsigned int ninodo, struct inodo *inodo);
+
 int reservar_inodo(unsigned char tipo, unsigned char permisos);
 
 // 4 bytes cada uno y tenemos 12 -> 4*12 = 48 bytes
@@ -40,7 +39,7 @@ struct superbloque {
     char padding[BLOCKSIZE - 12 * sizeof(unsigned int)]; // Relleno para ocupar el bloque completo
  };
 
- struct inodo {              // comprobar que ocupa 128 bytes haciendo un sizeof(inodo)!!!
+struct inodo {              // comprobar que ocupa 128 bytes haciendo un sizeof(inodo)!!!
     unsigned char tipo;      // Tipo ('l':libre, 'd':directorio o 'f':fichero)
     unsigned char permisos;  // Permisos (lectura y/o escritura y/o ejecución)
                              // Solo tendremos en cuenta los permisos del user (rwx: 000 - 111)
@@ -77,6 +76,8 @@ struct superbloque {
     char padding[INODOSIZE - 2 * sizeof(unsigned char) - 4 * sizeof(time_t) - 18 * sizeof(unsigned int) - 6 * sizeof(unsigned char)];
     // Fijarse que también se resta lo que ocupen las variables de alineación utilizadas!!!
 }; 
+int escribir_inodo(unsigned int ninodo, struct inodo *inodo);
+int leer_inodo(unsigned int ninodo, struct inodo *inodo);
  
 
 

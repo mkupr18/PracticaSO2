@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <time.h>
 #include "ficheros_basico.h"
 
 int main(int argc, char **argv) {
@@ -30,40 +31,76 @@ int main(int argc, char **argv) {
     printf("posUltimoBloqueDatos = %d\n", SB.posUltimoBloqueDatos);
     printf("posInodoRaiz = %d\n", SB.posInodoRaiz);
     printf("posPrimerInodoLibre = %d\n", SB.posPrimerInodoLibre);
+    printf("%d\n", SB.cantBloquesLibres);
     printf("cantBloquesLibres = %d\n", SB.cantBloquesLibres);
     printf("cantInodosLibres = %d\n", SB.cantInodosLibres);
     printf("totBloques = %d\n", SB.totBloques);
     printf("totInodos = %d\n", SB.totInodos);
 
-    
-    // Mostrar tamaños de estructuras
-    printf("\nsizeof struct superbloque: %lu\n", sizeof(struct superbloque));
-    printf("sizeof struct inodo: %lu\n", sizeof(struct inodo));
+    // Mostrar el mapa de bits (primer y último bit de cada zona)
+    printf("\nMAPA DE BITS CON BLOQUES DE METADATOS OCUPADOS\n");
+    printf("SB.posSB: %d → leer_bit(0) = %d\n", 0, leer_bit(0));
+    printf("SB.posPrimerBloqueMB: %d → leer_bit(%d) = %d\n", SB.posPrimerBloqueMB, SB.posPrimerBloqueMB, leer_bit(SB.posPrimerBloqueMB));
+    printf("SB.posUltimoBloqueMB: %d → leer_bit(%d) = %d\n", SB.posUltimoBloqueMB, SB.posUltimoBloqueMB, leer_bit(SB.posUltimoBloqueMB));
+    printf("SB.posPrimerBloqueAI: %d → leer_bit(%d) = %d\n", SB.posPrimerBloqueAI, SB.posPrimerBloqueAI, leer_bit(SB.posPrimerBloqueAI));
+    printf("SB.posUltimoBloqueAI: %d → leer_bit(%d) = %d\n", SB.posUltimoBloqueAI, SB.posUltimoBloqueAI, leer_bit(SB.posUltimoBloqueAI));
+    printf("SB.posPrimerBloqueDatos: %d → leer_bit(%d) = %d\n", SB.posPrimerBloqueDatos, SB.posPrimerBloqueDatos, leer_bit(SB.posPrimerBloqueDatos));
+    printf("SB.posUltimoBloqueDatos: %d → leer_bit(%d) = %d\n", SB.posUltimoBloqueDatos, SB.posUltimoBloqueDatos, leer_bit(SB.posUltimoBloqueDatos));
 
-    // Recorrido de la lista de inodos libres
-    printf("\nRECORRIDO LISTA ENLAZADA DE INODOS LIBRES\n");
-    struct inodo inodos[BLOCKSIZE / INODOSIZE];
-    unsigned int inodoLibre = SB.posPrimerInodoLibre;
+    // Reservar y liberar un bloque
+    printf("\nRESERVAMOS UN BLOQUE Y LUEGO LO LIBERAMOS\n");
+    int bloque_reservado = reservar_bloque();
+    if (bloque_reservado == -1) {
+        perror("Error al reservar un bloque");
+    } else {
+        printf("Se ha reservado el bloque físico nº %d que era el 1º libre indicado por el MB\n", bloque_reservado);
+        bread(posSB, &SB);  // Volver a leer el superbloque para actualizar datos
+        printf("SB.cantBloquesLibres = %d\n", SB.cantBloquesLibres);
 
-    for (unsigned int i = SB.posPrimerBloqueAI; i <= 10; i++) {
-        if (bread(i, inodos) == FALLO) {
-            perror("Error al leer el bloque de inodos");
-            bumount();
-            return FALLO;
-        }
-
-        for (unsigned int j = 0; j < 5; j++) {
-            printf("%d ", inodoLibre);
-            if (inodoLibre == UINT_MAX) {
-                printf("\n");
-                bumount();
-                return EXITO;
-            }
-            inodoLibre = inodos[j].punterosDirectos[0];
+        // Liberar el bloque reservado
+        if (liberar_bloque(bloque_reservado) == -1) {
+            perror("Error al liberar el bloque");
+        } else {
+            bread(posSB, &SB);
+            printf("Liberamos ese bloque y después SB.cantBloquesLibres = %d\n", SB.cantBloquesLibres);
         }
     }
 
-    printf("\n");
+    // Mostrar datos del inodo del directorio raíz
+    struct inodo inodo;
+    if (leer_inodo(SB.posInodoRaiz, &inodo) == FALLO) {
+        perror("Error al leer el inodo raíz");
+        bumount();
+        return FALLO;
+    }
+
+    char atime[80], mtime[80], ctime[80], btime[80];
+    struct tm *ts;
+    
+    ts = localtime(&inodo.atime);
+    strftime(atime, sizeof(atime), "%a %Y-%m-%d %H:%M:%S", ts);
+    
+    ts = localtime(&inodo.mtime);
+    strftime(mtime, sizeof(mtime), "%a %Y-%m-%d %H:%M:%S", ts);
+    
+    ts = localtime(&inodo.ctime);
+    strftime(ctime, sizeof(ctime), "%a %Y-%m-%d %H:%M:%S", ts);
+    
+    ts = localtime(&inodo.btime);
+    strftime(btime, sizeof(btime), "%a %Y-%m-%d %H:%M:%S", ts);
+
+    printf("\nDATOS DEL DIRECTORIO RAIZ\n");
+    printf("tipo: %c\n", (inodo.tipo == 'd') ? 'd' : '-');
+    printf("permisos: %d\n", inodo.permisos);
+    printf("atime: %s\n", atime);
+    printf("mtime: %s\n", mtime);
+    printf("ctime: %s\n", ctime);
+    printf("btime: %s\n", btime);
+    printf("nlinks: %d\n", inodo.nlinks);
+    printf("tamEnBytesLog: %d\n", inodo.tamEnBytesLog);
+    printf("numBloquesOcupados: %d\n", inodo.numBloquesOcupados);
+
+    // Desmontar el sistema de ficheros
     bumount();
     return EXITO;
 }
