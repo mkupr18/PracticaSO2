@@ -6,7 +6,7 @@
 int main(int argc, char **argv) {
     if (argc != 2) {
         fprintf(stderr, "Uso: %s <nombre_dispositivo>\n", argv[0]);
-        return FALLO;99
+        return FALLO;
     }
     #if DEBUGN1
         // Montar el dispositivo virtual
