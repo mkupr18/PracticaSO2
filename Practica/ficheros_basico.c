@@ -48,43 +48,31 @@ int initSB(unsigned int nbloques, unsigned int ninodos){
 // Inicializa el mapa de bits, marcando como ocupados con 1 los bloques de metadatos
 int initMB() {
     struct superbloque SB;
-    // Buffer para el mapa de bits
-    unsigned char bufferMB[BLOCKSIZE];
-    // Leemos el superbloque para obtener información necesaria
     if (bread(posSB, &SB) == -1) {
         return FALLO;
     }
 
-    memset(bufferMB,0,BLOCKSIZE);
-    // Obtenemos el tamaño de mapa de bits en bloques
+    unsigned char bufferMB[BLOCKSIZE];
+    memset(bufferMB, 0, BLOCKSIZE);
+
     unsigned int tamMB_bloques = tamMB(SB.totBloques);
-    // Obtenemos el tamaño de bloques ocupados por meta datos
     unsigned int bloquesOcupados = SB.posPrimerBloqueDatos;
-    // Obtenemos el tamaño en bytes los bloques ocupados por meta datos
     unsigned int bytesOcupados = bloquesOcupados / 8;
-    // Obtenemos cuántos bits restantes están ocupados
     unsigned int bitsRestantes = bloquesOcupados % 8;
 
-    
+    // Inicializamos todos los bloques ocupados con 1
+    memset(bufferMB, 255, BLOCKSIZE);
 
-    // Inicializamos el buffer con todos los bits a 1 (255 en decimal = 11111111 en binario)
-    
-    memset(bufferMB, 255, bytesOcupados);
-    // Recorremos cada bloque del mapa de bits e escribir el bloque completo con bits a 1
     for (unsigned int i = 0; i < tamMB_bloques; i++) {
-        if (i < (bytesOcupados / BLOCKSIZE)) {
+        if (i < bytesOcupados / BLOCKSIZE) {
             if (bwrite(SB.posPrimerBloqueMB + i, bufferMB) == -1) {
                 return FALLO;
             }
         } else {
-            // Si estamos en un bloque parcialmente ocupado
-            unsigned char bufferAux[BLOCKSIZE];
-            memcpy(bufferAux, bufferMB, bytesOcupados % BLOCKSIZE); // Guardamos los datos
-            memset(bufferMB, 0, BLOCKSIZE);  // Limpiamos el buffer
-            // Restauramos los bytes ocupados antes de escribir
-            memcpy(bufferMB, bufferAux, bytesOcupados % BLOCKSIZE);
+            // Último bloque parcial
+            memset(bufferMB, 0, BLOCKSIZE);
+            memcpy(bufferMB, bufferMB, bytesOcupados % BLOCKSIZE);
 
-            // Marcar los bits restantes con 1
             if (bitsRestantes > 0) {
                 bufferMB[bytesOcupados % BLOCKSIZE] = (unsigned char)(~(0xFF >> bitsRestantes));
             }
@@ -94,8 +82,8 @@ int initMB() {
             break;
         }
     }
-    // Actualizamos la cantidad de bloques libres en el superbloque
-    // SB.cantBloquesLibres -= bloquesOcupados;
+
+    SB.cantBloquesLibres -= bloquesOcupados;
     return bwrite(posSB, &SB) == -1 ? FALLO : EXITO;
 }
 
@@ -367,7 +355,7 @@ int reservar_inodo(unsigned char tipo, unsigned char permisos)
     // Guarda la posición del primer inodo libre
     unsigned int posInodoReservado = SB.posPrimerInodoLibre;
     struct inodo inodo;
-
+    memset(&inodo, 0, sizeof(struct inodo));
     // Inicializamos los campos del inodo
     inodo.tipo = tipo;
     inodo.permisos = permisos;
