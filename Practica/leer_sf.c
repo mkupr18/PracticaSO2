@@ -4,12 +4,11 @@
 #define DEBUGN1 0
 
 int main(int argc, char **argv) {
+    if (argc != 2) {
+        fprintf(stderr, "Uso: %s <nombre_dispositivo>\n", argv[0]);
+        return FALLO;99
+    }
     #if DEBUGN1
-        if (argc != 2) {
-            fprintf(stderr, "Uso: %s <nombre_dispositivo>\n", argv[0]);
-            return FALLO;
-        }
-
         // Montar el dispositivo virtual
         if (bmount(argv[1]) == FALLO) {
             perror("Error al montar el dispositivo virtual");
@@ -105,10 +104,6 @@ int main(int argc, char **argv) {
         // Desmontar el sistema de ficheros
         bumount();
     #endif
-    if (argc != 2) {
-        fprintf(stderr, "Uso: %s <disco>\n", argv[0]);
-        return 1;
-    }
 
     char *disco = argv[1];
     if (bmount(disco) == -1) {
@@ -126,69 +121,14 @@ int main(int argc, char **argv) {
     printf("INODO %d. TRADUCCIÓN DE BLOQUES LÓGICOS 8, 204, 30004, 400004 y 468750\n", ninodo);
 
     int bloques[] = {8, 204, 30004, 400004, 468750};
-    struct inodo inodo;
-
-    if (leer_inodo(ninodo, &inodo) == -1) {
-        fprintf(stderr, "Error al leer inodo %d\n", ninodo);
-        return 1;
-    }
-
     for (int i = 0; i < 5; i++) {
-        int nblogico = bloques[i];
-        unsigned int ptr = 0;
-        int nRangoBL = obtener_nRangoBL(&inodo, nblogico, &ptr);
-        int nivel_punteros = nRangoBL;
-        int indice = obtener_indice(nblogico, nivel_punteros);
-        
-        ptr = traducir_bloque_inodo(ninodo, nblogico, 1);
-
+        int ptr = traducir_bloque_inodo(ninodo, bloques[i], 1);
         if (ptr == -1) {
-            fprintf(stderr, "Error al traducir bloque lógico %d\n", nblogico);
-            continue;
+            printf("Error al traducir bloque lógico %d\n", bloques[i]);
         }
-
-        if (nRangoBL == 0) { 
-            printf("[traducir_bloque_inodo()→ inodo.punterosDirectos[%d] = %d (reservado BF %d para BL %d)]\n",
-                   nblogico, ptr, ptr, nblogico);
-        } else if (nRangoBL == 1) {
-            if (nivel_punteros == 1) {
-                printf("[traducir_bloque_inodo()→ punteros_nivel1 [%d] = %d (reservado BF %d para BL %d)]\n",
-                       indice, ptr, ptr, nblogico);
-            } else {
-                printf("[traducir_bloque_inodo()→ inodo.punterosIndirectos[0] = %d (reservado BF %d para punteros_nivel1)]\n",
-                       ptr, ptr);
-            }
-        } else if (nRangoBL == 2) {
-            if (nivel_punteros == 2) {
-                printf("[traducir_bloque_inodo()→ punteros_nivel2 [%d] = %d (reservado BF %d para punteros_nivel1)]\n",
-                       indice, ptr, ptr);
-            } else if (nivel_punteros == 1) {
-                printf("[traducir_bloque_inodo()→ punteros_nivel1 [%d] = %d (reservado BF %d para BL %d)]\n",
-                       indice, ptr, ptr, nblogico);
-            } else {
-                printf("[traducir_bloque_inodo()→ inodo.punterosIndirectos[1] = %d (reservado BF %d para punteros_nivel2)]\n",
-                       ptr, ptr);
-            }
-        } else if (nRangoBL == 3) {
-            if (nivel_punteros == 3) {
-                printf("[traducir_bloque_inodo()→ punteros_nivel3 [%d] = %d (reservado BF %d para punteros_nivel2)]\n",
-                       indice, ptr, ptr);
-            } else if (nivel_punteros == 2) {
-                printf("[traducir_bloque_inodo()→ punteros_nivel2 [%d] = %d (reservado BF %d para punteros_nivel1)]\n",
-                       indice, ptr, ptr);
-            } else if (nivel_punteros == 1) {
-                printf("[traducir_bloque_inodo()→ punteros_nivel1 [%d] = %d (reservado BF %d para BL %d)]\n",
-                       indice, ptr, ptr, nblogico);
-            } else {
-                printf("[traducir_bloque_inodo()→ inodo.punterosIndirectos[2] = %d (reservado BF %d para punteros_nivel3)]\n",
-                       ptr, ptr);
-            }
-        }
-
-        printf("[traducir_bloque_inodo() -> BL %d = BF %d]\n", nblogico, ptr);
     }
 
-    // Leer de nuevo el inodo para verificar cambios
+    struct inodo inodo;
     if (leer_inodo(ninodo, &inodo) == -1) {
         fprintf(stderr, "Error al leer inodo %d\n", ninodo);
         return 1;
@@ -199,5 +139,6 @@ int main(int argc, char **argv) {
     printf("Permisos: %d\n", inodo.permisos);
     printf("Número de bloques ocupados: %d\n", inodo.numBloquesOcupados);
 
+    bumount();
     return EXITO;
 }
