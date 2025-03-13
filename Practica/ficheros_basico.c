@@ -456,8 +456,7 @@ int obtener_indice(unsigned int nblogico, int nivel_punteros)
 }
 
 // Traduce un bloque lógico a su correspondiente bloque físico, reservándolo si es necesario
-int traducir_bloque_inodo(unsigned int ninodo, unsigned int nblogico, unsigned char reservar)
-{
+int traducir_bloque_inodo(unsigned int ninodo, unsigned int nblogico, unsigned char reservar) {
     struct inodo inodo;
     if (leer_inodo(ninodo, &inodo) == -1)
         return -1;
@@ -482,11 +481,14 @@ int traducir_bloque_inodo(unsigned int ninodo, unsigned int nblogico, unsigned c
             if (nivel_punteros == nRangoBL)
             {
                 inodo.punterosIndirectos[nRangoBL - 1] = ptr;
+                fprintf(stderr, "[traducir_bloque_inodo()\u2192 inodo.punterosIndirectos[%d] = %d (reservado BF %d para punteros_nivel%d)]\n", nRangoBL - 1, ptr, ptr, nRangoBL);
+
             }
             else
             {
                 buffer[indice] = ptr;
                 bwrite(ptr_ant, buffer);
+                fprintf(stderr, "[traducir_bloque_inodo()\u2192 punteros_nivel%d [%d] = %d (reservado BF %d para punteros_nivel%d)]\n", nivel_punteros + 1, indice, ptr, ptr, nivel_punteros);
             }
             memset(buffer, 0, BLOCKSIZE); // Limpia el buffer
         }
@@ -512,11 +514,14 @@ int traducir_bloque_inodo(unsigned int ninodo, unsigned int nblogico, unsigned c
         if (nRangoBL == 0)
         {
             inodo.punterosDirectos[nblogico] = ptr;
+            fprintf(stderr, "[traducir_bloque_inodo()\u2192 inodo.punterosDirectos[%d] = %d (reservado BF %d para BL %d)]\n", nblogico, ptr, ptr, nblogico);
+
         }
         else
         {
             buffer[indice] = ptr;
             bwrite(ptr_ant, buffer);
+            fprintf(stderr, "[traducir_bloque_inodo()\u2192 punteros_nivel1 [%d] = %d (reservado BF %d para BL %d)]\n", indice, ptr, ptr, nblogico);
         }
     }
 
