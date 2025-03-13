@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <time.h>
 #include "ficheros_basico.h"
-#define DEBUGN1 0
+#define DEBUGN1 1
 
 int main(int argc, char **argv) {
     if (argc != 2) {
@@ -128,7 +128,7 @@ int main(int argc, char **argv) {
         }
     }
 
-    struct inodo inodo;
+    //struct inodo inodo;
     if (leer_inodo(ninodo, &inodo) == -1) {
         fprintf(stderr, "Error al leer inodo %d\n", ninodo);
         return 1;
