@@ -86,7 +86,7 @@ int initMB() {
         }
     }
 
-    SB.cantBloquesLibres -= bloquesOcupados;
+    //SB.cantBloquesLibres -= bloquesOcupados;
     return bwrite(posSB, &SB) == -1 ? FALLO : EXITO;
 }
 
