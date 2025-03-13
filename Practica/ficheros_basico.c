@@ -60,7 +60,7 @@ int initMB() {
     unsigned int bytesOcupados = bloquesOcupados / 8;
     unsigned int bitsRestantes = bloquesOcupados % 8;
 
-    // Inicializamos todos los bloques ocupados con 1
+    // Inicializamos con 1 todos los bloques ocupados
     memset(bufferMB, 255, BLOCKSIZE);
 
     for (unsigned int i = 0; i < tamMB_bloques; i++) {
@@ -69,13 +69,16 @@ int initMB() {
                 return FALLO;
             }
         } else {
-            // Último bloque parcial
-            memset(bufferMB, 0, BLOCKSIZE);
-            memcpy(bufferMB, bufferMB, bytesOcupados % BLOCKSIZE);
+            // Manejo del último bloque con bits restantes
+            unsigned char bufferAux[BLOCKSIZE];  
+            memset(bufferAux, 0, BLOCKSIZE);  
+            memcpy(bufferAux, bufferMB, bytesOcupados % BLOCKSIZE);  
+            memcpy(bufferMB, bufferAux, BLOCKSIZE);  
 
             if (bitsRestantes > 0) {
                 bufferMB[bytesOcupados % BLOCKSIZE] = (unsigned char)(~(0xFF >> bitsRestantes));
             }
+
             if (bwrite(SB.posPrimerBloqueMB + i, bufferMB) == -1) {
                 return FALLO;
             }
@@ -86,6 +89,7 @@ int initMB() {
     SB.cantBloquesLibres -= bloquesOcupados;
     return bwrite(posSB, &SB) == -1 ? FALLO : EXITO;
 }
+
 
 // Inicialización de array de inodos
 int initAI() {
