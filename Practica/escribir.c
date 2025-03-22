@@ -41,7 +41,7 @@ int main(int argc, char **argv) {
 
     // Reservar un inodo inicial
     unsigned int ninodo = reservar_inodo('f', 6);
-    printf("Nº inodo reservado1: %d\n", ninodo);
+   
     if (ninodo == -1) {
         fprintf(stderr, "Error al reservar inodo\n");
         bumount();
@@ -54,15 +54,15 @@ int main(int argc, char **argv) {
     for (int i = 0; i < NUM_OFFSETS; i++) {
         if (diferentes_inodos) {
             // Si diferentes_inodos=1, reservar un nuevo inodo para cada offset
-            printf("Nº inodo reservado2: %d\n", ninodo);
+            
             ninodo = reservar_inodo('f', 6);
-            printf("Nº inodo reservado3: %d\n", ninodo);
+            
             if (ninodo == -1) {
                 fprintf(stderr, "Error al reservar inodo\n");
                 bumount();
                 return FALLO;
             }
-            printf("Nº inodo reservado4: %d\n", ninodo);
+           
         }
 
         printf("Nº inodo reservado: %d\n", ninodo);
