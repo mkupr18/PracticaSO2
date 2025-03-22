@@ -38,7 +38,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
         }
 
         memcpy(buf_bloque + desp1, buf_original, nbytes);
-
+        
         if (bwrite(nbfisico, buf_bloque) == -1) {
             fprintf(stderr, "Error al escribir el bloque físico %u\n", nbfisico);
             return FALLO;
@@ -89,6 +89,8 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
             return FALLO;
         }
         memcpy(buf_bloque, buf_original + escritos, desp2 + 1);
+
+
         if (bwrite(nbfisico, buf_bloque) == -1) {
             fprintf(stderr, "Error al escribir el bloque físico %u\n", nbfisico);
             return FALLO;

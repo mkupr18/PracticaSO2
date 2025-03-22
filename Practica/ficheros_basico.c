@@ -319,8 +319,10 @@ int escribir_inodo(unsigned int ninodo, struct inodo *inodo)
 
     // Escribimos el inodo en la posición correspondiente dentro del bloque
     inodos[ninodo % (BLOCKSIZE / INODOSIZE)] = *inodo;
-
+    printf("escribir_inodo: Guardando inodo %u con numBloquesOcupados=%u, tamEnBytesLog=%u\n", 
+        ninodo, inodo->numBloquesOcupados, inodo->tamEnBytesLog);
     return bwrite(nbloqueAI, inodos) == -1 ? FALLO : EXITO;
+
 }
 
 // Lee un inodo del array de inodos y lo almacena en la estructura proporcionada
@@ -512,7 +514,6 @@ int traducir_bloque_inodo(unsigned int ninodo, unsigned int nblogico, unsigned c
             fprintf(stderr, "[traducir_bloque_inodo()\u2192 punteros_nivel1 [%d] = %d (reservado BF %d para BL %d)]\n", indice, ptr, ptr, nblogico);
         }
     }
-
     escribir_inodo(ninodo, &inodo); // Guardamos los cambios en el inodo
     return ptr;
 }
