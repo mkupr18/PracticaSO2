@@ -348,11 +348,9 @@ int leer_inodo(unsigned int ninodo, struct inodo *inodo)
 }
 
 // Reserva un inodo y devuelve su número
-int reservar_inodo(unsigned char tipo, unsigned char permisos)
-{
+int reservar_inodo(unsigned char tipo, unsigned char permisos){
     struct superbloque SB;
-    if (bread(posSB, &SB) == -1 || SB.cantInodosLibres == 0)
-    {
+    if (bread(posSB, &SB) == -1 || SB.cantInodosLibres == 0){
         return FALLO; // Error si no hay inodos libres
     }
 
@@ -376,8 +374,7 @@ int reservar_inodo(unsigned char tipo, unsigned char permisos)
 
     // Leemos el inodo libre para obtener el siguiente inodo disponible
     struct inodo inodoLibre;
-    if (leer_inodo(posInodoReservado, &inodoLibre) == -1)
-    {
+    if (leer_inodo(posInodoReservado, &inodoLibre) == -1){
         return FALLO;
     }
 
@@ -386,8 +383,7 @@ int reservar_inodo(unsigned char tipo, unsigned char permisos)
     SB.cantInodosLibres--;
 
     // Escribimos el inodo reservado en el array de inodos y actualizamos el superbloque
-    if (escribir_inodo(posInodoReservado, &inodo) == -1 || bwrite(posSB, &SB) == -1)
-    {
+    if (escribir_inodo(posInodoReservado, &inodo) == -1 || bwrite(posSB, &SB) == -1){
         return FALLO;
     }
 

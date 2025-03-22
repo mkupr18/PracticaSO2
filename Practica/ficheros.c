@@ -1,16 +1,18 @@
 #include "ficheros.h"
-#include "ficheros_basico.h"
 #include <stdio.h>
 #include <string.h>
 
 
 int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offset, unsigned int nbytes) {
     struct inodo inodo;
-    if (leer_inodo(ninodo, &inodo) == -1) return -1;
+    if (leer_inodo(ninodo, &inodo) == -1) {
+        fprintf(stderr, "Error al leer el inodo %u\n", ninodo);
+        return FALLO;
+    }
 
     if ((inodo.permisos & 2) != 2) {
         fprintf(stderr, "No hay permisos de escritura\n");
-        return -1;
+        return FALLO;
     }
 
     unsigned int primerBL = offset / BLOCKSIZE;
@@ -24,40 +26,85 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
 
     if (primerBL == ultimoBL) {
         nbfisico = traducir_bloque_inodo(ninodo, primerBL, 1);
-        if (nbfisico == -1) return -1;
+        if (nbfisico == -1) {
+            fprintf(stderr, "Error al traducir bloque lógico %u\n", primerBL);
+            return FALLO;
+        }
 
-        if (bread(nbfisico, buf_bloque) == -1) return -1;
+        if (bread(nbfisico, buf_bloque) == -1) {
+            fprintf(stderr, "Error al leer el bloque físico %u\n", nbfisico);
+            return FALLO;
+        }
         memcpy(buf_bloque + desp1, buf_original, nbytes);
-        if (bwrite(nbfisico, buf_bloque) == -1) return -1;
+        if (bwrite(nbfisico, buf_bloque) == -1) {
+            fprintf(stderr, "Error al escribir el bloque físico %u\n", nbfisico);
+            return FALLO;
+        }
         escritos = nbytes;
     } else {
         nbfisico = traducir_bloque_inodo(ninodo, primerBL, 1);
-        if (nbfisico == -1) return -1;
+        if (nbfisico == -1) {
+            fprintf(stderr, "Error al traducir bloque lógico %u\n", primerBL);
+            return FALLO;
+        }
 
-        if (bread(nbfisico, buf_bloque) == -1) return -1;
+        if (bread(nbfisico, buf_bloque) == -1) {
+            fprintf(stderr, "Error al leer el bloque físico %u\n", nbfisico);
+            return FALLO;
+        }
+
         memcpy(buf_bloque + desp1, buf_original, BLOCKSIZE - desp1);
-        if (bwrite(nbfisico, buf_bloque) == -1) return -1;
+        if (bwrite(nbfisico, buf_bloque) == -1) {
+            fprintf(stderr, "Error al escribir el bloque físico %u\n", nbfisico);
+            return FALLO;
+        }
+
         escritos += BLOCKSIZE - desp1;
 
         for (unsigned int bl = primerBL + 1; bl < ultimoBL; bl++) {
             nbfisico = traducir_bloque_inodo(ninodo, bl, 1);
-            if (nbfisico == -1) return -1;
-            if (bwrite(nbfisico, buf_original + escritos) == -1) return -1;
+            if (nbfisico == -1) {
+                fprintf(stderr, "Error al traducir bloque lógico %u\n", bl);
+                return FALLO;
+            }
+            if (bwrite(nbfisico, buf_original + escritos) == -1) {
+                fprintf(stderr, "Error al escribir el bloque físico %u\n", nbfisico);
+                return FALLO;
+            }
             escritos += BLOCKSIZE;
         }
-
+        
+        // Último bloque
         nbfisico = traducir_bloque_inodo(ninodo, ultimoBL, 1);
-        if (nbfisico == -1) return -1;
-        if (bread(nbfisico, buf_bloque) == -1) return -1;
+        if (nbfisico == -1) {
+            fprintf(stderr, "Error al traducir bloque lógico %u\n", ultimoBL);
+            return FALLO;
+        }
+        if (bread(nbfisico, buf_bloque) == -1) {
+            fprintf(stderr, "Error al leer el bloque físico %u\n", nbfisico);
+            return FALLO;
+        }
         memcpy(buf_bloque, buf_original + escritos, desp2 + 1);
-        if (bwrite(nbfisico, buf_bloque) == -1) return -1;
+        if (bwrite(nbfisico, buf_bloque) == -1) {
+            fprintf(stderr, "Error al escribir el bloque físico %u\n", nbfisico);
+            return FALLO;
+        }
         escritos += desp2 + 1;
+            // Incrementar numBloquesOcupados si se reservó un nuevo bloque
+            if (nbfisico != -1) {
+                inodo.numBloquesOcupados++;
+            }
+        
     }
 
     if (inodo.tamEnBytesLog < offset + nbytes) inodo.tamEnBytesLog = offset + nbytes;
     inodo.mtime = time(NULL);
     inodo.ctime = time(NULL);
-    if (escribir_inodo(ninodo, &inodo) == -1) return -1;
+    if (escribir_inodo(ninodo, &inodo) == -1) {
+        fprintf(stderr, "Error al actualizar el inodo %u\n", ninodo);
+        return FALLO;
+    }
+
 
     return escritos;
 }
@@ -65,16 +112,15 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
 
 int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsigned int nbytes) {
     struct inodo inodo;
-    // Leer el inodo correspondiente al número de inodo proporcionado
     if (leer_inodo(ninodo, &inodo) == -1) {
-        fprintf(stderr, RED "Error al leer el inodo\n" RESET);
-        return FALLO;
+        fprintf(stderr, "Error al leer el inodo %u\n", ninodo);
+        return -1;
     }
 
     // Verificar permisos de lectura
     if ((inodo.permisos & 4) != 4) {
-        fprintf(stderr, RED "No hay permisos de lectura\n" RESET);
-        return FALLO;
+        fprintf(stderr, "No hay permisos de lectura en el inodo %u\n", ninodo);
+        return -1;
     }
 
     // Verificar si el offset está más allá del tamaño del archivo
@@ -107,8 +153,8 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
 
         // Leer el bloque físico
         if (bread(bloque_fisico, buf_bloque) == -1) {
-            fprintf(stderr, RED "Error al leer el bloque físico\n" RESET);
-            return FALLO;
+            fprintf(stderr, "Error al leer el bloque físico %d\n", bloque_fisico);
+            return -1;
         }
 
         // Calcular cuántos bytes copiar en esta iteración
@@ -131,14 +177,12 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
     // Actualizar el atime del inodo
     inodo.atime = time(NULL);
     if (escribir_inodo(ninodo, &inodo) == -1) {
-        fprintf(stderr, RED "Error al actualizar el inodo\n" RESET);
-        return FALLO;
+        fprintf(stderr, "Error al actualizar el inodo %u\n", ninodo);
+        return -1;
     }
-    
-    // Devolver la cantidad de bytes leídos
-    return bytes_leidos; 
-}
 
+    return bytes_leidos; // Devolver la cantidad de bytes leídos
+}
 
 int mi_stat_f(unsigned int ninodo, struct STAT *p_stat) {
     struct inodo inodo;
