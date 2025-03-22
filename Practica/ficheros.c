@@ -23,6 +23,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
     unsigned int nbfisico;
     char buf_bloque[BLOCKSIZE];
     unsigned int escritos = 0;
+    unsigned int bloquesReservados = 0; 
 
     if (primerBL == ultimoBL) {
         nbfisico = traducir_bloque_inodo(ninodo, primerBL, 1);
@@ -35,7 +36,9 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
             fprintf(stderr, "Error al leer el bloque físico %u\n", nbfisico);
             return FALLO;
         }
+
         memcpy(buf_bloque + desp1, buf_original, nbytes);
+
         if (bwrite(nbfisico, buf_bloque) == -1) {
             fprintf(stderr, "Error al escribir el bloque físico %u\n", nbfisico);
             return FALLO;
@@ -54,6 +57,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
         }
 
         memcpy(buf_bloque + desp1, buf_original, BLOCKSIZE - desp1);
+
         if (bwrite(nbfisico, buf_bloque) == -1) {
             fprintf(stderr, "Error al escribir el bloque físico %u\n", nbfisico);
             return FALLO;
@@ -97,9 +101,20 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
         
     }
 
-    if (inodo.tamEnBytesLog < offset + nbytes) inodo.tamEnBytesLog = offset + nbytes;
+    for (unsigned int bl = primerBL; bl <= ultimoBL; bl++) {
+        if (traducir_bloque_inodo(ninodo, bl, 0) == 0) { // Si antes no existía el bloque
+            bloquesReservados++;
+        }
+    }
+    inodo.numBloquesOcupados += bloquesReservados;
+
+    if (inodo.tamEnBytesLog < offset + nbytes) {
+        inodo.tamEnBytesLog = offset + nbytes;
+    }
+
     inodo.mtime = time(NULL);
     inodo.ctime = time(NULL);
+
     if (escribir_inodo(ninodo, &inodo) == -1) {
         fprintf(stderr, "Error al actualizar el inodo %u\n", ninodo);
         return FALLO;
@@ -114,13 +129,13 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
     struct inodo inodo;
     if (leer_inodo(ninodo, &inodo) == -1) {
         fprintf(stderr, "Error al leer el inodo %u\n", ninodo);
-        return -1;
+        return FALLO;
     }
 
     // Verificar permisos de lectura
     if ((inodo.permisos & 4) != 4) {
         fprintf(stderr, "No hay permisos de lectura en el inodo %u\n", ninodo);
-        return -1;
+        return FALLO;
     }
 
     // Verificar si el offset está más allá del tamaño del archivo
@@ -154,7 +169,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
         // Leer el bloque físico
         if (bread(bloque_fisico, buf_bloque) == -1) {
             fprintf(stderr, "Error al leer el bloque físico %d\n", bloque_fisico);
-            return -1;
+            return FALLO;
         }
 
         // Calcular cuántos bytes copiar en esta iteración
@@ -178,7 +193,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
     inodo.atime = time(NULL);
     if (escribir_inodo(ninodo, &inodo) == -1) {
         fprintf(stderr, "Error al actualizar el inodo %u\n", ninodo);
-        return -1;
+        return FALLO;
     }
 
     return bytes_leidos; // Devolver la cantidad de bytes leídos
@@ -186,7 +201,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
 
 int mi_stat_f(unsigned int ninodo, struct STAT *p_stat) {
     struct inodo inodo;
-    if (leer_inodo(ninodo, &inodo) == -1) return -1;
+    if (leer_inodo(ninodo, &inodo) == -1) return FALLO;
 
     p_stat->tipo = inodo.tipo;
     p_stat->permisos = inodo.permisos;
@@ -195,12 +210,12 @@ int mi_stat_f(unsigned int ninodo, struct STAT *p_stat) {
     p_stat->mtime = inodo.mtime;
     p_stat->ctime = inodo.ctime;
     p_stat->numBloquesOcupados = inodo.numBloquesOcupados;
-    return 0;
+    return EXITO;
 }
 
 int mi_chmod_f(unsigned int ninodo, unsigned char permisos) {
     struct inodo inodo;
-    if (leer_inodo(ninodo, &inodo) == -1) return -1;
+    if (leer_inodo(ninodo, &inodo) == -1) return FALLO;
     inodo.permisos = permisos;
     inodo.ctime = time(NULL);
     return escribir_inodo(ninodo, &inodo);
