@@ -2,6 +2,7 @@
 #include <time.h>
 #include "ficheros_basico.h"
 #define DEBUGN1 0
+#define DEBUGN2 0
 
 int main(int argc, char **argv) {
     if (argc != 2) {
@@ -32,7 +33,6 @@ int main(int argc, char **argv) {
     printf("posUltimoBloqueDatos = %d\n", SB.posUltimoBloqueDatos);
     printf("posInodoRaiz = %d\n", SB.posInodoRaiz);
     printf("posPrimerInodoLibre = %d\n", SB.posPrimerInodoLibre);
-    printf("%d\n", SB.cantBloquesLibres);
     printf("cantBloquesLibres = %d\n", SB.cantBloquesLibres);
     printf("cantInodosLibres = %d\n", SB.cantInodosLibres);
     printf("totBloques = %d\n", SB.totBloques);
@@ -124,10 +124,10 @@ int main(int argc, char **argv) {
         bumount();
         return FALLO;
     }
-
+    #if DEBUGN2 
     char atime[80], mtime[80], ctime[80], btime[80];
     struct tm *ts;
-    
+   
     ts = localtime(&inodo.atime);
     strftime(atime, sizeof(atime), "%a %Y-%m-%d %H:%M:%S", ts);
     
@@ -139,7 +139,7 @@ int main(int argc, char **argv) {
     
     ts = localtime(&inodo.btime);
     strftime(btime, sizeof(btime), "%a %Y-%m-%d %H:%M:%S", ts);
-
+   
     printf("INODO %d. TRADUCCIÓN DE BLOQUES LÓGICOS 8, 204, 30004, 400004 y 468750\n\n", ninodo);
 
     int bloques[] = {8, 204, 30004, 400004, 468750};
@@ -162,7 +162,7 @@ int main(int argc, char **argv) {
     printf("tamEnBytesLog: %d\n", inodo.tamEnBytesLog);
     printf( BLUE "numBloquesOcupados: %d\n" RESET, inodo.numBloquesOcupados);
     printf( BLUE "posPrimerInodoLibre = %d\n" RESET, SB.posPrimerInodoLibre);
-
+    #endif
 
     bumount();
     return EXITO;

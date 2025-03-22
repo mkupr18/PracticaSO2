@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "bloques.h"
+#include "ficheros_basico.h"
+
 struct STAT {
     char tipo;
     unsigned char permisos;
