@@ -25,6 +25,12 @@ int main(int argc, char **argv) {
         return FALLO;
     }
 
+    // Validar que el texto no esté vacío
+    if (strlen(texto) == 0) {
+        fprintf(stderr, "Error: El texto no puede estar vacío\n");
+        return FALLO;
+    }
+
     // Montar el dispositivo
     if (bmount(nombre_dispositivo) == -1) {
         fprintf(stderr, "Error al montar el dispositivo\n");
@@ -41,7 +47,6 @@ int main(int argc, char **argv) {
 
     // Reservar un inodo inicial
     unsigned int ninodo = reservar_inodo('f', 6);
-   
     if (ninodo == -1) {
         fprintf(stderr, "Error al reservar inodo\n");
         bumount();
@@ -54,15 +59,13 @@ int main(int argc, char **argv) {
     for (int i = 0; i < NUM_OFFSETS; i++) {
         if (diferentes_inodos) {
             // Si diferentes_inodos=1, reservar un nuevo inodo para cada offset
-            
             ninodo = reservar_inodo('f', 6);
-            
             if (ninodo == -1) {
                 fprintf(stderr, "Error al reservar inodo\n");
                 bumount();
                 return FALLO;
             }
-           
+            printf("Nuevo inodo reservado: %d\n", ninodo);
         }
 
         printf("Nº inodo reservado: %d\n", ninodo);
@@ -85,6 +88,17 @@ int main(int argc, char **argv) {
         printf("Bytes escritos: %d\n", bytes_escritos);
         printf("stat.tamEnBytesLog=%u\n", stat.tamEnBytesLog);
         printf("stat.numBloquesOcupados=%u\n\n", stat.numBloquesOcupados);
+
+        // Verificación de lectura
+        char buf_leido[tamTexto + 1];
+        memset(buf_leido, 0, tamTexto + 1);
+        int bytes_leidos = mi_read_f(ninodo, buf_leido, offsets[i], tamTexto);
+        if (bytes_leidos == -1) {
+            fprintf(stderr, "Error al leer del inodo %d\n", ninodo);
+            bumount();
+            return FALLO;
+        }
+      
     }
 
     // Desmontar el dispositivo
@@ -94,4 +108,4 @@ int main(int argc, char **argv) {
     }
 
     return EXITO;
-}
+} 

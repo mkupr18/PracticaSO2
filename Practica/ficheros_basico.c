@@ -308,7 +308,7 @@ int escribir_inodo(unsigned int ninodo, struct inodo *inodo){
     unsigned int nbloqueAI = SB.posPrimerBloqueAI + (ninodo / (BLOCKSIZE / INODOSIZE));
     struct inodo inodos[BLOCKSIZE / INODOSIZE];
 
-    // Inicializa el array de inodos (buena práctica)
+    // Inicializa el array de inodos
     memset(inodos, 0, BLOCKSIZE);
 
     // Lee el bloque de inodos
@@ -320,14 +320,14 @@ int escribir_inodo(unsigned int ninodo, struct inodo *inodo){
     inodos[posInodo] = *inodo;
 
     //printf("escribir_inodo: Guardando inodo %u con numBloquesOcupados=%u, tamEnBytesLog=%u\n", 
-    //   ninodo, inodo->numBloquesOcupados, inodo->tamEnBytesLog);
+    //  ninodo, inodo->numBloquesOcupados, inodo->tamEnBytesLog);
 
   // Escribe el bloque de inodos actualizado en el dispositivo
     if (bwrite(nbloqueAI, inodos) == -1) {
     return FALLO; // Error al escribir el bloque de inodos
     }
 
-    return EXITO; 
+    return EXITO; // Éxito
 }
 
 // Lee un inodo del array de inodos y lo almacena en la estructura proporcionada
@@ -463,15 +463,14 @@ int traducir_bloque_inodo(unsigned int ninodo, unsigned int nblogico, unsigned c
     // Descendemos por los niveles de punteros
     while (nivel_punteros > 0)
     {
-        if (ptr == 0) // Si el puntero no está asignado
-        { 
-            if (reservar == 0) // No reserva si no se solicita
-                return -1;           
+        if (ptr == 0){ // Si el puntero no está asignado  
+            if (reservar == 0){ // No reserva si no se solicita
+                return FALLO;
+            }           
             ptr = reservar_bloque(); // Reserva un nuevo bloque
             inodo.numBloquesOcupados++;
             inodo.ctime = time(NULL);
-            if (nivel_punteros == nRangoBL)
-            {
+            if (nivel_punteros == nRangoBL){
                 inodo.punterosIndirectos[nRangoBL - 1] = ptr;
                 fprintf(stderr, "[traducir_bloque_inodo()\u2192 inodo.punterosIndirectos[%d] = %d (reservado BF %d para punteros_nivel%d)]\n", nRangoBL - 1, ptr, ptr, nRangoBL);
 
@@ -498,8 +497,9 @@ int traducir_bloque_inodo(unsigned int ninodo, unsigned int nblogico, unsigned c
     // Último nivel
     if (ptr == 0)
     {
-        if (reservar == 0)
+        if (reservar == 0){
             return FALLO;
+        }
         ptr = reservar_bloque(); // Reserva el bloque de datos
         inodo.numBloquesOcupados++;
         inodo.ctime = time(NULL);
@@ -516,7 +516,10 @@ int traducir_bloque_inodo(unsigned int ninodo, unsigned int nblogico, unsigned c
             fprintf(stderr, "[traducir_bloque_inodo()\u2192 punteros_nivel1 [%d] = %d (reservado BF %d para BL %d)]\n", indice, ptr, ptr, nblogico);
         }
     }
-    escribir_inodo(ninodo, &inodo); // Guardamos los cambios en el inodo
+ 
+    if (escribir_inodo(ninodo, &inodo) == -1) {
+        return FALLO;
+    }
     return ptr;
 }
 
