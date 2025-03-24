@@ -385,11 +385,13 @@ int reservar_inodo(unsigned char tipo, unsigned char permisos){
     // Actualizamos la posición del primer inodo libre en el superbloque
     SB.posPrimerInodoLibre = inodoLibre.punterosDirectos[0];
     SB.cantInodosLibres--;
+    
 
     // Escribimos el inodo reservado en el array de inodos y actualizamos el superbloque
     if (escribir_inodo(posInodoReservado, &inodo) == -1 || bwrite(posSB, &SB) == -1){
         return FALLO;
     }
+    
 
     return posInodoReservado; // Devolvemos la posición del inodo reservado
 }
@@ -522,4 +524,55 @@ int traducir_bloque_inodo(unsigned int ninodo, unsigned int nblogico, unsigned c
     }
     return ptr;
 }
+
+int liberar_inodo(unsigned int ninodo) {
+    struct superbloque sb;
+    struct inodo inodo;
+    
+    // Leer el superbloque
+    if (bread(posSB, &sb) == -1) {
+        return FALLO;
+    }
+    
+    // Leer el inodo a liberar
+    if (leer_inodo(ninodo, &inodo) == -1) {
+        return FALLO;
+    }
+    
+    // Liberar todos los bloques del inodo
+    int bloques_liberados = liberar_bloques_inodo(0, &inodo);
+    if (bloques_liberados == -1) {
+        return FALLO;
+    }
+    
+    // Actualizar el inodo
+    inodo.numBloquesOcupados -= bloques_liberados;
+    inodo.tipo = 'l'; // Tipo libre
+    inodo.tamEnBytesLog = 0;
+    
+    // Actualizar la lista de inodos libres
+    inodo.punterosDirectos[0] = sb.posPrimerInodoLibre;
+    sb.posPrimerInodoLibre = ninodo;
+    sb.cantInodosLibres++;
+    
+    // Actualizar tiempos
+    inodo.ctime = time(NULL);
+    
+    // Escribir los cambios
+    if (bwrite(posSB, &sb) == -1) {
+        return FALLO;
+    }
+    
+    if (escribir_inodo(ninodo, &inodo) == -1) {
+        return FALLO;
+    }
+    
+    return ninodo;
+}
+
+int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo){
+
+
+}
+
 
