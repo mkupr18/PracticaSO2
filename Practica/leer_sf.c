@@ -110,6 +110,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "Error al montar el sistema de archivos\n");
         return 1;
     }
+    #if DEBUGN2
 
     // Reservar un inodo para la prueba
     int ninodo = reservar_inodo('f', 6);
@@ -124,7 +125,7 @@ int main(int argc, char **argv) {
         bumount();
         return FALLO;
     }
-    #if DEBUGN2 
+     
     char atime[80], mtime[80], ctime[80], btime[80];
     struct tm *ts;
    

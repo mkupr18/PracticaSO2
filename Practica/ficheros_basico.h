@@ -87,6 +87,8 @@ int escribir_inodo(unsigned int ninodo, struct inodo *inodo);
 int leer_inodo(unsigned int ninodo, struct inodo *inodo);
 int obtener_nRangoBL(struct inodo *inodo, unsigned int nblogico, unsigned int *ptr);
 int traducir_bloque_inodo(unsigned int ninodo, unsigned int nblogico, unsigned char reservar);
- 
+int liberar_inodo(unsigned int ninodo);
+int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo);
+
 
 
