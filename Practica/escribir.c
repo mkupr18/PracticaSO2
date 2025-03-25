@@ -6,6 +6,7 @@
 
 #define NUM_OFFSETS 5
 
+
 int main(int argc, char **argv) {
     if (argc != 4) {
         fprintf(stderr, RED "Sintaxis: escribir <nombre_dispositivo> \"<texto>\" <diferentes_inodos>\n" RESET);
