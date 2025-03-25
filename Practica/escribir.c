@@ -5,6 +5,7 @@
 
 #define NUM_OFFSETS 5
 
+
 int main(int argc, char **argv) {
     if (argc != 4) {
         fprintf(stderr, "Sintaxis: escribir <nombre_dispositivo> \"<texto>\" <diferentes_inodos>\n");
@@ -16,81 +17,62 @@ int main(int argc, char **argv) {
     char *nombre_dispositivo = argv[1];
     char *texto = argv[2];
     int diferentes_inodos = atoi(argv[3]);
-
-    if (diferentes_inodos < 0 || diferentes_inodos > 1) {
-        fprintf(stderr, "Error: diferentes_inodos debe ser 0 o 1\n");
-        return FALLO;
-    }
-
-    if (strlen(texto) == 0) {
-        fprintf(stderr, "Error: El texto no puede estar vacío\n");
-        return FALLO;
-    }
+    unsigned int ninodos[NUM_OFFSETS];
+    unsigned int offsets[NUM_OFFSETS] = {9000, 209000, 30725000, 409605000, 480000000};
+    int tamTexto = strlen(texto);
 
     if (bmount(nombre_dispositivo) == -1) {
         fprintf(stderr, "Error al montar el dispositivo\n");
         return FALLO;
     }
 
-    unsigned int offsets[NUM_OFFSETS] = {9000, 209000, 30725000, 409605000, 480000000};
-    int tamTexto = strlen(texto);
-    char buf_original[tamTexto + 1];
+    printf("longitud texto: %d\n\n", tamTexto);
 
-    memset(buf_original, 0, tamTexto + 1);
-    strcpy(buf_original, texto);
-
-    unsigned int ninodo = reservar_inodo('f', 6);
-    if (ninodo == -1) {
-        fprintf(stderr, "Error al reservar inodo\n");
-        bumount();
-        return FALLO;
-    }
-
-    printf("Longitud texto: %d\n\n", tamTexto);
-
-    for (int i = 0; i < NUM_OFFSETS; i++) {
-        if (diferentes_inodos) {
-            printf("Estamos dentro del bucle dif = 1\n");
-
-            unsigned int nuevo_inodo = reservar_inodo('f', 6);
-            if (nuevo_inodo == -1) {
-                fprintf(stderr, "Error al reservar inodo\n");
+    // Reserva de inodos
+    if (diferentes_inodos == 0) {
+        ninodos[0] = reservar_inodo('f', 6);
+        if (ninodos[0] == -1) {
+            fprintf(stderr, "Error al reservar inodo\n");
+            bumount();
+            return FALLO;
+        }
+        for (int i = 1; i < NUM_OFFSETS; i++) {
+            ninodos[i] = ninodos[0];
+        }
+    } else {
+        for (int i = 0; i < NUM_OFFSETS; i++) {
+            printf("Estamos dentro de dif 1");
+            ninodos[i] = reservar_inodo('f', 6);
+            if (ninodos[i] == -1) {
+                fprintf(stderr, "Error al reservar inodo %d\n", i);
                 bumount();
                 return FALLO;
             }
-            printf("Estamos dentro del bucle dif. Tamaño nuevo inodo: %d\n", nuevo_inodo);
-            ninodo = nuevo_inodo;
         }
+    }
 
-        printf("Nº inodo reservado: %d\n", ninodo);
-        printf("Offset: %u\n", offsets[i]);
+    // Procesamiento de cada offset
+    for (int i = 0; i < NUM_OFFSETS; i++) {
+        printf("\nNº inodo reservado: %d\n", ninodos[i]);
+        printf("offset: %d\n", offsets[i]);
 
-        int bytes_escritos = mi_write_f(ninodo, buf_original, offsets[i], tamTexto);
+
+        int bytes_escritos = mi_write_f(ninodos[i], texto, offsets[i], tamTexto);
         if (bytes_escritos == -1) {
-            fprintf(stderr, "Error al escribir en el inodo %d\n", ninodo);
+            fprintf(stderr, "Error al escribir en el inodo %d\n", ninodos[i]);
             bumount();
             return FALLO;
         }
+        printf("Bytes escritos: %d\n", bytes_escritos);
 
         struct STAT stat;
-        if (mi_stat_f(ninodo, &stat) == -1) {
-            fprintf(stderr, "Error al obtener stat del inodo %d\n", ninodo);
+        if (mi_stat_f(ninodos[i], &stat) == -1) {
+            fprintf(stderr, "Error al obtener stat del inodo %d\n", ninodos[i]);
             bumount();
             return FALLO;
         }
-
-        printf("Bytes escritos: %d\n", bytes_escritos);
         printf("stat.tamEnBytesLog=%u\n", stat.tamEnBytesLog);
-        printf("stat.numBloquesOcupados=%u\n\n", stat.numBloquesOcupados);
-
-        char buf_leido[tamTexto + 1];
-        memset(buf_leido, 0, tamTexto + 1);
-        int bytes_leidos = mi_read_f(ninodo, buf_leido, offsets[i], tamTexto);
-        if (bytes_leidos == -1) {
-            fprintf(stderr, "Error al leer del inodo %d\n", ninodo);
-            bumount();
-            return FALLO;
-        }
+        printf("stat.numBloquesOcupados=%u\n", stat.numBloquesOcupados);
     }
 
     if (bumount() == -1) {
