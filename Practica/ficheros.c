@@ -1,4 +1,5 @@
 #include "ficheros.h"
+#include "bloques.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -11,7 +12,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
 
     // Verificar permisos de escritura
     if ((inodo.permisos & 2) != 2) {
-        fprintf(stderr, "No hay permisos de escritura\n");
+        fprintf(stderr, RED "No hay permisos de escritura\n" RESET);
         return FALLO;
     }
 
@@ -101,13 +102,13 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
 int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsigned int nbytes) {
     struct inodo inodo;
     if (leer_inodo(ninodo, &inodo) == -1) {
-        fprintf(stderr, "Error al leer el inodo %u\n", ninodo);
+        fprintf(stderr, RED "Error al leer el inodo %u\n" RESET, ninodo);
         return FALLO;
     }
 
     // Verificar permisos de lectura
     if ((inodo.permisos & 4) != 4) {
-        fprintf(stderr, "No hay permisos de lectura en el inodo %u\n", ninodo);
+        fprintf(stderr, RED "No hay permisos de lectura en el inodo %u\n" RESET, ninodo);
         return FALLO;
     }
     unsigned int bytes_leidos = 0;
@@ -142,7 +143,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
 
         // Leer el bloque físico
         if (bread(bloque_fisico, buf_bloque) == -1) {
-            fprintf(stderr, "Error al leer el bloque físico %d\n", bloque_fisico);
+            fprintf(stderr, RED "Error al leer el bloque físico %d\n" RESET, bloque_fisico);
             return FALLO;
         }
 
@@ -167,7 +168,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
     inodo.atime = time(NULL);
 
     if (escribir_inodo(ninodo, &inodo) == -1) {
-        fprintf(stderr, "Error al actualizar el inodo %u\n", ninodo);
+        fprintf(stderr, RED "Error al actualizar el inodo %u\n" RESET, ninodo);
         return FALLO;
     }
 

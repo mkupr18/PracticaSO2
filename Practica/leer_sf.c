@@ -6,7 +6,7 @@
 
 int main(int argc, char **argv) {
     if (argc != 2) {
-        fprintf(stderr, "Uso: %s <nombre_dispositivo>\n", argv[0]);
+        fprintf(stderr, RED "Uso: %s <nombre_dispositivo>\n" RESET, argv[0]);
         return FALLO;
     }
     

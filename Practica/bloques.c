@@ -57,6 +57,7 @@ int bwrite(unsigned int nbloque, const void *buf) {
     // Devolvemos el número de bytes escritos o -1
     return (int)bytes_escritos;
 }
+
 int bread(unsigned int nbloque, void *buf) {
     // Calculamos el desplazamiento en Bytes
     off_t desplazamiento = nbloque * BLOCKSIZE;
