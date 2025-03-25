@@ -2,11 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include "ficheros.h"
+#include "bloques.h"
 
 int main(int argc, char **argv) {
     // Validación de la sintaxis
     if (argc != 3) {
-        fprintf(stderr, "Sintaxis: leer <nombre_dispositivo> <ninodo>\n");
+        fprintf(stderr, RED "Sintaxis: leer <nombre_dispositivo> <ninodo>\n" RESET);
         return FALLO;
     }
 
@@ -16,14 +17,14 @@ int main(int argc, char **argv) {
 
     // Montar el dispositivo
     if (bmount(nombre_dispositivo) == -1) {
-        fprintf(stderr, "Error al montar el dispositivo\n");
+        fprintf(stderr,RED "Error al montar el dispositivo\n" RESET);
         return FALLO;
     }
 
     // Leer el inodo para obtener su tamaño
     struct inodo inodo;
     if (leer_inodo(ninodo, &inodo) == -1) {
-        fprintf(stderr, "Error al leer el inodo %u\n", ninodo);
+        fprintf(stderr, RED "Error al leer el inodo %u\n" RESET, ninodo);
         bumount();
         return FALLO;
     }
@@ -32,7 +33,7 @@ int main(int argc, char **argv) {
     unsigned int tamano_fichero = inodo.tamEnBytesLog;
     char *buffer = (char *)malloc(tamano_fichero);
     if (!buffer) {
-        fprintf(stderr, "Error al reservar memoria para el buffer\n");
+        fprintf(stderr, RED "Error al reservar memoria para el buffer\n" RESET);
         bumount();
         return FALLO;
     }
@@ -40,7 +41,7 @@ int main(int argc, char **argv) {
     // Leer el contenido del fichero
     int bytes_leidos = mi_read_f(ninodo, buffer, 0, tamano_fichero);
     if (bytes_leidos == -1) {
-        fprintf(stderr, "Error al leer el fichero\n");
+        fprintf(stderr, RED "Error al leer el fichero\n" RESET);
         free(buffer);
         bumount();
         return FALLO;
@@ -56,7 +57,7 @@ int main(int argc, char **argv) {
     // Liberar memoria y desmontar el dispositivo
     free(buffer);
     if (bumount() == -1) {
-        fprintf(stderr, "Error al desmontar el dispositivo\n");
+        fprintf(stderr, RED "Error al desmontar el dispositivo\n" RESET);
         return FALLO;
     }
 

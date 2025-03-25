@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
     }
 
     // Mostrar información del superbloque
-    printf("DATOS DEL SUPERBLOQUE\n");
+    printf("\nDATOS DEL SUPERBLOQUE\n");
     printf("posPrimerBloqueMB = %d\n", SB.posPrimerBloqueMB);
     printf("posUltimoBloqueMB = %d\n", SB.posUltimoBloqueMB);
     printf("posPrimerBloqueAI = %d\n", SB.posPrimerBloqueAI);

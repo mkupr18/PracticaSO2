@@ -2,6 +2,8 @@
 #include "ficheros_basico.h"
 #include <string.h>
 
+#define DEBUGN0 0
+
 int main(int argc, char **argv){
     // Queremos tres argumentos al iniciar el programa, nuestra memoria virtual
     if (argc != 3) {
@@ -65,8 +67,9 @@ int main(int argc, char **argv){
         bumount();
         return FALLO;
     }
-
-    printf("Dispositivo '%s' formateado con %d bloques de %d bytes.\n", nombre_dispositivo, nbloques, BLOCKSIZE);
+    #if DEBUGN0
+        printf("Dispositivo '%s' formateado con %d bloques de %d bytes.\n", nombre_dispositivo, nbloques, BLOCKSIZE);
+    #endif
     // Reservar el inodo para el directorio raíz
     int inodo_raiz = reservar_inodo('d', 7);
     if (inodo_raiz != 0) {
@@ -90,9 +93,9 @@ int main(int argc, char **argv){
         bumount();
         return FALLO;
     }
-
-    printf("Directorio raíz creado en el inodo 0.\n");
-
+    #if DEBUGN0
+        printf("Directorio raíz creado en el inodo 0.\n");
+    #endif
     
     // Desmontamos el dispositivo virtual
     if (bumount() == FALLO) {

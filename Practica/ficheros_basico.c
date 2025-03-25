@@ -4,6 +4,8 @@
 #include <string.h> // Para memset
 #include <time.h>   // Para manejar timestamps
 
+#define DEBUGN0 1
+
 // Calcula el tamaño en bloque necesario para el mapa de bits
 int tamMB(unsigned int nbloques)
 {
@@ -527,13 +529,17 @@ int traducir_bloque_inodo(unsigned int ninodo, unsigned int nblogico, unsigned c
             if (nivel_punteros == nRangoBL)
             {
                 inodo.punterosIndirectos[nRangoBL - 1] = ptr;
-                fprintf(stderr, "[traducir_bloque_inodo()\u2192 inodo.punterosIndirectos[%d] = %d (reservado BF %d para punteros_nivel%d)]\n", nRangoBL - 1, ptr, ptr, nRangoBL);
+                #if DEBUGN0
+                    fprintf(stderr, GRAY "[traducir_bloque_inodo()\u2192 inodo.punterosIndirectos[%d] = %d (reservado BF %d para punteros_nivel%d)]\n" RESET, nRangoBL - 1, ptr, ptr, nRangoBL);
+                #endif
             }
             else
             {
                 buffer[indice] = ptr;
                 bwrite(ptr_ant, buffer);
-                fprintf(stderr, "[traducir_bloque_inodo()\u2192 punteros_nivel%d [%d] = %d (reservado BF %d para punteros_nivel%d)]\n", nivel_punteros + 1, indice, ptr, ptr, nivel_punteros);
+                #if DEBUGN0
+                    fprintf(stderr, GRAY "[traducir_bloque_inodo()\u2192 punteros_nivel%d [%d] = %d (reservado BF %d para punteros_nivel%d)]\n" RESET, nivel_punteros + 1, indice, ptr, ptr, nivel_punteros);
+                #endif
             }
             memset(buffer, 0, BLOCKSIZE); // Limpia el buffer
         }
@@ -561,13 +567,17 @@ int traducir_bloque_inodo(unsigned int ninodo, unsigned int nblogico, unsigned c
         if (nRangoBL == 0)
         {
             inodo.punterosDirectos[nblogico] = ptr;
-            fprintf(stderr, "[traducir_bloque_inodo()\u2192 inodo.punterosDirectos[%d] = %d (reservado BF %d para BL %d)]\n", nblogico, ptr, ptr, nblogico);
+            #if DEBUGN0
+                fprintf(stderr, GRAY "[traducir_bloque_inodo()\u2192 inodo.punterosDirectos[%d] = %d (reservado BF %d para BL %d)]\n" RESET, nblogico, ptr, ptr, nblogico);
+            #endif
         }
         else
         {
             buffer[indice] = ptr;
             bwrite(ptr_ant, buffer);
-            fprintf(stderr, "[traducir_bloque_inodo()\u2192 punteros_nivel1 [%d] = %d (reservado BF %d para BL %d)]\n", indice, ptr, ptr, nblogico);
+            #if DEBUGN0
+                fprintf(stderr, GRAY "[traducir_bloque_inodo()\u2192 punteros_nivel1 [%d] = %d (reservado BF %d para BL %d)]\n" RESET, indice, ptr, ptr, nblogico);
+            #endif
         }
     }
 
@@ -628,5 +638,5 @@ int liberar_inodo(unsigned int ninodo){
 
 int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo)
 {
-    return 1;
+    return EXITO;
 }
