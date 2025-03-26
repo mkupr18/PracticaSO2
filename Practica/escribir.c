@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
             bumount();
             return FALLO;
         }
-        printf("Bytes escritos: %d\n", bytes_escritos);
+        fprintf(stdout,"Bytes escritos: %d\n", bytes_escritos);
 
         struct STAT stat;
         if (mi_stat_f(ninodos[i], &stat) == -1) {
