@@ -24,7 +24,7 @@ int main(int argc, char **argv){
 
     // Montamos el dispositivo virtual
     if (bmount(nombre_dispositivo) == FALLO) {
-        perror("Error al montar el dispositivo virtual");
+        fprintf(stderr,"Error al montar el dispositivo virtual");
         return FALLO;
     }
 
@@ -37,7 +37,7 @@ int main(int argc, char **argv){
     // Escribimos nbloques de ceros en el dispositivo virtual
     for (int i = 0; i < nbloques; i++) {
         if (bwrite(i, buffer) == FALLO) {
-            perror("Error al escribir en el dispositivo virtual");
+            fprintf(stderr,"Error al escribir en el dispositivo virtual");
             bumount();
             return FALLO;
         }
@@ -49,26 +49,26 @@ int main(int argc, char **argv){
     // Inicializamos las estructuras del sistema de ficheros
     if (initSB(nbloques, ninodos) == FALLO)
     {
-        perror("Error al inicializar el superbloque");
+        fprintf(stderr,"Error al inicializar el superbloque");
         bumount();
         return FALLO;
     }
 
     if (initMB() == FALLO)
     {
-        perror("Error al inicializar el mapa de bits");
+        fprintf(stderr,"Error al inicializar el mapa de bits");
         bumount();
         return FALLO;
     }
 
     if (initAI() == FALLO)
     {
-        perror("Error al inicializar el array de inodos");
+        fprintf(stderr,"Error al inicializar el array de inodos");
         bumount();
         return FALLO;
     }
     #if DEBUGN0
-        printf("Dispositivo '%s' formateado con %d bloques de %d bytes.\n", nombre_dispositivo, nbloques, BLOCKSIZE);
+        fprintf(stdout,"Dispositivo '%s' formateado con %d bloques de %d bytes.\n", nombre_dispositivo, nbloques, BLOCKSIZE);
     #endif
     // Reservar el inodo para el directorio raíz
     int inodo_raiz = reservar_inodo('d', 7);
@@ -81,7 +81,7 @@ int main(int argc, char **argv){
     // Actualizar el superbloque
     struct superbloque SB;
     if (bread(posSB, &SB) == FALLO) {
-        perror("Error al leer el superbloque");
+        fprintf(stderr,"Error al leer el superbloque");
         bumount();
         return FALLO;
     }
@@ -89,17 +89,17 @@ int main(int argc, char **argv){
     
 
     if (bwrite(posSB, &SB) == FALLO) {
-        perror("Error al escribir el superbloque actualizado");
+        fprintf(stderr,"Error al escribir el superbloque actualizado");
         bumount();
         return FALLO;
     }
     #if DEBUGN0
-        printf("Directorio raíz creado en el inodo 0.\n");
+        fprintf(stdout,"Directorio raíz creado en el inodo 0.\n");
     #endif
     
     // Desmontamos el dispositivo virtual
     if (bumount() == FALLO) {
-        perror("Error al desmontar el dispositivo virtual");
+        fprintf(stderr,"Error al desmontar el dispositivo virtual");
         return FALLO;
     }
 

@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
         return FALLO;
     }
 
-    printf("longitud texto: %d\n\n", tamTexto);
+    fprintf(stdout,"longitud texto: %d\n\n", tamTexto);
     
     // Reserva de inodos
     if (diferentes_inodos == 0) {
@@ -54,8 +54,8 @@ int main(int argc, char **argv) {
 
     // Procesamiento de cada offset
     for (int i = 0; i < NUM_OFFSETS; i++) {
-        printf("\nNº inodo reservado: %d\n", ninodos[i]);
-        printf("offset: %d\n", offsets[i]);
+        fprintf(stdout, "\nNº inodo reservado: %d\n", ninodos[i]);
+        fprintf(stdout, "offset: %d\n", offsets[i]);
 
         int bytes_escritos = mi_write_f(ninodos[i], texto, offsets[i], tamTexto);
         if (bytes_escritos == -1) {
@@ -71,8 +71,8 @@ int main(int argc, char **argv) {
             bumount();
             return FALLO;
         }
-        printf("stat.tamEnBytesLog=%u\n", stat.tamEnBytesLog);
-        printf("stat.numBloquesOcupados=%u\n", stat.numBloquesOcupados);
+        fprintf(stdout, "stat.tamEnBytesLog=%u\n", stat.tamEnBytesLog);
+        fprintf(stdout, "stat.numBloquesOcupados=%u\n", stat.numBloquesOcupados);
     }
     if (bumount() == -1) {
         fprintf(stderr, RED "Error al desmontar el dispositivo\n" RESET);

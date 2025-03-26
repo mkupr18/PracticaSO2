@@ -224,7 +224,7 @@ char leer_bit(unsigned int nbloque)
     // Leemos el mapa de bit y lo pasamos al nuestro auxiliar, para no modificar directamente el principal y ahorar espacio
     if (bread(nbloqueabs, bufferMB) == -1)
     {
-        perror(RED "Error leyendo el mapa de bits" RESET);
+        fprintf(stdout, RED "Error leyendo el mapa de bits" RESET);
         return -1;
     }
 

@@ -52,6 +52,6 @@ int main(int argc, char **argv) {
         return FALLO;
     }
 
-    fprintf(stderr, "Permisos del inodo %u cambiados a %u correctamente.\n", ninodo, permisos);
+    fprintf(stdout, "Permisos del inodo %u cambiados a %u correctamente.\n", ninodo, permisos);
     return EXITO;
 }
