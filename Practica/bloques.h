@@ -1,5 +1,3 @@
-// bloques.h
-
 #include <stdio.h>      // printf(), fprintf(), stderr, stdout, stdin
 #include <fcntl.h>      // O_WRONLY, O_CREAT, O_TRUNC
 #include <sys/stat.h>   // S_IRUSR, S_IWUSR
@@ -16,6 +14,7 @@
 #define FALLO -1
 
 
+// Definimos colores
 #define BLACK      "\x1B[30m"
 #define RED        "\x1b[31m"
 #define GREEN      "\x1b[32m"
@@ -31,10 +30,10 @@
 #define GRAY       "\x1B[38;2;176;174;174m"
 #define RESET      "\x1b[0m"
 
-
+// Definimos estilos
 #define NEGRITA    "\x1b[1m"
 
-
+// Inicialización de las funciones
 int bmount(const char *camino);
 int bumount();
 int bwrite(unsigned int nbloque, const void *buf);

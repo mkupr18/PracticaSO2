@@ -25,8 +25,6 @@ char leer_bit(unsigned int nbloque);
 int reservar_bloque();
 int liberar_bloque(unsigned int nbloque);
 int obtener_indice(unsigned int nblogico, int nivel_punteros);
-//int traducir_bloque_inodo(unsigned int ninodo, unsigned int nblogico, unsigned char reservar);
-
 int reservar_inodo(unsigned char tipo, unsigned char permisos);
 
 // 4 bytes cada uno y tenemos 12 -> 4*12 = 48 bytes
