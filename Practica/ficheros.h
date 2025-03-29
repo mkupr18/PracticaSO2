@@ -6,6 +6,7 @@
 #include "bloques.h"
 #include "ficheros_basico.h"
 
+// Estructura Stat para guardar información de inodo
 struct STAT {
     char tipo;
     unsigned char permisos;

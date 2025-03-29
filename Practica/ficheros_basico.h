@@ -81,6 +81,8 @@ struct inodo {              // comprobar que ocupa 128 bytes haciendo un sizeof(
     char padding[INODOSIZE - 2 * sizeof(unsigned char) - 4 * sizeof(time_t) - 18 * sizeof(unsigned int) - 6 * sizeof(unsigned char)];
     // Fijarse que también se resta lo que ocupen las variables de alineación utilizadas!!!
 }; 
+
+// Inicialización de las funciones
 int escribir_inodo(unsigned int ninodo, struct inodo *inodo);
 int leer_inodo(unsigned int ninodo, struct inodo *inodo);
 int obtener_nRangoBL(struct inodo *inodo, unsigned int nblogico, unsigned int *ptr);

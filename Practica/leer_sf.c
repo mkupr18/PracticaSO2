@@ -75,6 +75,7 @@ int main(int argc, char **argv) {
             return FALLO;
         }
 
+        // Obtenemos tiempos
         char atime[80], mtime[80], ctime[80], btime[80];
         struct tm *ts;
         
@@ -90,6 +91,7 @@ int main(int argc, char **argv) {
         ts = localtime(&inodo.btime);
         strftime(btime, sizeof(btime), "%a %Y-%m-%d %H:%M:%S", ts);
 
+        // Mostramos datos
         fprintf(stdout,"\nDATOS DEL DIRECTORIO RAIZ\n");
         fprintf(stdout,"tipo: %c\n", (inodo.tipo == 'd') ? 'd' : '-');
         fprintf(stdout,"permisos: %d\n", inodo.permisos);
@@ -119,6 +121,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    // Creamos un inodo 
     struct inodo inodo;
     if (leer_inodo(ninodo, &inodo) == -1) {
         fprintf(stderr, "Error al leer inodo %d\n", ninodo);
@@ -140,7 +143,8 @@ int main(int argc, char **argv) {
     
     ts = localtime(&inodo.btime);
     strftime(btime, sizeof(btime), "%a %Y-%m-%d %H:%M:%S", ts);
-   
+
+    // Traducimos el inodo en diferentes offsets y mostramos su información para validar que traducir_boque_inodo funciona bien
     fprintf(stdout,"INODO %d. TRADUCCIÓN DE BLOQUES LÓGICOS 8, 204, 30004, 400004 y 468750\n\n", ninodo);
 
     int bloques[] = {8, 204, 30004, 400004, 468750};
@@ -152,6 +156,7 @@ int main(int argc, char **argv) {
         }
     }
 
+    // Mostramos información por consola
     fprintf(stdout,"\nDATOS DEL INODO RESERVADO %d\n", ninodo);
     fprintf(stdout,"Tipo: %c\n", inodo.tipo);
     fprintf(stdout,"Permisos: %d\n", inodo.permisos);
@@ -165,6 +170,7 @@ int main(int argc, char **argv) {
     fprintf(stdout, BLUE "posPrimerInodoLibre = %d\n" RESET, SB.posPrimerInodoLibre);
     #endif
 
+    // Desmontamos el disco
     bumount();
     return EXITO;
 }

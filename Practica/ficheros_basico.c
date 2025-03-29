@@ -6,7 +6,17 @@
 
 #define DEBUGN0 1
 
-// Calcula el tamaño en bloque necesario para el mapa de bits
+/**
+ * @brief Calcula el tamaño en bloques necesario para el mapa de bits.
+ * 
+ * @param nbloques Número total de bloques del sistema de archivos.
+ * 
+ * @pre nbloques debe ser un número positivo.
+ * @post Retorna el número de bloques necesarios para almacenar el mapa de bits.
+ * 
+ * @return Número de bloques necesarios para el mapa de bits.
+ */
+
 int tamMB(unsigned int nbloques)
 {
     int tam = (nbloques / 8) / BLOCKSIZE;
@@ -17,7 +27,16 @@ int tamMB(unsigned int nbloques)
     return tam;
 }
 
-// Calcula el tamaño en bloques del array de inodos
+/**
+ * @brief Calcula el tamaño en bloques del array de inodos.
+ * 
+ * @param ninodos Número total de inodos del sistema de archivos.
+ * 
+ * @pre `ninodos` debe ser un número positivo.
+ * @post Retorna el número de bloques necesarios para almacenar la estructura de inodos.
+ * 
+ * @return Número de bloques necesarios para el array de inodos.
+ */
 int tamAI(unsigned int ninodos)
 {
     int tam = (ninodos * INODOSIZE) / BLOCKSIZE;
@@ -28,7 +47,24 @@ int tamAI(unsigned int ninodos)
     return tam;
 }
 
-// Inicializa el superbloque con la información del sistema de ficheros
+/**
+ * @brief Inicializa el superbloque con la información del sistema de archivos.
+ * 
+ * @param nbloques Número total de bloques del sistema de archivos.
+ * @param ninodos Número total de inodos del sistema de archivos.
+ * 
+ * @pre `nbloques` y `ninodos` deben ser valores positivos.
+ *      Debe ser posible leer el superbloque desde el almacenamiento (`bread(posSB, &SB) != -1`).
+ *      Las constantes como `posSB`, `tamSB`, `BLOCKSIZE`, `INODOSIZE` deben estar definidas.
+ *      La estructura `superbloque` debe estar correctamente declarada.
+ * @post Se inicializa el superbloque con la información esencial del sistema de archivos.
+ *       Se definen las posiciones de los bloques del mapa de bits, inodos y datos.
+ *       Se establecen los contadores de bloques e inodos libres.
+ *       Se escribe la estructura del superbloque en almacenamiento (`bwrite(posSB, &SB)`).
+ *       Retorna `EXITO` si la operación es exitosa, o `FALLO` si ocurre un error.
+ * 
+ * @return `EXITO` si la inicialización fue correcta, `FALLO` en caso de error.
+ */
 int initSB(unsigned int nbloques, unsigned int ninodos)
 {
     struct superbloque SB;
@@ -51,7 +87,18 @@ int initSB(unsigned int nbloques, unsigned int ninodos)
     return bwrite(posSB, &SB) == -1 ? FALLO : EXITO;
 }
 
-// Inicializa el mapa de bits, marcando como ocupados con 1 los bloques de metadatos
+/**
+ * @brief Inicializa el mapa de bits, marcando como ocupados los bloques de metadatos.
+ * 
+ * @pre El superbloque debe estar inicializado y accesible.
+ *      `bread(posSB, &SB) != -1` debe ser verdadero.
+ *      `bwrite()` debe ser capaz de escribir en el almacenamiento.
+ * @post Los bloques de metadatos estarán marcados como ocupados en el mapa de bits.
+ *       Se actualizará el superbloque y se guardará en almacenamiento.
+ *       Retorna `EXITO` si la operación es exitosa, `FALLO` en caso de error.
+ * 
+ * @return `EXITO` si la inicialización fue correcta, `FALLO` en caso de error.
+ */
 int initMB()
 {
     struct superbloque SB;
@@ -105,7 +152,20 @@ int initMB()
     return bwrite(posSB, &SB) == -1 ? FALLO : EXITO;
 }
 
-// Inicialización de array de inodos
+/**
+ * @brief Inicializa el array de inodos, marcándolos como libres y enlazándolos en lista.
+ * 
+ * @pre El superbloque debe estar inicializado y accesible.
+ *      `bread(posSB, &SB) != -1` debe ser verdadero.
+ *      `bwrite()` debe ser capaz de escribir en el almacenamiento.
+ *      La estructura `struct inodo` debe estar definida.
+ * @post Todos los inodos se marcarán como libres ('l').
+ *       Se enlazarán los inodos libres en una lista enlazada.
+ *       Se escribirán en el almacenamiento los bloques de inodos inicializados.
+ *       Retorna `EXITO` si la operación es exitosa, `FALLO` en caso de error.
+ * 
+ * @return `EXITO` si la inicialización fue correcta, `FALLO` en caso de error.
+ */
 int initAI()
 {
     struct superbloque SB;
@@ -150,8 +210,22 @@ int initAI()
 
     return EXITO;
 }
-
-// Escribe el valor indicado por el parámetro bit: 0 (libre) o 1 (ocupado) en un determinado bit del MB que representa un bloque
+/**
+ * @brief Escribe el valor indicado por el parámetro bit en un determinado bit del mapa de bits.
+ *
+ * @param nbloque Número del bloque cuyo bit se modificará.
+ * @param bit Valor a escribir en el bit (0 para libre, 1 para ocupado).
+ *
+ * @pre `nbloque` debe ser un índice válido dentro del sistema de archivos.
+ *      `bit` debe ser 0 o 1.
+ *      El superbloque debe estar correctamente inicializado y accesible.
+ *
+ * @post Se actualiza el bit correspondiente en el mapa de bits.
+ *       Si el proceso es exitoso, el bit del bloque en el MB reflejará el nuevo estado.
+ *       En caso de error, el mapa de bits no se modificará y se retornará `FALLO`.
+ *
+ * @return `EXITO` si la escritura fue exitosa, `FALLO` en caso de error.
+ */
 int escribir_bit(unsigned int nbloque, unsigned int bit)
 {
     struct superbloque SB;
@@ -202,7 +276,19 @@ int escribir_bit(unsigned int nbloque, unsigned int bit)
     return EXITO;
 }
 
-// Lee un determinado bit del MB y devuelve el valor del bit leído
+/**
+ * @brief Lee el valor de un determinado bit en el mapa de bits.
+ *
+ * @param nbloque Número del bloque cuyo bit se leerá.
+ *
+ * @pre `nbloque` debe ser un índice válido dentro del sistema de archivos.
+ *      El superbloque debe estar correctamente inicializado y accesible.
+ *
+ * @post Se obtiene el valor actual del bit correspondiente en el mapa de bits.
+ *       En caso de error, se retornará `-1`.
+ *
+ * @return `0` si el bit indica un bloque libre, `1` si está ocupado, `-1` en caso de error.
+ */
 char leer_bit(unsigned int nbloque)
 {
     struct superbloque SB;
@@ -243,7 +329,20 @@ char leer_bit(unsigned int nbloque)
     return mascara; // Devuelve 0 o 1 según el bit leído
 }
 
-// Encuentra el primer bloque libre, lo ocupa y devuelve su posición
+/**
+ * @brief Encuentra el primer bloque libre, lo ocupa y devuelve su posición.
+ *
+ * @pre El sistema de archivos debe estar montado y accesible.
+ *      Debe haber bloques libres disponibles en el sistema de archivos.
+ *      El superbloque debe estar correctamente inicializado y accesible.
+ *
+ * @post Se reserva un bloque libre en el mapa de bits, marcándolo como ocupado.
+ *       Se decrementa el contador de bloques libres en el superbloque.
+ *       El bloque reservado se inicializa con ceros en la zona de datos.
+ *       Se retorna el número del bloque reservado o `FALLO` si no hay bloques disponibles.
+ *
+ * @return Número del bloque reservado si tiene éxito, `FALLO` en caso de error.
+ */
 int reservar_bloque()
 {
 
@@ -316,7 +415,20 @@ int reservar_bloque()
     return FALLO; // No se encontraron bloques libres
 }
 
-// Libera un bloque determinado
+/**
+ * @brief Libera un bloque previamente reservado en el sistema de archivos.
+ *
+ * @param nbloque Número del bloque que se desea liberar.
+ *
+ * @pre `nbloque` debe ser un bloque previamente reservado dentro del sistema de archivos.
+ *      El superbloque debe estar correctamente inicializado y accesible.
+ *
+ * @post El bloque `nbloque` se marca como libre en el mapa de bits.
+ *       Se incrementa el contador de bloques libres en el superbloque.
+ *       Se actualiza el superbloque en el sistema de archivos.
+ *
+ * @return El número del bloque liberado si tiene éxito, `FALLO` en caso de error.
+ */
 int liberar_bloque(unsigned int nbloque)
 {
     struct superbloque SB;
@@ -339,7 +451,21 @@ int liberar_bloque(unsigned int nbloque)
     return nbloque;
 }
 
-// Escribe el contenido de un inodo en la posición correspondiente del array de inodos
+/**
+ * @brief Escribe el contenido de un inodo en la posición correspondiente del array de inodos.
+ *
+ * @param ninodo Número del inodo a escribir.
+ * @param inodo Puntero a la estructura `inodo` con la información a guardar.
+ *
+ * @pre `ninodo` debe estar dentro del rango permitido en el sistema de archivos.
+ *      El superbloque debe estar correctamente inicializado y accesible.
+ *      La estructura `inodo` debe estar correctamente inicializada con datos válidos.
+ *
+ * @post La información del inodo se almacena en la posición correspondiente en el array de inodos.
+ *       Se actualiza el bloque de inodos en el sistema de archivos.
+ *
+ * @return `EXITO` si la operación fue exitosa, `FALLO` en caso de error.
+ */
 int escribir_inodo(unsigned int ninodo, struct inodo *inodo)
 {
     struct superbloque SB;
@@ -376,7 +502,21 @@ int escribir_inodo(unsigned int ninodo, struct inodo *inodo)
     return EXITO; // Éxito
 }
 
-// Lee un inodo del array de inodos y lo almacena en la estructura proporcionada
+/**
+ * @brief Lee un inodo del array de inodos y lo almacena en la estructura proporcionada.
+ *
+ * @param ninodo Número del inodo a leer.
+ * @param inodo Puntero a la estructura `inodo` donde se almacenará el inodo leído.
+ *
+ * @pre `ninodo` debe ser un índice válido dentro del sistema de archivos.
+ *      El superbloque debe estar correctamente inicializado y accesible.
+ *      La estructura `inodo` debe ser una referencia válida.
+ *
+ * @post Se carga en `inodo` la información correspondiente al inodo solicitado.
+ *       En caso de error, no se modifica `inodo` y se retorna `FALLO`.
+ *
+ * @return `EXITO` si la operación fue exitosa, `FALLO` en caso de error.
+ */
 int leer_inodo(unsigned int ninodo, struct inodo *inodo)
 {
     struct superbloque SB;
@@ -400,7 +540,22 @@ int leer_inodo(unsigned int ninodo, struct inodo *inodo)
     return EXITO;
 }
 
-// Reserva un inodo y devuelve su número
+/**
+ * @brief Reserva un inodo y devuelve su número.
+ *
+ * @param tipo Tipo del inodo a reservar (archivo, directorio, etc.).
+ * @param permisos Permisos del inodo en el sistema de archivos.
+ *
+ * @pre Debe haber inodos libres disponibles en el sistema de archivos.
+ *      El superbloque debe estar correctamente inicializado y accesible.
+ *
+ * @post Se reserva un inodo y se inicializa con los valores proporcionados.
+ *       Se actualiza la cantidad de inodos libres en el superbloque.
+ *       Se guarda el inodo en el array de inodos y se actualiza el superbloque.
+ *       En caso de error, no se modifica el estado del sistema.
+ *
+ * @return Número del inodo reservado si la operación fue exitosa, `FALLO` en caso de error.
+ */
 int reservar_inodo(unsigned char tipo, unsigned char permisos)
 {
     struct superbloque SB;
@@ -447,7 +602,21 @@ int reservar_inodo(unsigned char tipo, unsigned char permisos)
     return posInodoReservado; // Devolvemos la posición del inodo reservado
 }
 
-// Determina el nivel de punteros en el que se encuentra el bloque lógico y devuelve el puntero correspondiente
+/**
+ * @brief Determina el nivel de punteros en el que se encuentra el bloque lógico y devuelve el puntero correspondiente.
+ *
+ * @param inodo Puntero a la estructura `inodo` en la que se buscará el bloque lógico.
+ * @param nblogico Número del bloque lógico cuyo nivel de punteros se desea obtener.
+ * @param ptr Puntero donde se almacenará el puntero correspondiente al nivel encontrado.
+ *
+ * @pre `inodo` debe ser un puntero válido y `nblogico` debe estar dentro del rango permitido en el sistema de archivos.
+ *
+ * @post Se almacena en `ptr` el puntero correspondiente al nivel de punteros del bloque lógico `nblogico`.
+ *       En caso de éxito, se retorna el nivel de punteros (`0` para directo, `1` para indirecto simple, `2` para doble, `3` para triple).
+ *       Si el `nblogico` está fuera de rango, se almacena `0` en `ptr` y se retorna `FALLO`.
+ *
+ * @return Nivel de punteros (`0` a `3`) si la operación fue exitosa, `FALLO` en caso de error.
+ */
 int obtener_nRangoBL(struct inodo *inodo, unsigned int nblogico, unsigned int *ptr)
 {
     if (nblogico < DIRECTOS)
@@ -474,7 +643,20 @@ int obtener_nRangoBL(struct inodo *inodo, unsigned int nblogico, unsigned int *p
     return FALLO; // Error: bloque lógico fuera de rango
 }
 
-// Calcula el índice dentro del bloque de punteros dependiendo del nivel de punteros
+/**
+ * @brief Calcula el índice dentro del bloque de punteros dependiendo del nivel de punteros.
+ *
+ * @param nblogico Número del bloque lógico cuyo índice se desea calcular.
+ * @param nivel_punteros Nivel de punteros en el que se encuentra el bloque lógico.
+ *
+ * @pre `nblogico` debe estar dentro del rango permitido en el sistema de archivos.
+ *      `nivel_punteros` debe ser un valor entre `0` y `3` correspondiente a los niveles de punteros (directo, simple, doble, triple).
+ *
+ * @post Se obtiene el índice dentro del bloque de punteros correspondiente al `nblogico` y `nivel_punteros`.
+ *       Si el `nblogico` está fuera de rango, se retorna `FALLO`.
+ *
+ * @return Índice dentro del bloque de punteros si la operación fue exitosa, `FALLO` en caso de error.
+ */
 int obtener_indice(unsigned int nblogico, int nivel_punteros)
 {
     if (nblogico < DIRECTOS)
@@ -500,7 +682,23 @@ int obtener_indice(unsigned int nblogico, int nivel_punteros)
     return FALLO; // Error: fuera de rango
 }
 
-// Traduce un bloque lógico a su correspondiente bloque físico, reservándolo si es necesario
+/**
+ * @brief Traduce un bloque lógico a su correspondiente bloque físico, reservándolo si es necesario.
+ *
+ * @param ninodo Número del inodo en el que se busca el bloque lógico.
+ * @param nblogico Número del bloque lógico a traducir.
+ * @param reservar Indica si se debe reservar un nuevo bloque en caso de que el `nblogico` no tenga uno asignado (`1` para reservar, `0` para solo consultar).
+ *
+ * @pre `ninodo` debe ser un inodo válido en el sistema de archivos.
+ *      `nblogico` debe estar dentro del rango permitido en el sistema de archivos.
+ *      Si `reservar` es `1`, debe haber bloques libres disponibles en el sistema.
+ *
+ * @post Se obtiene el número del bloque físico correspondiente al `nblogico` en el inodo `ninodo`.
+ *       Si `reservar` es `1` y el bloque lógico no tenía un bloque físico asignado, se reserva uno nuevo.
+ *       Se actualizan los punteros en el inodo y, si es necesario, se reservan y actualizan bloques de punteros intermedios.
+ *
+ * @return Número del bloque físico correspondiente si la operación fue exitosa, `FALLO` en caso de error.
+ */
 int traducir_bloque_inodo(unsigned int ninodo, unsigned int nblogico, unsigned char reservar)
 {
     struct inodo inodo;
@@ -587,6 +785,21 @@ int traducir_bloque_inodo(unsigned int ninodo, unsigned int nblogico, unsigned c
     }
     return ptr;
 }
+/**
+ * @brief Libera un inodo, eliminando todos sus bloques asociados y marcándolo como libre.
+ *
+ * @param ninodo Número del inodo que se desea liberar.
+ *
+ * @pre `ninodo` debe ser un inodo válido dentro del sistema de archivos.
+ *      El superbloque y el inodo deben estar correctamente inicializados y accesibles.
+ *
+ * @post Se eliminan todos los bloques asociados al inodo.
+ *       Se actualizan los metadatos del inodo marcándolo como libre.
+ *       Se enlaza a la lista de inodos libres en el superbloque.
+ *       Se incrementa el contador de inodos libres en el superbloque.
+ *
+ * @return `ninodo` si la operación fue exitosa, `FALLO` en caso de error.
+ */
 int liberar_inodo(unsigned int ninodo){
     struct superbloque sb;
     struct inodo inodo;
@@ -636,6 +849,20 @@ int liberar_inodo(unsigned int ninodo){
     return ninodo;
 }
 
+/**
+ * @brief Libera los bloques ocupados por un inodo a partir de un bloque lógico determinado.
+ *
+ * @param primerBL Número del primer bloque lógico desde donde se empezará a liberar.
+ * @param inodo Puntero al inodo cuyos bloques se van a liberar.
+ *
+ * @pre `inodo` debe ser un puntero válido a una estructura `inodo` inicializada.
+ *      `primerBL` debe estar dentro del rango de bloques del inodo.
+ *
+ * @post Se liberan todos los bloques a partir de `primerBL`.
+ *       Se actualiza el inodo con el nuevo número de bloques ocupados.
+ *
+ * @return `EXITO` si la operación se realiza correctamente, `FALLO` en caso de error.
+ */
 int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo)
 {
     return EXITO;

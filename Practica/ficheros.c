@@ -3,7 +3,24 @@
 #include <stdio.h>
 #include <string.h>
 
-
+/**
+ * @brief Escribe datos en un inodo en la posición y tamaño especificados.
+ *
+ * @param ninodo Número del inodo donde se escribirá.
+ * @param buf_original Puntero al buffer con los datos a escribir.
+ * @param offset Posición dentro del archivo donde comenzará la escritura.
+ * @param nbytes Cantidad de bytes a escribir.
+ *
+ * @pre `ninodo` debe ser un inodo válido con permisos de escritura.
+ *      `buf_original` debe ser un puntero válido con al menos `nbytes` datos disponibles.
+ *      `offset` debe estar dentro del rango permitido para el inodo.
+ *
+ * @post Se escriben `nbytes` desde `buf_original` en el inodo, comenzando desde `offset`.
+ *       Se actualiza el tamaño lógico del inodo si la escritura expande el archivo.
+ *       Se actualizan los tiempos de modificación (`mtime`) y cambio (`ctime`).
+ *
+ * @return Número de bytes escritos si la operación fue exitosa, `FALLO` en caso de error.
+ */
 int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offset, unsigned int nbytes) {
     struct inodo inodo;
     if (leer_inodo(ninodo, &inodo) == FALLO) {
@@ -98,7 +115,24 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
     return bytes_escritos;
 }
 
-
+/**
+ * @brief Lee datos de un inodo desde una posición y tamaño especificados.
+ *
+ * @param ninodo Número del inodo del que se leerá.
+ * @param buf_original Puntero al buffer donde se almacenarán los datos leídos.
+ * @param offset Posición dentro del archivo desde donde comenzará la lectura.
+ * @param nbytes Cantidad de bytes a leer.
+ *
+ * @pre `ninodo` debe ser un inodo válido con permisos de lectura.
+ *      `buf_original` debe ser un puntero válido con espacio suficiente para `nbytes`.
+ *      `offset` debe estar dentro del rango permitido del inodo.
+ *
+ * @post Se copian hasta `nbytes` datos desde el inodo al `buf_original`, comenzando desde `offset`.
+ *       Si `offset + nbytes` excede el tamaño lógico del inodo, se ajusta la cantidad de datos leídos.
+ *       Se actualiza el tiempo de acceso (`atime`).
+ *
+ * @return Número de bytes leídos si la operación fue exitosa, `FALLO` en caso de error.
+ */
 int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsigned int nbytes) {
     struct inodo inodo;
     if (leer_inodo(ninodo, &inodo) == -1) {
@@ -175,6 +209,20 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
     return bytes_leidos; // Devolver la cantidad de bytes leídos
 }
 
+/**
+ * @brief Obtiene la información del estado de un inodo.
+ *
+ * @param ninodo Número del inodo del que se obtendrá la información.
+ * @param p_stat Puntero a una estructura `STAT` donde se almacenará la información.
+ *
+ * @pre `ninodo` debe ser un inodo válido.
+ *      `p_stat` debe ser un puntero válido a una estructura `STAT`.
+ *
+ * @post Se llena la estructura `STAT` con los datos del inodo, incluyendo tipo, permisos,
+ *       tamaño en bytes, número de bloques ocupados y tiempos de modificación (`mtime`) y creación (`ctime`).
+ *
+ * @return `EXITO` si la operación fue exitosa, `FALLO` en caso de error.
+ */
 int mi_stat_f(unsigned int ninodo, struct STAT *p_stat) {
     struct inodo inodo;
     if (leer_inodo(ninodo, &inodo) == -1) return FALLO;
@@ -189,6 +237,20 @@ int mi_stat_f(unsigned int ninodo, struct STAT *p_stat) {
     return EXITO;
 }
 
+/**
+ * @brief Cambia los permisos de un inodo.
+ *
+ * @param ninodo Número del inodo cuyos permisos se modificarán.
+ * @param permisos Nuevo valor de permisos (bits de lectura, escritura y ejecución).
+ *
+ * @pre `ninodo` debe ser un inodo válido.
+ *      `permisos` debe ser un valor válido dentro de la representación de permisos (ej. `0-7` en octal).
+ *
+ * @post Se actualiza el campo de permisos del inodo.
+ *       Se actualiza el tiempo de cambio (`ctime`).
+ *
+ * @return `EXITO` si la operación fue exitosa, `FALLO` en caso de error.
+ */
 int mi_chmod_f(unsigned int ninodo, unsigned char permisos) {
     struct inodo inodo;
     if (leer_inodo(ninodo, &inodo) == -1) return FALLO;
