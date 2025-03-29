@@ -863,7 +863,70 @@ int liberar_inodo(unsigned int ninodo){
  *
  * @return `EXITO` si la operación se realiza correctamente, `FALLO` en caso de error.
  */
-int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo)
-{
-    return EXITO;
+int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo) {
+    #define NPUNTEROS (BLOCKSIZE / sizeof(unsigned int))
+    unsigned int nivel_punteros, nblog, ultimoBL;
+    unsigned char bufAux_punteros[BLOCKSIZE];
+    unsigned int bloques_punteros[3][NPUNTEROS];
+    int indices_primerBL[3];
+    int liberados = 0;
+    int i, j, k;
+    int eof = 0;
+    
+    memset(bufAux_punteros, 0, BLOCKSIZE);
+
+    if (inodo->tamEnBytesLog == 0) {
+        return 0;
+    }
+
+    // Calcular último bloque lógico
+    if (inodo->tamEnBytesLog % BLOCKSIZE == 0) {
+        ultimoBL = inodo->tamEnBytesLog / BLOCKSIZE - 1;
+    } else {
+        ultimoBL = inodo->tamEnBytesLog / BLOCKSIZE;
+    }
+
+    // Liberar bloques directos
+    if (primerBL < DIRECTOS) {
+        i = primerBL;
+        while (!eof && i < DIRECTOS) {
+            nblog = i;
+            if (nblog == ultimoBL) eof = 1;
+            if (inodo->punterosDirectos[i]) {
+                liberar_bloque(inodo->punterosDirectos[i]);
+                liberados++;
+                inodo->punterosDirectos[i] = 0;
+            }
+            i++;
+        }
+    }
+
+    // Liberar bloques indirectos nivel 1
+    if (primerBL < INDIRECTOS0 && !eof) {
+        if (inodo->punterosIndirectos[0]) {
+            bread(inodo->punterosIndirectos[0], bloques_punteros[0]);
+            
+            i = (primerBL >= DIRECTOS) ? obtener_indice(primerBL, 1) : 0;
+            while (!eof && i < NPUNTEROS) {
+                nblog = DIRECTOS + i;
+                if (nblog == ultimoBL) eof = 1;
+                if (bloques_punteros[0][i]) {
+                    liberar_bloque(bloques_punteros[0][i]);
+                    liberados++;
+                    bloques_punteros[0][i] = 0;
+                }
+                i++;
+            }
+            
+            if (memcmp(bloques_punteros[0], bufAux_punteros, BLOCKSIZE) == 0) {
+                liberar_bloque(inodo->punterosIndirectos[0]);
+                liberados++;
+                inodo->punterosIndirectos[0] = 0;
+            } else {
+                bwrite(inodo->punterosIndirectos[0], bloques_punteros[0]);
+            }
+        }
+    }
+    
+    return liberados;
 }
