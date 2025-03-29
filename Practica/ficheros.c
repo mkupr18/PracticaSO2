@@ -277,13 +277,13 @@ int mi_truncar_f(unsigned int ninodo, unsigned int nbytes){
         }
     
 
-    unsigned int primerBL;
+    unsigned int primerBL = 0;
      
     //Primer bloque a liberar
     if(nbytes%BLOCKSIZE == 0){
         primerBL = nbytes/BLOCKSIZE;
     } else{
-        primerBL == nbytes/BLOCKSIZE + 1;
+        primerBL = nbytes/BLOCKSIZE + 1;
     }
     int bloques_liberados = liberar_bloques_inodo(primerBL, &inodo);
     if (bloques_liberados == -1) {
