@@ -260,8 +260,24 @@ int mi_chmod_f(unsigned int ninodo, unsigned char permisos) {
     return escribir_inodo(ninodo, &inodo);
 }
 
+/**
+ * @brief Trunca un fichero/directorio.
+ *
+ * @param ninodo Número del inodo que se truncará.
+ * @param nbytes Número de bytes.
+ *
+ * @pre `ninodo` debe ser un inodo válido y tener permisos de escritura.
+ *      No se puede truncar más allá del tamaño en bytes lógicos (EOF) del fichero/directorio.
+ *
+ * @post Se actualiza mtime, ctime, tamEnBytesLog y numBloquesOcupados.
+ *       Se liberan los bloques necesarios y se devuelve la cantidad de estos.
+ *
+ * @return `EXITO` si la operación fue exitosa, `FALLO` en caso de error.
+ */
 int mi_truncar_f(unsigned int ninodo, unsigned int nbytes){
     struct inodo inodo;
+
+    // Leemos el inodo
     if (leer_inodo(ninodo, &inodo) == FALLO) {
         return FALLO;
     }
@@ -271,10 +287,10 @@ int mi_truncar_f(unsigned int ninodo, unsigned int nbytes){
         fprintf(stderr, "No hay permisos de escritura\n");
         return FALLO;
     }
-        // No se puede truncar más allá del tamaño actual
-        if (nbytes >= inodo.tamEnBytesLog) {
-            return 0;
-        }
+    // No se puede truncar más allá del tamaño actual
+    if (nbytes >= inodo.tamEnBytesLog) {
+        return 0;
+    }
     
 
     unsigned int primerBL = 0;
@@ -285,11 +301,14 @@ int mi_truncar_f(unsigned int ninodo, unsigned int nbytes){
     } else{
         primerBL = nbytes/BLOCKSIZE + 1;
     }
+
     int bloques_liberados = liberar_bloques_inodo(primerBL, &inodo);
+
     if (bloques_liberados == -1) {
         fprintf(stderr, "Error al liberar el bloque inodo %u\n", ninodo);
         return FALLO;
     }
+
     inodo.mtime = time(NULL);
     inodo.ctime = time(NULL);
 
