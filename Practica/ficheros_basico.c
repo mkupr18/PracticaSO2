@@ -906,7 +906,7 @@ int liberar_indirectos_recursivo(unsigned int *nBL, unsigned int primerBL, unsig
                     case 2: (*nBL) += NPUNTEROS; break;
                     case 3: (*nBL) += NPUNTEROS * NPUNTEROS; break;
                 }
-                fprintf(stdout, "[liberar_bloques_inodo()\u2192 Saltamos del BL %d al BL %d]\n", *nBL, *nBL);
+                //fprintf(stdout, "[liberar_bloques_inodo()\u2192 Saltamos del BL %d al BL %d]\n", *nBL, *nBL);
             }
             if (*nBL > ultimoBL) *eof = 1;
         }

@@ -10,7 +10,7 @@
 int main(int argc, char **argv) {
     // Damos respectivo error en caso de no haver ejecutado bien el programa
     if (argc != 4) {
-        fprintf(stderr, RED "Sintaxis: escribir <nombre_dispositivo> \"<texto>\" <diferentes_inodos>\n" RESET);
+        fprintf(stderr, RED "Sintaxis: escribir <nombre_dispositivo> <\"$(cat fichero)\"> <diferentes_inodos>\n" RESET);
         fprintf(stderr, RED "Offsets: 9000, 209000, 30725000, 409605000, 480000000\n" RESET);
         fprintf(stderr, RED "Si diferentes_inodos=0 se reserva un solo inodo para todos los offsets\n" RESET);
         return FALLO;

@@ -136,13 +136,13 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
 int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsigned int nbytes) {
     struct inodo inodo;
     if (leer_inodo(ninodo, &inodo) == -1) {
-        fprintf(stderr, RED "Error al leer el inodo %u\n" RESET, ninodo);
+        //fprintf(stderr, RED "Error al leer el inodo %u\n" RESET, ninodo);
         return FALLO;
     }
 
     // Verificar permisos de lectura
     if ((inodo.permisos & 4) != 4) {
-        fprintf(stderr, RED "No hay permisos de lectura en el inodo %u\n" RESET, ninodo);
+        fprintf(stderr, RED "No hay permisos de lectura\n" RESET);
         return FALLO;
     }
     unsigned int bytes_leidos = 0;
@@ -292,7 +292,6 @@ int mi_truncar_f(unsigned int ninodo, unsigned int nbytes){
         return 0;
     }
     
-
     unsigned int primerBL = 0;
      
     // Primer bloque a liberar

@@ -51,7 +51,5 @@ int main(int argc, char **argv) {
         fprintf(stderr, RED "Error al desmontar el dispositivo\n" RESET);
         return FALLO;
     }
-
-    fprintf(stdout, "Permisos del inodo %u cambiados a %u correctamente.\n", ninodo, permisos);
     return EXITO;
 }

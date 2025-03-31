@@ -41,7 +41,7 @@ int main(int argc, char **argv) {
     // Leer el contenido del fichero
     int bytes_leidos = mi_read_f(ninodo, buffer, 0, tamano_fichero);
     if (bytes_leidos == -1) {
-        fprintf(stderr, RED "Error al leer el fichero\n" RESET);
+        //fprintf(stderr, RED "Error al leer el fichero\n" RESET);
         free(buffer);
         bumount();
         return FALLO;
