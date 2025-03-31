@@ -892,6 +892,7 @@ int liberar_indirectos_recursivo(unsigned int *nBL, unsigned int primerBL, unsig
         for (int i = indice_inicial; i < NPUNTEROS && !(*eof); i++) {
             if (bloquePunteros[i] != 0) {
                 if (nivel_punteros == 1) {
+                    fprintf(stdout, "[liberar_bloques_inodo()→ liberado BF %d de datos para BL %d]\n", bloquePunteros[i], *nBL);
                     liberar_bloque(bloquePunteros[i]);
                     bloquePunteros[i] = 0;
                     liberados++;
@@ -905,6 +906,7 @@ int liberar_indirectos_recursivo(unsigned int *nBL, unsigned int primerBL, unsig
                     case 2: (*nBL) += NPUNTEROS; break;
                     case 3: (*nBL) += NPUNTEROS * NPUNTEROS; break;
                 }
+                fprintf(stdout, "[liberar_bloques_inodo()\u2192 Saltamos del BL %d al BL %d]\n", *nBL, *nBL);
             }
             if (*nBL > ultimoBL) *eof = 1;
         }
@@ -912,6 +914,7 @@ int liberar_indirectos_recursivo(unsigned int *nBL, unsigned int primerBL, unsig
             if (memcmp(bloquePunteros, bufferCeros, BLOCKSIZE) != 0) {
                 bwrite(*ptr, bloquePunteros);
             } else {
+                fprintf(stdout, "[liberar_bloques_inodo()→ liberado BF %d de punteros_nivel%d correspondiente al BL %d]\n", *ptr, nivel_punteros, *nBL);
                 liberar_bloque(*ptr);
                 *ptr = 0;
                 if (nRangoBL == nivel_punteros) {
@@ -940,6 +943,8 @@ int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo) {
     ultimoBL = (inodo->tamEnBytesLog % BLOCKSIZE == 0) ? (inodo->tamEnBytesLog / BLOCKSIZE - 1) : (inodo->tamEnBytesLog / BLOCKSIZE);
     
     nRangoBL = obtener_nRangoBL(inodo, nBL, &ptr);
+    fprintf(stdout, "[liberar_bloques_inodo()→ Primer BL: %d, Último BL: %d]\n", primerBL, ultimoBL);
+
     if (nRangoBL == 0) {
         liberados += liberar_directos(&nBL, ultimoBL, inodo, &eof);
     }
@@ -948,5 +953,7 @@ int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo) {
         nivel_punteros = nRangoBL;
         liberados += liberar_indirectos_recursivo(&nBL, primerBL, ultimoBL, inodo, nRangoBL, nivel_punteros, &ptr, &eof);
     }
+    fprintf(stdout, "[liberar_bloques_inodo()→ total bloques liberados: %d]\n", liberados);
+
     return liberados;
 }
