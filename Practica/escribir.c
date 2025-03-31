@@ -1,3 +1,5 @@
+// Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -40,7 +42,7 @@ int main(int argc, char **argv) {
         // Entramos aqui en caso de que queramos modificar sobre un mismo inodoo todos los offsets
         ninodos[0] = reservar_inodo('f', 6);
 
-        //Error al reservar inodo
+        // Error al reservar inodo
         if (ninodos[0] == -1) {
             fprintf(stderr, RED "Error al reservar inodo\n" RESET);
             bumount();

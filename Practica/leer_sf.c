@@ -1,3 +1,5 @@
+// Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
+
 #include <stdio.h>
 #include <time.h>
 #include "ficheros_basico.h"
@@ -10,7 +12,7 @@ int main(int argc, char **argv) {
         return FALLO;
     }
     
-    // Montar el dispositivo virtual
+    // Monta el dispositivo virtual
     if (bmount(argv[1]) == FALLO) {
         fprintf(stdout,"Error al montar el dispositivo virtual");
         return FALLO;
@@ -23,7 +25,7 @@ int main(int argc, char **argv) {
         return FALLO;
     }
 
-    // Mostrar información del superbloque
+    // Mostramos la información del superbloque
     printf("\nDATOS DEL SUPERBLOQUE\n");
     printf("posPrimerBloqueMB = %d\n", SB.posPrimerBloqueMB);
     printf("posUltimoBloqueMB = %d\n", SB.posUltimoBloqueMB);
@@ -38,7 +40,7 @@ int main(int argc, char **argv) {
     printf("totBloques = %d\n", SB.totBloques);
     printf("totInodos = %d\n", SB.totInodos);
 
-    #if DEBUGN1  // Mostrar el mapa de bits (primer y último bit de cada zona)
+    #if DEBUGN1  // Muestra el mapa de bits (primer y último bit de cada zona)
         fprintf(stdout, "\nMAPA DE BITS CON BLOQUES DE METADATOS OCUPADOS\n");
         fprintf(stdout,"SB.posSB: %d → leer_bit(0) = %d\n", 0, leer_bit(0));
         fprintf(stdout,"SB.posPrimerBloqueMB: %d → leer_bit(%d) = %d\n", SB.posPrimerBloqueMB, SB.posPrimerBloqueMB, leer_bit(SB.posPrimerBloqueMB));
@@ -48,17 +50,17 @@ int main(int argc, char **argv) {
         fprintf(stdout,"SB.posPrimerBloqueDatos: %d → leer_bit(%d) = %d\n", SB.posPrimerBloqueDatos, SB.posPrimerBloqueDatos, leer_bit(SB.posPrimerBloqueDatos));
         fprintf(stdout,"SB.posUltimoBloqueDatos: %d → leer_bit(%d) = %d\n", SB.posUltimoBloqueDatos, SB.posUltimoBloqueDatos, leer_bit(SB.posUltimoBloqueDatos));
 
-        // Reservar y liberar un bloque
+        // Reserva y libera un bloque
         fprintf(stdout,"\nRESERVAMOS UN BLOQUE Y LUEGO LO LIBERAMOS\n");
         int bloque_reservado = reservar_bloque();
         if (bloque_reservado == -1) {
             perror("Error al reservar un bloque");
         } else {
             fprintf(stdout,"Se ha reservado el bloque físico nº %d que era el 1º libre indicado por el MB\n", bloque_reservado);
-            bread(posSB, &SB);  // Volver a leer el superbloque para actualizar datos
+            bread(posSB, &SB);  // Vuelve a leer el superbloque para actualizar datos
             fprintf(stdout,"SB.cantBloquesLibres = %d\n", SB.cantBloquesLibres);
 
-            // Liberar el bloque reservado
+            // Libera el bloque reservado
             if (liberar_bloque(bloque_reservado) == -1) {
                 fprintf(stderr,"Error al liberar el bloque");
             } else {
@@ -67,7 +69,7 @@ int main(int argc, char **argv) {
             }
         }
 
-        // Mostrar datos del inodo del directorio raíz
+        // Muestra datos del inodo del directorio raíz
         struct inodo inodo;
         if (leer_inodo(SB.posInodoRaiz, &inodo) == FALLO) {
             fprintf(stderr,"Error al leer el inodo raíz");
@@ -75,7 +77,7 @@ int main(int argc, char **argv) {
             return FALLO;
         }
 
-        // Obtenemos tiempos
+        // Obtiene los tiempos
         char atime[80], mtime[80], ctime[80], btime[80];
         struct tm *ts;
         
@@ -103,7 +105,7 @@ int main(int argc, char **argv) {
         fprintf(stdout,"tamEnBytesLog: %d\n", inodo.tamEnBytesLog);
         fprintf(stdout,"numBloquesOcupados: %d\n", inodo.numBloquesOcupados);
 
-        // Desmontar el sistema de ficheros
+        // Desmonta el sistema de ficheros
         bumount();
     #endif
 
@@ -114,7 +116,7 @@ int main(int argc, char **argv) {
     }
     #if DEBUGN2
 
-    // Reservar un inodo para la prueba
+    // Reserva un inodo para la prueba
     int ninodo = reservar_inodo('f', 6);
     if (ninodo == -1) {
         fprintf(stderr, "Error al reservar inodo\n");

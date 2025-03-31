@@ -1,3 +1,5 @@
+// Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
+
 #include "bloques.h"
 #include "ficheros_basico.h"
 #include <string.h>
@@ -70,7 +72,7 @@ int main(int argc, char **argv){
     #if DEBUGN0
         fprintf(stdout,"Dispositivo '%s' formateado con %d bloques de %d bytes.\n", nombre_dispositivo, nbloques, BLOCKSIZE);
     #endif
-    // Reservar el inodo para el directorio raíz
+    // Reserva el inodo para el directorio raíz
     int inodo_raiz = reservar_inodo('d', 7);
     if (inodo_raiz != 0) {
         fprintf(stderr, "Error: No se pudo reservar el inodo para el directorio raíz\n");
@@ -78,7 +80,7 @@ int main(int argc, char **argv){
         return FALLO;
     }
 
-    // Actualizar el superbloque
+    // Actualiza el superbloque
     struct superbloque SB;
     if (bread(posSB, &SB) == FALLO) {
         fprintf(stderr,"Error al leer el superbloque");

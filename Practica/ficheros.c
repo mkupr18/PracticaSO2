@@ -1,3 +1,5 @@
+// Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
+
 #include "ficheros.h"
 #include "bloques.h"
 #include <stdio.h>
@@ -27,7 +29,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
         return FALLO;
     }
 
-    // Verificar permisos de escritura
+    // Verifica los permisos de escritura
     if ((inodo.permisos & 2) != 2) {
         fprintf(stderr, RED "No hay permisos de escritura\n" RESET);
         return FALLO;
@@ -99,7 +101,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
         bytes_escritos += desp2 + 1;
     }
 
-    // Actualizar metainformación del inodo
+    // Actualiza la metainformación del inodo
     if (leer_inodo(ninodo, &inodo) == FALLO) {
         return FALLO;
     }
@@ -140,19 +142,19 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
         return FALLO;
     }
 
-    // Verificar permisos de lectura
+    // Verifica permisos de lectura
     if ((inodo.permisos & 4) != 4) {
         fprintf(stderr, RED "No hay permisos de lectura\n" RESET);
         return FALLO;
     }
     unsigned int bytes_leidos = 0;
-    // Verificar si el offset está más allá del tamaño del archivo
+    // Verifica si el offset está más allá del tamaño del archivo
     if (offset >= inodo.tamEnBytesLog) {
         bytes_leidos = 0;
         return bytes_leidos; // No hay nada que leer
     }
 
-    // Ajustar nbytes si se intenta leer más allá del EOF
+    // Ajusta nbytes si se intenta leer más allá del EOF
     if (offset + nbytes >= inodo.tamEnBytesLog) {
         nbytes = inodo.tamEnBytesLog - offset;
     }
@@ -164,9 +166,9 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
 
     char buf_bloque[BLOCKSIZE];
 
-    // Recorrer los bloques lógicos necesarios para la lectura
+    // Recorre los bloques lógicos necesarios para la lectura
     for (unsigned int bloque_logico = bloque_logico_inicial; bloque_logico <= bloque_logico_final; bloque_logico++) {
-        // Traducir el bloque lógico a físico
+        // Traduce el bloque lógico a físico
         int bloque_fisico = traducir_bloque_inodo(ninodo, bloque_logico, 0);
 
         if (bloque_fisico == -1) {
@@ -175,13 +177,13 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
             continue;
         }
 
-        // Leer el bloque físico
+        // Lee el bloque físico
         if (bread(bloque_fisico, buf_bloque) == -1) {
             fprintf(stderr, RED "Error al leer el bloque físico %d\n" RESET, bloque_fisico);
             return FALLO;
         }
 
-        // Calcular cuántos bytes copiar en esta iteración
+        // Calcula cuántos bytes copiar en esta iteración
         unsigned int bytes_a_copiar;
         if (bloque_logico == bloque_logico_inicial && bloque_logico == bloque_logico_final) {
             bytes_a_copiar = nbytes;
@@ -193,12 +195,12 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
             bytes_a_copiar = BLOCKSIZE;
         }
 
-        // Copiar los datos al buffer original
+        // Copia los datos al buffer original
         memcpy(buf_original + bytes_leidos, buf_bloque + (bloque_logico == bloque_logico_inicial ? desplazamiento_inicial : 0), bytes_a_copiar);
         bytes_leidos += bytes_a_copiar;
     }
 
-    // Actualizar el atime del inodo
+    // Actualiza el atime del inodo
     inodo.atime = time(NULL);
 
     if (escribir_inodo(ninodo, &inodo) == -1) {
@@ -206,7 +208,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
         return FALLO;
     }
 
-    return bytes_leidos; // Devolver la cantidad de bytes leídos
+    return bytes_leidos; // Devuelve la cantidad de bytes leídos
 }
 
 /**
@@ -252,6 +254,7 @@ int mi_stat_f(unsigned int ninodo, struct STAT *p_stat) {
  * @return `EXITO` si la operación fue exitosa, `FALLO` en caso de error.
  */
 int mi_chmod_f(unsigned int ninodo, unsigned char permisos) {
+
     struct inodo inodo;
     if (leer_inodo(ninodo, &inodo) == -1) return FALLO;
     inodo.permisos = permisos;
@@ -275,6 +278,7 @@ int mi_chmod_f(unsigned int ninodo, unsigned char permisos) {
  * @return `EXITO` si la operación fue exitosa, `FALLO` en caso de error.
  */
 int mi_truncar_f(unsigned int ninodo, unsigned int nbytes){
+
     struct inodo inodo;
 
     // Leemos el inodo
@@ -282,7 +286,7 @@ int mi_truncar_f(unsigned int ninodo, unsigned int nbytes){
         return FALLO;
     }
 
-    // Verificar permisos de escritura
+    // Verifica los permisos de escritura
     if ((inodo.permisos & 2) != 2) {
         fprintf(stderr, "No hay permisos de escritura\n");
         return FALLO;

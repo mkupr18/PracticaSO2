@@ -1,3 +1,5 @@
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,7 +13,7 @@ int main(int argc, char **argv) {
         return FALLO;
     }
 
-    // Montar dispositivo
+    // Monta el dispositivo
     if (bmount(argv[1]) == -1) {
         fprintf(stderr, "Error al montar el dispositivo\n");
         return FALLO;
@@ -28,7 +30,7 @@ int main(int argc, char **argv) {
         resultado = mi_truncar_f(ninodo, nbytes);
     }
 
-    // Obtener información del inodo
+    // Obtiene información del inodo
     struct inodo inodo;
     if (leer_inodo(ninodo, &inodo) == -1) {
         fprintf(stderr, "Error al leer el inodo\n");
@@ -36,7 +38,7 @@ int main(int argc, char **argv) {
         return FALLO;
     }
 
-    // Obtener información STAT
+    // Obtiene información del STAT
     struct STAT stat;
     if (mi_stat_f(ninodo, &stat) == -1) {
         fprintf(stderr, "Error al obtener stat del inodo\n");
@@ -56,7 +58,7 @@ int main(int argc, char **argv) {
     ts = localtime(&inodo.btime);
     strftime(btime, sizeof(btime), "%a %Y-%m-%d %H:%M:%S", ts);
 
-    // Mostrar información del inodo
+    // Muestra información del inodo
         fprintf(stdout,"\nDATOS INODO %d:\n", ninodo);
         fprintf(stdout,"tipo=%c\n", inodo.tipo);
         fprintf(stdout,"permisos=%d\n", inodo.permisos);
@@ -68,7 +70,7 @@ int main(int argc, char **argv) {
         fprintf(stdout,"tamEnBytesLog: %u\n", stat.tamEnBytesLog);
         fprintf(stdout,"numBloquesOcupados: %u\n", stat.numBloquesOcupados);
 
-    // Desmontar dispositivo
+    // Desmonta el dispositivo
     if (bumount() == -1) {
         fprintf(stderr, "Error al desmontar el dispositivo\n");
         return FALLO;
