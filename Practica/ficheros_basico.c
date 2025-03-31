@@ -827,6 +827,7 @@ int liberar_inodo(unsigned int ninodo){
     inodo.numBloquesOcupados -= bloques_liberados;
     inodo.tipo = 'l'; // Tipo libre
     inodo.tamEnBytesLog = 0;
+    
     // Actualizar la lista de inodos libres
     inodo.punterosDirectos[0] = sb.posPrimerInodoLibre;
     sb.posPrimerInodoLibre = ninodo;
