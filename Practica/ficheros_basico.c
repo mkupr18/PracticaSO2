@@ -882,6 +882,7 @@ int liberar_directos(unsigned int *nBL, unsigned int ultimoBL, struct inodo *ino
 int liberar_indirectos_recursivo(unsigned int *nBL, unsigned int primerBL, unsigned int ultimoBL, struct inodo *inodo, int nRangoBL, unsigned int nivel_punteros, unsigned int *ptr, int *eof) {
     int liberados = 0, indice_inicial;
     unsigned int bloquePunteros[NPUNTEROS], bloquePunteros_Aux[NPUNTEROS], bufferCeros[NPUNTEROS] = {0};
+    int a = 0;
     
     if (*ptr) {
         indice_inicial = obtener_indice(*nBL, nivel_punteros);
@@ -901,12 +902,17 @@ int liberar_indirectos_recursivo(unsigned int *nBL, unsigned int primerBL, unsig
                     liberados += liberar_indirectos_recursivo(nBL, primerBL, ultimoBL, inodo, nRangoBL, nivel_punteros - 1, &bloquePunteros[i], eof);
                 }
             } else {
+                int prin = *nBL;
                 switch (nivel_punteros) {
                     case 1: (*nBL)++; break;
                     case 2: (*nBL) += NPUNTEROS; break;
                     case 3: (*nBL) += NPUNTEROS * NPUNTEROS; break;
                 }
-                //fprintf(stdout, "[liberar_bloques_inodo()\u2192 Saltamos del BL %d al BL %d]\n", *nBL, *nBL);
+                if(a == 0){
+                    fprintf(stdout, "[liberar_bloques_inodo()\u2192 Saltamos del BL %d al BL %d]\n", prin, *nBL);
+                    a=1;
+                }
+                
             }
             if (*nBL > ultimoBL) *eof = 1;
         }
@@ -929,6 +935,7 @@ int liberar_indirectos_recursivo(unsigned int *nBL, unsigned int primerBL, unsig
             case 2: *nBL = INDIRECTOS1; break;
             case 3: *nBL = INDIRECTOS2; break;
         }
+        
     }
     return liberados;
 }
