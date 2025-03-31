@@ -110,7 +110,7 @@ int main(int argc, char **argv) {
     char *disco = argv[1];
     if (bmount(disco) == -1) {
         fprintf(stderr, "Error al montar el sistema de archivos\n");
-        return 1;
+        return FALLO;
     }
     #if DEBUGN2
 
