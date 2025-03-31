@@ -1,14 +1,33 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include "ficheros.h"
 
-void mostrar_inodo(unsigned int ninodo) {
+int main(int argc, char **argv) {
+    if (argc != 4) {
+        fprintf(stderr, RED "Sintaxis: truncar <nombre_dispositivo> <ninodo> <nbytes>\n" RESET);
+        return FALLO;
+    }
+
+    char *nombre_dispositivo = argv[1];
+    unsigned int ninodo = atoi(argv[2]);
+    unsigned int nbytes = atoi(argv[3]);
+
+    if (bmount(nombre_dispositivo) == -1) {
+        fprintf(stderr, RED "Error al montar el dispositivo\n" RESET);
+        return FALLO;
+    }
+
+    int resultado;
+    if (nbytes == 0){
+        resultado = liberar_inodo(ninodo);
+    }else{
+        resultado = mi_truncar_f(ninodo,nbytes);
+    }
     struct inodo inodo;
     if (leer_inodo(ninodo, &inodo) == -1) {
         fprintf(stderr, "Error al leer el inodo\n");
-        return;
+        return FALLO;
     }
 
     struct tm *ts;
@@ -33,46 +52,19 @@ void mostrar_inodo(unsigned int ninodo) {
     printf("nlinks=%d\n", inodo.nlinks);
     printf("tamEnBytesLog=%u\n", inodo.tamEnBytesLog);
     printf("numBloquesOcupados=%u\n", inodo.numBloquesOcupados);
-}
+    
+    struct STAT stat;
+    if (mi_stat_f(ninodo, &stat) == -1) {
+        fprintf(stderr, RED "Error al obtener stat del inodo %d\n" RESET, ninodo);
+        bumount();
+        return FALLO;
+    }
+    fprintf(stderr, "tamEnBytesLog: %d\n", stat.tamEnBytesLog);
+    fprintf(stderr, "numBloquesOcupados: %d\n", stat.numBloquesOcupados);
 
-int main(int argc, char **argv) {
-    if (argc != 4) {
-        fprintf(stderr, "Sintaxis: truncar <nombre_dispositivo> <ninodo> <nbytes>\n");
-        return -1;
-    }
-    
-    char *nombre_dispositivo = argv[1];
-    unsigned int ninodo = atoi(argv[2]);
-    unsigned int nbytes = atoi(argv[3]);
-    
-    // Montar el dispositivo
-    if (bmount(nombre_dispositivo) == -1) {
-        fprintf(stderr, "Error al montar el dispositivo\n");
-        return -1;
-    }
-    
-    int resultado;
-    if (nbytes == 0) {
-        // Liberar inodo completo
-        printf("$ time ./truncar %s %d %d\n", nombre_dispositivo, ninodo, nbytes);
-        resultado = liberar_inodo(ninodo);
-    } else {
-        // Truncar a nbytes
-        printf("$ time ./truncar %s %d %d\n", nombre_dispositivo, ninodo, nbytes);
-        resultado = mi_truncar_f(ninodo, nbytes);
-    }
-    
-    if (resultado == -1) {
-        fprintf(stderr, "Error al truncar/liberar\n");
-    } else {
-        mostrar_inodo(ninodo);
-    }
-    
-    // Desmontar el dispositivo
     if (bumount() == -1) {
-        fprintf(stderr, "Error al desmontar el dispositivo\n");
-        return -1;
+        fprintf(stderr, RED "Error al desmontar el dispositivo\n" RESET);
+        return FALLO;
     }
-    
-    return 0;
+    return resultado;
 }
