@@ -902,13 +902,14 @@ int liberar_indirectos_recursivo(unsigned int *nBL, unsigned int primerBL, unsig
                     liberados += liberar_indirectos_recursivo(nBL, primerBL, ultimoBL, inodo, nRangoBL, nivel_punteros - 1, &bloquePunteros[i], eof);
                 }
             } else {
+                int prin = *nBL;
                 switch (nivel_punteros) {
                     case 1: (*nBL)++; break;
                     case 2: (*nBL) += NPUNTEROS; break;
                     case 3: (*nBL) += NPUNTEROS * NPUNTEROS; break;
                 }
                 if(a == 0){
-                    fprintf(stdout, "[liberar_bloques_inodo()\u2192 Saltamos del BL %d al BL %d]\n", *nBL, *nBL);
+                    fprintf(stdout, "[liberar_bloques_inodo()\u2192 Saltamos del BL %d al BL %d]\n", prin, *nBL);
                     a=1;
                 }
                 
