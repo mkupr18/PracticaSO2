@@ -1,4 +1,4 @@
-
+// Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
 
 #include <stdio.h>
 #include <stdlib.h>
