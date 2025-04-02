@@ -1,7 +1,5 @@
 // Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
-
 #include "ficheros.h"
-#include "bloques.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -136,6 +134,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
  * @return Número de bytes leídos si la operación fue exitosa, `FALLO` en caso de error.
  */
 int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsigned int nbytes) {
+
     struct inodo inodo;
     if (leer_inodo(ninodo, &inodo) == -1) {
         //fprintf(stderr, RED "Error al leer el inodo %u\n" RESET, ninodo);
@@ -207,7 +206,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
         fprintf(stderr, RED "Error al actualizar el inodo %u\n" RESET, ninodo);
         return FALLO;
     }
-
+    
     return bytes_leidos; // Devuelve la cantidad de bytes leídos
 }
 

@@ -1,7 +1,6 @@
 // Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
 
 #include "ficheros_basico.h"
-#include "bloques.h"
 #include <limits.h> // Para UINT_MAX
 #include <string.h> // Para memset
 #include <time.h>   // Para manejar timestamps

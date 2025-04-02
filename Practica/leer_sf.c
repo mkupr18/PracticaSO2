@@ -109,11 +109,11 @@ int main(int argc, char **argv) {
         bumount();
     #endif
 
-    char *disco = argv[1];
-    if (bmount(disco) == -1) {
-        fprintf(stderr, "Error al montar el sistema de archivos\n");
-        return FALLO;
-    }
+    //char *disco = argv[1];
+    //if (bmount(disco) == -1) {
+    //    fprintf(stderr, "Error al montar el sistema de archivos\n");
+    //    return FALLO;
+    //}
     #if DEBUGN2
 
     // Reserva un inodo para la prueba
