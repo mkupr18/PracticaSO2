@@ -1,5 +1,6 @@
+// Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
+
 #include "ficheros_basico.h"
-#include "bloques.h"
 #include <limits.h> // Para UINT_MAX
 #include <string.h> // Para memset
 #include <time.h>   // Para manejar timestamps
@@ -269,7 +270,7 @@ int escribir_bit(unsigned int nbloque, unsigned int bit)
         bufferMB[posbyte] &= ~mascara; // Poner el bit a 0
     }
 
-    // Escribir el bloque actualizado de vuelta en el dispositivo
+    // Escribimos el bloque actualizado de vuelta en el dispositivo
     if (bwrite(nbloqueabs, bufferMB) == -1)
     {
         fprintf(stderr, RED "Error escribiendo en el mapa de bits" RESET);
@@ -304,7 +305,7 @@ char leer_bit(unsigned int nbloque)
     unsigned char bufferMB[BLOCKSIZE]; // Buffer auxiliar que hacemos de Mapa de bit
     unsigned char mascara = 128;       // 10000000 en binario, servirá de mascara
 
-    // Calcular la posición del byte y bit en el MB
+    // Calcula la posición del byte y bit en el MB
     unsigned int posbyte = nbloque / 8;
     unsigned int posbit = nbloque % 8;
     unsigned int nbloqueMB = posbyte / BLOCKSIZE;
@@ -709,7 +710,7 @@ int traducir_bloque_inodo(unsigned int ninodo, unsigned int nblogico, unsigned c
         return FALLO;
 
     unsigned int ptr, ptr_ant;
-    int nRangoBL = obtener_nRangoBL(&inodo, nblogico, &ptr); // Obtener el nivel de punteros
+    int nRangoBL = obtener_nRangoBL(&inodo, nblogico, &ptr); // Obtiene el nivel de punteros
     int nivel_punteros = nRangoBL;
 
     unsigned int buffer[NPUNTEROS]; // Buffer para bloques de punteros
@@ -807,39 +808,39 @@ int liberar_inodo(unsigned int ninodo){
     struct superbloque sb;
     struct inodo inodo;
 
-    // Leer el superbloque
+    // Lee el superbloque
     if (bread(posSB, &sb) == -1)
     {
         return FALLO;
     }
 
-    // Leer el inodo a liberar
+    // Lee el inodo a liberar
     if (leer_inodo(ninodo, &inodo) == -1)
     {
         return FALLO;
     }
 
-    // Liberar todos los bloques del inodo
+    // Libera todos los bloques del inodo
     int bloques_liberados = liberar_bloques_inodo(0, &inodo);
     if (bloques_liberados == -1)
     {
         return FALLO;
     }
 
-    // Actualizar el inodo
+    // Actualiza el inodo
     inodo.numBloquesOcupados -= bloques_liberados;
     inodo.tipo = 'l'; // Tipo libre
     inodo.tamEnBytesLog = 0;
     
-    // Actualizar la lista de inodos libres
+    // Actualiza la lista de inodos libres
     inodo.punterosDirectos[0] = sb.posPrimerInodoLibre;
     sb.posPrimerInodoLibre = ninodo;
     sb.cantInodosLibres++;
 
-    // Actualizar tiempos
+    // Actualiza tiempos
     inodo.ctime = time(NULL);
 
-    // Escribir los cambios
+    // Escribe los cambios
     if (bwrite(posSB, &sb) == -1)
     {
         return FALLO;
@@ -853,20 +854,7 @@ int liberar_inodo(unsigned int ninodo){
     return ninodo;
 }
 
-/**
- * @brief Libera los bloques ocupados por un inodo a partir de un bloque lógico determinado.
- *
- * @param primerBL Número del primer bloque lógico desde donde se empezará a liberar.
- * @param inodo Puntero al inodo cuyos bloques se van a liberar.
- *
- * @pre `inodo` debe ser un puntero válido a una estructura `inodo` inicializada.
- *      `primerBL` debe estar dentro del rango de bloques del inodo.
- *
- * @post Se liberan todos los bloques a partir de `primerBL`.
- *       Se actualiza el inodo con el nuevo número de bloques ocupados.
- *
- * @return `EXITO` si la operación se realiza correctamente, `FALLO` en caso de error.
- */
+
 
 int liberar_directos(unsigned int *nBL, unsigned int ultimoBL, struct inodo *inodo, int *eof) {
     int liberados = 0;
@@ -943,6 +931,21 @@ int liberar_indirectos_recursivo(unsigned int *nBL, unsigned int primerBL, unsig
     }
     return liberados;
 }
+
+/**
+ * @brief Libera los bloques ocupados por un inodo a partir de un bloque lógico determinado.
+ *
+ * @param primerBL Número del primer bloque lógico desde donde se empezará a liberar.
+ * @param inodo Puntero al inodo cuyos bloques se van a liberar.
+ *
+ * @pre `inodo` debe ser un puntero válido a una estructura `inodo` inicializada.
+ *      `primerBL` debe estar dentro del rango de bloques del inodo.
+ *
+ * @post Se liberan todos los bloques a partir de `primerBL`.
+ *       Se actualiza el inodo con el nuevo número de bloques ocupados.
+ *
+ * @return `EXITO` si la operación se realiza correctamente, `FALLO` en caso de error.
+ */
 
 int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo) {
     if (inodo->tamEnBytesLog == 0) return 0;

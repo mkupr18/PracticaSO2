@@ -1,3 +1,5 @@
+# Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
+
 CC = gcc
 CFLAGS = -c -g -Wall -std=gnu99
 SOURCES = bloques.c ficheros_basico.c mi_mkfs.c leer_sf.c ficheros.c leer.c escribir.c permitir.c truncar.c# Agrega aquí los .c necesarios

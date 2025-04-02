@@ -1,3 +1,5 @@
+// Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
+
 #include "bloques.h"
 #include <limits.h>
 

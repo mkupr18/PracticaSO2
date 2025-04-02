@@ -1,8 +1,9 @@
+// Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "ficheros.h"
-#include "bloques.h"
 
 int main(int argc, char **argv) {
     // Validación de la sintaxis
@@ -11,17 +12,17 @@ int main(int argc, char **argv) {
         return FALLO;
     }
 
-    // Obtener los argumentos
+    // Obtiene los argumentos
     char *nombre_dispositivo = argv[1];
     unsigned int ninodo = atoi(argv[2]);
 
-    // Montar el dispositivo
+    // Monta el dispositivo
     if (bmount(nombre_dispositivo) == -1) {
         fprintf(stderr,RED "Error al montar el dispositivo\n" RESET);
         return FALLO;
     }
 
-    // Leer el inodo para obtener su tamaño
+    // Lee el inodo para obtener su tamaño
     struct inodo inodo;
     if (leer_inodo(ninodo, &inodo) == -1) {
         fprintf(stderr, RED "Error al leer el inodo %u\n" RESET, ninodo);
@@ -38,23 +39,23 @@ int main(int argc, char **argv) {
         return FALLO;
     }
 
-    // Leer el contenido del fichero
+    // Lee el contenido del fichero
     int bytes_leidos = mi_read_f(ninodo, buffer, 0, tamano_fichero);
     if (bytes_leidos == -1) {
-        fprintf(stderr, RED "Error al leer el fichero\n" RESET);
+        //fprintf(stderr, RED "Error al leer el fichero\n" RESET);
         free(buffer);
         bumount();
         return FALLO;
     }
 
-    // Escribir el contenido en la salida estándar (redireccionado a ext1.txt)
+    // Escribe el contenido en la salida estándar (redireccionado a ext1.txt)
     fwrite(buffer, 1, bytes_leidos, stdout);
 
-    // Mostrar el número de bytes leídos y el tamaño en bytes lógicos
-    fprintf(stdout, "total_leidos %d\n", bytes_leidos);
-    fprintf(stdout, "tamEnBytesLog %u\n", inodo.tamEnBytesLog);
+    // Muestra el número de bytes leídos y el tamaño en bytes lógicos
+    //fprintf(stdout, "total_leidos %d\n", bytes_leidos);
+    //fprintf(stdout, "tamEnBytesLog %u\n", inodo.tamEnBytesLog);
 
-    // Liberar memoria y desmontar el dispositivo
+    // Libera memoria y desmonta el dispositivo
     free(buffer);
     if (bumount() == -1) {
         fprintf(stderr, RED "Error al desmontar el dispositivo\n" RESET);

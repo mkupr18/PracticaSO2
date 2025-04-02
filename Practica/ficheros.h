@@ -1,3 +1,5 @@
+// Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
+
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>

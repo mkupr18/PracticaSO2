@@ -1,32 +1,48 @@
+// Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "ficheros.h"
 
 int main(int argc, char **argv) {
+    // Validación de sintaxis
     if (argc != 4) {
-        fprintf(stderr, RED "Sintaxis: truncar <nombre_dispositivo> <ninodo> <nbytes>\n" RESET);
+        fprintf(stderr, "Sintaxis: truncar <nombre_dispositivo> <ninodo> <nbytes>\n");
         return FALLO;
     }
 
-    char *nombre_dispositivo = argv[1];
+    // Monta el dispositivo
+    if (bmount(argv[1]) == -1) {
+        fprintf(stderr, "Error al montar el dispositivo\n");
+        return FALLO;
+    }
+
     unsigned int ninodo = atoi(argv[2]);
     unsigned int nbytes = atoi(argv[3]);
-
-    if (bmount(nombre_dispositivo) == -1) {
-        fprintf(stderr, RED "Error al montar el dispositivo\n" RESET);
-        return FALLO;
-    }
-
     int resultado;
-    if (nbytes == 0){
+
+    // Operación de truncado/liberación
+    if (nbytes == 0) {
         resultado = liberar_inodo(ninodo);
-    }else{
-        resultado = mi_truncar_f(ninodo,nbytes);
+    } else {
+        resultado = mi_truncar_f(ninodo, nbytes);
     }
+
+    // Obtiene información del inodo
     struct inodo inodo;
     if (leer_inodo(ninodo, &inodo) == -1) {
         fprintf(stderr, "Error al leer el inodo\n");
+        bumount();
+        return FALLO;
+    }
+
+    // Obtiene información del STAT
+    struct STAT stat;
+    if (mi_stat_f(ninodo, &stat) == -1) {
+        fprintf(stderr, "Error al obtener stat del inodo\n");
+        bumount();
         return FALLO;
     }
 
@@ -42,29 +58,23 @@ int main(int argc, char **argv) {
     ts = localtime(&inodo.btime);
     strftime(btime, sizeof(btime), "%a %Y-%m-%d %H:%M:%S", ts);
 
-    printf("\nDATOS INODO %d:\n", ninodo);
-    printf("tipo=%c\n", inodo.tipo);
-    printf("permisos=%d\n", inodo.permisos);
-    printf("atime: %s\n", atime);
-    printf("mtime: %s\n", mtime);
-    printf("ctime: %s\n", ctime);
-    printf("btime: %s\n", btime);
-    printf("nlinks=%d\n", inodo.nlinks);
-    printf("tamEnBytesLog=%u\n", inodo.tamEnBytesLog);
-    printf("numBloquesOcupados=%u\n", inodo.numBloquesOcupados);
-    
-    struct STAT stat;
-    if (mi_stat_f(ninodo, &stat) == -1) {
-        fprintf(stderr, RED "Error al obtener stat del inodo %d\n" RESET, ninodo);
-        bumount();
-        return FALLO;
-    }
-    fprintf(stderr, "tamEnBytesLog: %d\n", stat.tamEnBytesLog);
-    fprintf(stderr, "numBloquesOcupados: %d\n", stat.numBloquesOcupados);
+    // Muestra información del inodo
+        fprintf(stdout,"\nDATOS INODO %d:\n", ninodo);
+        fprintf(stdout,"tipo=%c\n", inodo.tipo);
+        fprintf(stdout,"permisos=%d\n", inodo.permisos);
+        fprintf(stdout,"atime: %s\n", atime);
+        fprintf(stdout,"mtime: %s\n", mtime);
+        fprintf(stdout,"ctime: %s\n", ctime);
+        fprintf(stdout,"btime: %s\n", btime);
+        fprintf(stdout,"nlinks=%d\n", inodo.nlinks);
+        fprintf(stdout,"tamEnBytesLog: %u\n", stat.tamEnBytesLog);
+        fprintf(stdout,"numBloquesOcupados: %u\n", stat.numBloquesOcupados);
 
+    // Desmonta el dispositivo
     if (bumount() == -1) {
-        fprintf(stderr, RED "Error al desmontar el dispositivo\n" RESET);
+        fprintf(stderr, "Error al desmontar el dispositivo\n");
         return FALLO;
     }
+
     return resultado;
 }
