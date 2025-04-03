@@ -8,9 +8,8 @@
 
 #define NUM_OFFSETS 5
 
-
 int main(int argc, char **argv) {
-    // Damos respectivo error en caso de no haver ejecutado bien el programa
+    // Damos respectivo error en caso de no haber ejecutado bien el programa
     if (argc != 4) {
         fprintf(stderr, RED "Sintaxis: escribir <nombre_dispositivo> <\"$(cat fichero)\"> <diferentes_inodos>\n" RESET);
         fprintf(stderr, RED "Offsets: 9000, 209000, 30725000, 409605000, 480000000\n" RESET);
