@@ -52,8 +52,8 @@ int main(int argc, char **argv) {
     fwrite(buffer, 1, bytes_leidos, stdout);
 
     // Muestra el número de bytes leídos y el tamaño en bytes lógicos
-    //fprintf(stdout, "total_leidos %d\n", bytes_leidos);
-    //fprintf(stdout, "tamEnBytesLog %u\n", inodo.tamEnBytesLog);
+    //fprintf(stdout,LBLUE "total_leidos %d\n", bytes_leidos);
+    //fprintf(stdout,LBLUE"tamEnBytesLog %u\n", inodo.tamEnBytesLog);
 
     // Libera memoria y desmonta el dispositivo
     free(buffer);
