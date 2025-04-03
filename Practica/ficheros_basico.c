@@ -6,6 +6,8 @@
 #include <time.h>   // Para manejar timestamps
 
 #define DEBUGN0 1
+int breads = 0;
+int bwrites = 0;
 
 /**
  * @brief Calcula el tamaño en bloques necesario para el mapa de bits.
@@ -875,7 +877,9 @@ int liberar_indirectos_recursivo(unsigned int *nBL, unsigned int primerBL, unsig
     if (*ptr) {
         indice_inicial = obtener_indice(*nBL, nivel_punteros);
         if (indice_inicial == 0 || *nBL == primerBL) {
-            if (bread(*ptr, bloquePunteros) == -1) return -1;
+            if (bread(*ptr, bloquePunteros) == -1) return FALLO;
+            breads++;
+
             memcpy(bloquePunteros_Aux, bloquePunteros, BLOCKSIZE);
         }
         for (int i = indice_inicial; i < NPUNTEROS && !(*eof); i++) {
@@ -907,6 +911,7 @@ int liberar_indirectos_recursivo(unsigned int *nBL, unsigned int primerBL, unsig
         if (memcmp(bloquePunteros, bloquePunteros_Aux, BLOCKSIZE) != 0) {
             if (memcmp(bloquePunteros, bufferCeros, BLOCKSIZE) != 0) {
                 bwrite(*ptr, bloquePunteros);
+                bwrites++;
             } else {
                 fprintf(stdout, GRAY "[liberar_bloques_inodo()→ liberado BF %d de punteros_nivel%d correspondiente al BL %d]\n" RESET, *ptr, nivel_punteros, *nBL);
                 liberar_bloque(*ptr);
@@ -962,7 +967,7 @@ int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo) {
         nivel_punteros = nRangoBL;
         liberados += liberar_indirectos_recursivo(&nBL, primerBL, ultimoBL, inodo, nRangoBL, nivel_punteros, &ptr, &eof);
     }
-    fprintf(stdout, "[liberar_bloques_inodo()→ total bloques liberados: %d]\n", liberados);
+    fprintf(stdout, "[liberar_bloques_inodo()→ total bloques liberados: %d , total_breads: %d, total_bwrites: %d ]\n", liberados, breads, bwrites);
 
     return liberados;
 }
