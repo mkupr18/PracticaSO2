@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
     printf("posUltimoBloqueDatos = %d\n", SB.posUltimoBloqueDatos);
     printf("posInodoRaiz = %d\n", SB.posInodoRaiz);
     printf("posPrimerInodoLibre = %d\n", SB.posPrimerInodoLibre);
-    printf("cantBloquesLibres = %d\n", SB.cantBloquesLibres);
+    printf(LBLUE"cantBloquesLibres = %d\n" RESET, SB.cantBloquesLibres);
     printf("cantInodosLibres = %d\n", SB.cantInodosLibres);
     printf("totBloques = %d\n", SB.totBloques);
     printf("totInodos = %d\n", SB.totInodos);

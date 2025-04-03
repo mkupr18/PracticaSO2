@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "ficheros.h"
-#include "bloques.h"
+
 
 #define NUM_OFFSETS 5
 
@@ -88,8 +88,8 @@ int main(int argc, char **argv) {
             bumount();
             return FALLO;
         }
-        fprintf(stdout, "stat.tamEnBytesLog=%u\n", stat.tamEnBytesLog);
-        fprintf(stdout, "stat.numBloquesOcupados=%u\n", stat.numBloquesOcupados);
+        fprintf(stdout, LBLUE "stat.tamEnBytesLog=%u\n" RESET, stat.tamEnBytesLog);
+        fprintf(stdout, LBLUE"stat.numBloquesOcupados=%u\n"RESET ,stat.numBloquesOcupados);
     }
     if (bumount() == -1) {
         fprintf(stderr, RED "Error al desmontar el dispositivo\n" RESET);
