@@ -1,5 +1,3 @@
-
-
 #include <stdio.h>
 #include <string.h>
 #include "directorios.h"
@@ -182,8 +180,8 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
 
         // Creamos una nueva entrada
         strcpy(entrada.nombre, inicial);
-        entrada.inodo = (tipo == 'd' && strcmp(final, "/") == 0) ? reservar_inodo('d', permisos) : reservar_inodo('f', permisos);
-        if (entrada.inodo < 0)
+        entrada.ninodo = (tipo == 'd' && strcmp(final, "/") == 0) ? reservar_inodo('d', permisos) : reservar_inodo('f', permisos);
+        if (entrada.ninodo < 0)
         {
             return ERROR_NO_EXISTE_DIRECTORIO_INTERMEDIO;
         }
@@ -191,7 +189,7 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
         // Guardamos la nueva entrada
         if (escribir_entrada(*p_inodo_dir, &entrada, num_entrada_inodo) < 0)
         {
-            liberar_inodo(entrada.inodo);
+            liberar_inodo(entrada.ninodo);
             return FALLO;
         }
     }
@@ -199,13 +197,13 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
     // Si hemos llegado al final del camino, asignamos el inodo encontrado
     if (strlen(final) == 0)
     {
-        *p_inodo = entrada.inodo;
+        *p_inodo = entrada.ninodo;
         *p_entrada = num_entrada_inodo;
         return EXITO;
     }
 
     // Llamada recursiva con la parte restante del camino
-    *p_inodo_dir = entrada.inodo;
+    *p_inodo_dir = entrada.ninodo;
     return buscar_entrada(final, p_inodo_dir, p_inodo, p_entrada, reservar, permisos);
 }
 
