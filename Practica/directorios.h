@@ -1,5 +1,6 @@
 #include "ficheros.h"
-#define TAMNOMBRE 60 //tamaño del nombre de directorio o fichero, en Ext2 = 256
+
+#define TAMNOMBRE 60 // Tamaño del nombre de directorio o fichero, en Ext2 = 256
 #define ERROR_CAMINO_INCORRECTO (-2)
 #define ERROR_PERMISO_LECTURA (-3)
 #define ERROR_NO_EXISTE_ENTRADA_CONSULTA (-4)
