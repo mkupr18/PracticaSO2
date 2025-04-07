@@ -969,7 +969,7 @@ int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo) {
         nivel_punteros = nRangoBL;
         liberados += liberar_indirectos_recursivo(&nBL, primerBL, ultimoBL, inodo, nRangoBL, nivel_punteros, &ptr, &eof);
         //if (nBL > anteriorBL + 1) {
-            //fprintf(stderr,"[liberar_bloques_inodo()→[Saltamos del BL %u al BL %u]\n", anteriorBL, nBL - 1);
+            //fprintf(stderr,"liberar_bloques_inodo()[Saltamos del BL %u al BL %u\n", anteriorBL, nBL - 1);
         //}
     }
     fprintf(stdout, "[liberar_bloques_inodo()→ total bloques liberados: %d , total_breads: %d, total_bwrites: %d ]\n", liberados, breads, bwrites);
