@@ -188,8 +188,7 @@ int main(int argc, char **argv) {
     fprintf(stdout, BLUE "posPrimerInodoLibre = %d\n" RESET, SB.posPrimerInodoLibre);
     #endif
 
-    // Desmontamos el disco
-    bumount();
+
 
     #if DEBUGN7
         //Mostrar creación directorios y errores
@@ -207,6 +206,8 @@ int main(int argc, char **argv) {
         mostrar_buscar_entrada("/pruebas/casos/", 1); //creamos /pruebas/casos/
         mostrar_buscar_entrada("/pruebas/docs/doc2", 1); //creamos /pruebas/docs/doc2
     #endif
+        // Desmontamos el disco
+        bumount();
 
     return EXITO;
 }

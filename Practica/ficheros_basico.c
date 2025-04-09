@@ -5,7 +5,7 @@
 #include <string.h> // Para memset
 #include <time.h>   // Para manejar timestamps
 
-#define DEBUGN0 1
+#define DEBUGN0 0
 int breads = 0;
 int bwrites = 0;
 
