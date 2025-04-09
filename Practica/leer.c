@@ -43,6 +43,8 @@ int main(int argc, char **argv) {
     int bytes_leidos = mi_read_f(ninodo, buffer, 0, tamano_fichero);
     if (bytes_leidos == -1) {
         //fprintf(stderr, RED "Error al leer el fichero\n" RESET);
+        fprintf(stderr, LBLUE "total_leidos 0\n" RESET, bytes_leidos);
+        fprintf(stderr, LBLUE "tamEnBytesLog %u\n" RESET, inodo.tamEnBytesLog);
         free(buffer);
         bumount();
         return FALLO;
@@ -52,8 +54,8 @@ int main(int argc, char **argv) {
     fwrite(buffer, 1, bytes_leidos, stdout);
 
     // Muestra el número de bytes leídos y el tamaño en bytes lógicos
-    //fprintf(stdout,LBLUE "total_leidos %d\n", bytes_leidos);
-    //fprintf(stdout,LBLUE"tamEnBytesLog %u\n", inodo.tamEnBytesLog);
+    fprintf(stderr,LBLUE "total_leidos %d\n" RESET, bytes_leidos);
+    fprintf(stderr,LBLUE"tamEnBytesLog %u\n" RESET, inodo.tamEnBytesLog);
 
     // Libera memoria y desmonta el dispositivo
     free(buffer);
