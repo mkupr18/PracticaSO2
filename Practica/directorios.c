@@ -118,11 +118,18 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
     char final[strlen(camino_parcial)];   // Parte restante del camino
     char tipo;
     int cant_entradas_inodo, num_entrada_inodo = 0;
+    struct superbloque SB;
+    if (bread(posSB, &SB) == FALLO) {
+        fprintf(stdout,"Error al leer el superbloque");
+        bumount();
+        return FALLO;
+    }
 
     // Si el camino es "/", devolvemos la raíz
     if (strcmp(camino_parcial, "/") == 0)
     {
-        *p_inodo = SB.posInodoRaiz;
+        *p_inodo = SB.posInodoRaiz; //nuestra raiz siempre estará asociada al inodo 0
+
         *p_entrada = 0;
         return 0;
     }
@@ -157,7 +164,7 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
         }
         if (strcmp(inicial, entrada.nombre) == 0)
         {
-            break; // Encontramos la entrada
+            break; // Encontramos la entrada, salimos
         }
         num_entrada_inodo++;
     }
@@ -165,14 +172,21 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
     // Si la entrada no existe
     if (num_entrada_inodo == cant_entradas_inodo)
     {
-        if (!reservar)
+        //modo consulta. Como no existe retornamos error
+        if (!reservar) 
         {
             return ERROR_NO_EXISTE_ENTRADA_CONSULTA;
         }
+
+        //modo escritura 
+        //Creamos la entrada en el directorio referenciado por *p_inodo_dir
+        //si es fichero no permitir escritura
         if (inodo_dir.tipo == 'f')
         {
             return ERROR_NO_SE_PUEDE_CREAR_ENTRADA_EN_UN_FICHERO;
         }
+
+        //si es directorio comprobar que tiene permiso de escritura
         if (!(inodo_dir.permisos & 2))
         {
             return ERROR_PERMISO_ESCRITURA;
