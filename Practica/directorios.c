@@ -1,6 +1,6 @@
-#include <stdio.h>
-#include <string.h>
-#include "directorios.h"
+// #include <stdio.h>
+// #include <string.h>
+// #include "directorios.h"
 
 /**
  * @brief Muestra un mensaje de error según el código de error proporcionado.
@@ -36,60 +36,60 @@ void mostrar_error_buscar_entrada(int error)
     }
 }
 
-/**
- * @brief Dada una ruta que comienza con '/', separa su contenido en inicial, final y tipo.
- *
- * @param camino La ruta completa de entrada. Debe comenzar con '/'.
- * @param inicial Puntero al buffer donde se almacenará el primer componente (directorio o fichero).
- * @param final Puntero al buffer donde se almacenará el resto de la ruta.
- * @param tipo Puntero a un char donde se almacenará 'd' (directorio) o 'f' (fichero).
- *
- * @return 0 si éxito, -1 si hay algún error.
- */
-int extraer_camino(const char *camino, char *inicial, char *final, char *tipo)
-{
-    // Comprobamos si el camino empieza por '/'
-    if (camino == NULL || camino[0] != '/')
-    {
-        // fprintf(stderr, "Error en extraer_camino: El camino no empieza por '/'\n");
-        return FALLO;
-    }
+// /**
+//  * @brief Dada una ruta que comienza con '/', separa su contenido en inicial, final y tipo.
+//  *
+//  * @param camino La ruta completa de entrada. Debe comenzar con '/'.
+//  * @param inicial Puntero al buffer donde se almacenará el primer componente (directorio o fichero).
+//  * @param final Puntero al buffer donde se almacenará el resto de la ruta.
+//  * @param tipo Puntero a un char donde se almacenará 'd' (directorio) o 'f' (fichero).
+//  *
+//  * @return 0 si éxito, -1 si hay algún error.
+//  */
+// int extraer_camino(const char *camino, char *inicial, char *final, char *tipo)
+// {
+//     // Comprobamos si el camino empieza por '/'
+//     if (camino == NULL || camino[0] != '/')
+//     {
+//         // fprintf(stderr, "Error en extraer_camino: El camino no empieza por '/'\n");
+//         return FALLO;
+//     }
 
-    // Buscamos el primer carácter después del '/' inicial
-    const char *start_inicial = camino + 1;
+//     // Buscamos el primer carácter después del '/' inicial
+//     const char *start_inicial = camino + 1;
 
-    // Buscamos la siguiente aparición de '/' a partir de start_inicial
-    char *segundo_slash = strchr(start_inicial, '/');
+//     // Buscamos la siguiente aparición de '/' a partir de start_inicial
+//     char *segundo_slash = strchr(start_inicial, '/');
 
-    if (segundo_slash != NULL) // Se encontró un segundo '/', indica un directorio en 'inicial'
-    {
-        // Calculamos la longitud del nombre en 'inicial'
-        int longitud_inicial = segundo_slash - start_inicial;
+//     if (segundo_slash != NULL) // Se encontró un segundo '/', indica un directorio en 'inicial'
+//     {
+//         // Calculamos la longitud del nombre en 'inicial'
+//         int longitud_inicial = segundo_slash - start_inicial;
 
-        // Copiamos el nombre del directorio a 'inicial'
-        strncpy(inicial, start_inicial, longitud_inicial);
-        inicial[longitud_inicial] = '\0'; // Aseguramos la terminación NULL
+//         // Copiamos el nombre del directorio a 'inicial'
+//         strncpy(inicial, start_inicial, longitud_inicial);
+//         inicial[longitud_inicial] = '\0'; // Aseguramos la terminación NULL
 
-        // Copiamos el resto del camino (desde el segundo '/') a 'final'
-        strcpy(final, segundo_slash);
+//         // Copiamos el resto del camino (desde el segundo '/') a 'final'
+//         strcpy(final, segundo_slash);
 
-        // Asignamos el tipo 'd' (directorio)
-        *tipo = 'd';
-    }
-    else // No se encontró un segundo '/', indica un fichero en 'inicial'
-    {
-        // Copiamos todo desde start_inicial hasta el final de 'camino' a 'inicial'
-        strcpy(inicial, start_inicial);
+//         // Asignamos el tipo 'd' (directorio)
+//         *tipo = 'd';
+//     }
+//     else // No se encontró un segundo '/', indica un fichero en 'inicial'
+//     {
+//         // Copiamos todo desde start_inicial hasta el final de 'camino' a 'inicial'
+//         strcpy(inicial, start_inicial);
 
-        // 'final' es una cadena vacía
-        final[0] = '\0'; // O strcpy(final, "");
+//         // 'final' es una cadena vacía
+//         final[0] = '\0'; // O strcpy(final, "");
 
-        // Asignamos el tipo 'f' (fichero)
-        *tipo = 'f';
-    }
+//         // Asignamos el tipo 'f' (fichero)
+//         *tipo = 'f';
+//     }
 
-    return EXITO;
-}
+//     return EXITO;
+// }
 
 /**
  * @brief Busca una entrada en un directorio y, si es necesario, la crea.
