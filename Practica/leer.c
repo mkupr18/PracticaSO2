@@ -5,6 +5,8 @@
 #include <string.h>
 #include "ficheros.h"
 
+unsigned int buffer = 1500;
+
 int main(int argc, char **argv) {
     // Validación de la sintaxis
     if (argc != 3) {
@@ -30,9 +32,7 @@ int main(int argc, char **argv) {
         return FALLO;
     }
 
-    // Buffer para almacenar el contenido del fichero
-    unsigned int tamano_fichero = inodo.tamEnBytesLog;
-    char *buffer = (char *)malloc(tamano_fichero);
+    char *buffer = (char *)malloc(buffer);
     if (!buffer) {
         fprintf(stderr, RED "Error al reservar memoria para el buffer\n" RESET);
         bumount();
