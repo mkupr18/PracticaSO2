@@ -2,9 +2,10 @@
 
 #include <stdio.h>
 #include <time.h>
-#include "ficheros_basico.h"
+#include "directorios.h"
 #define DEBUGN1 0
 #define DEBUGN2 0
+#define DEBUGN7 0
 
 int main(int argc, char **argv)
 {

@@ -1,4 +1,4 @@
-// #include "ficheros.h"
+ #include "ficheros.h"
 
 // #define TAMNOMBRE 60 // Tamaño del nombre de directorio o fichero, en Ext2 = 256
 // #define ERROR_CAMINO_INCORRECTO (-2)
@@ -14,8 +14,6 @@
 //   unsigned int ninodo;
 // };
 
-void mostrar_error_buscar_entrada(int error);
-int extraer_camino(const char *camino, char *inicial, char *final, char *tipo);
-int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsigned int *p_inodo, unsigned int *p_entrada, char reservar, unsigned char permisos);
-int escribir_entrada(unsigned int ninodo, struct entrada *entrada, unsigned int nentrada);
-int leer_entrada(unsigned int ninodo, unsigned int nentrada, struct entrada *entrada);
+//void mostrar_error_buscar_entrada(int error);
+//int extraer_camino(const char *camino, char *inicial, char *final, char *tipo);
+//int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsigned int *p_inodo, unsigned int *p_entrada, char reservar, unsigned char permisos);

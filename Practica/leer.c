@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
     int bytes_leidos = mi_read_f(ninodo, buffer, 0, tamano_fichero);
     if (bytes_leidos == -1) {
         //fprintf(stderr, RED "Error al leer el fichero\n" RESET);
-        fprintf(stderr, LBLUE "total_leidos 0\n" RESET, bytes_leidos);
+        fprintf(stderr, LBLUE "total_leidos 0 %d\n" RESET, bytes_leidos);
         fprintf(stderr, LBLUE "tamEnBytesLog %u\n" RESET, inodo.tamEnBytesLog);
         free(buffer);
         bumount();
