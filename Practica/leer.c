@@ -5,7 +5,8 @@
 #include <string.h>
 #include "ficheros.h"
 
-unsigned int buffer = 1500;
+//Al no haber necesidad de modificarlo posteriormente, no es una variable como lo teniamos antes
+#define TAM_BUFFER 1500
 
 int main(int argc, char **argv) {
     // Validación de la sintaxis
@@ -32,7 +33,7 @@ int main(int argc, char **argv) {
         return FALLO;
     }
 
-    char *buffer = (char *)malloc(buffer);
+    char *buffer = malloc(TAM_BUFFER);
     if (!buffer) {
         fprintf(stderr, RED "Error al reservar memoria para el buffer\n" RESET);
         bumount();
@@ -40,7 +41,7 @@ int main(int argc, char **argv) {
     }
 
     // Lee el contenido del fichero
-    int bytes_leidos = mi_read_f(ninodo, buffer, 0, tamano_fichero);
+    int bytes_leidos = mi_read_f(ninodo, buffer, 0, TAM_BUFFER);
     if (bytes_leidos == -1) {
         //fprintf(stderr, RED "Error al leer el fichero\n" RESET);
         fprintf(stderr, LBLUE "total_leidos 0 %d\n" RESET, bytes_leidos);

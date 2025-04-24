@@ -8,6 +8,7 @@
 #define DEBUGN7 1
 
 void mostrar_buscar_entrada(char *camino, char reservar){
+
     unsigned int p_inodo_dir = 0;
     unsigned int p_inodo = 0;
     unsigned int p_entrada = 0;

@@ -897,11 +897,12 @@ int liberar_indirectos_recursivo(unsigned int *nBL, unsigned int primerBL, unsig
                 switch (nivel_punteros) {
                     case 1: *nBL += 1; 
                     break;
-                    case 2: *nBL += NPUNTEROS; 
+                    case 2: *nBL += NPUNTEROS;
+                    //fprintf(stdout, LBLUE "[liberar_bloques_inodo()→ Estamos en el BL %d y saltamos hasta el BL %d]\n" RESET, salto_inicio, *nBL); 
+                    break;
+                    case 3: *nBL += NPUNTEROS * NPUNTEROS; 
                     fprintf(stdout, LBLUE "[liberar_bloques_inodo()→ Estamos en el BL %d y saltamos hasta el BL %d]\n" RESET, salto_inicio, *nBL);
                     break;
-                    fprintf(stdout, LBLUE "[liberar_bloques_inodo()→ Estamos en el BL %d y saltamos hasta el BL %d]\n" RESET, salto_inicio, *nBL);
-                    case 3: *nBL += NPUNTEROS * NPUNTEROS; break;
                 }
                 
             }
