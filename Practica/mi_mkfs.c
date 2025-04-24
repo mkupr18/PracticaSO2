@@ -1,7 +1,5 @@
 // Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
-
-#include "bloques.h"
-#include "ficheros_basico.h"
+#include "directorios.h"
 #include <string.h>
 
 #define DEBUGN0 0

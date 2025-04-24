@@ -119,6 +119,15 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
     char tipo;
     int cant_entradas_inodo, num_entrada_inodo = 0;
 
+    
+    //No se había declarado el SB
+    struct superbloque SB;
+    // Lee el superbloque
+    if (bread(posSB, &SB) == -1)
+    {
+        return FALLO;
+    }
+
     // Si el camino es "/", devolvemos la raíz
     if (strcmp(camino_parcial, "/") == 0)
     {
@@ -148,12 +157,16 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
     // Calculamos cuántas entradas hay en el directorio
     cant_entradas_inodo = inodo_dir.tamEnBytesLog / sizeof(struct entrada);
 
-    // Buscamos la entrada en el directorio
-    while (num_entrada_inodo < cant_entradas_inodo)
-    {
-        if (leer_entrada(*p_inodo_dir, num_entrada_inodo, &entrada) < 0)
-        {
-            return ERROR_NO_EXISTE_ENTRADA_CONSULTA;
+    // Buffer para leer entradas
+    // struct entrada entradas[BLOCKSIZE / sizeof(struct entrada)];
+    int encontrada = 0;
+
+    // Buscar la entrada en el directorio
+    for (num_entrada_inodo = 0; num_entrada_inodo < cant_entradas_inodo && !encontrada; num_entrada_inodo++) {
+        // Leer la entrada actual
+        if (mi_read_f(*p_inodo_dir, &entrada, num_entrada_inodo * sizeof(struct entrada), sizeof(struct entrada)) != sizeof(struct entrada)) {
+            fprintf(stderr, RED "[mi_read_f()→ Error al leer la entrada]\n" RESET);
+            return FALLO;
         }
         if (strcmp(inicial, entrada.nombre) == 0)
         {
@@ -186,9 +199,9 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
             return ERROR_NO_EXISTE_DIRECTORIO_INTERMEDIO;
         }
 
-        // Guardamos la nueva entrada
-        if (escribir_entrada(*p_inodo_dir, &entrada, num_entrada_inodo) < 0)
-        {
+        // Escribir la nueva entrada al final del directorio
+        if (mi_write_f(*p_inodo_dir, &entrada, inodo_dir.tamEnBytesLog, sizeof(struct entrada)) != sizeof(struct entrada)) {
+            fprintf(stderr, RED "[mi_write_f()→ Error al escribir entrada]\n" RESET);
             liberar_inodo(entrada.ninodo);
             return FALLO;
         }

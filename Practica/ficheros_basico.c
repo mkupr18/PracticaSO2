@@ -873,7 +873,6 @@ int liberar_directos(unsigned int *nBL, unsigned int ultimoBL, struct inodo *ino
 int liberar_indirectos_recursivo(unsigned int *nBL, unsigned int primerBL, unsigned int ultimoBL, struct inodo *inodo, int nRangoBL, unsigned int nivel_punteros, unsigned int *ptr, int *eof) {
     int liberados = 0, indice_inicial;
     unsigned int bloquePunteros[NPUNTEROS], bloquePunteros_Aux[NPUNTEROS], bufferCeros[NPUNTEROS] = {0};
-    int a = 0;
     
     if (*ptr) {
         indice_inicial = obtener_indice(*nBL, nivel_punteros);
@@ -896,14 +895,13 @@ int liberar_indirectos_recursivo(unsigned int *nBL, unsigned int primerBL, unsig
             } else {
                 unsigned int salto_inicio = *nBL;
                 switch (nivel_punteros) {
-                    case 1: *nBL += 1; break;
-                    case 2: *nBL += NPUNTEROS; break;
+                    case 1: *nBL += 1; 
+                    break;
+                    case 2: *nBL += NPUNTEROS; 
+                    fprintf(stdout, LBLUE "[liberar_bloques_inodo()→ Estamos en el BL %d y saltamos hasta el BL %d]\n" RESET, salto_inicio, *nBL);
+                    break;
+                    fprintf(stdout, LBLUE "[liberar_bloques_inodo()→ Estamos en el BL %d y saltamos hasta el BL %d]\n" RESET, salto_inicio, *nBL);
                     case 3: *nBL += NPUNTEROS * NPUNTEROS; break;
-                }
-                unsigned int salto_fin = *nBL - 1;
-                if (salto_fin >= salto_inicio && i  == NPUNTEROS && !(*eof)) {
-                    fprintf(stdout, LBLUE "[liberar_bloques_inodo()→ Estamos en el BL %d y saltamos hasta el BL %d]\n" RESET, salto_inicio, salto_fin);
-                    a = 1;
                 }
                 
             }
