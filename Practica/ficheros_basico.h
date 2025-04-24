@@ -6,9 +6,7 @@
 // Constantes
 #define posSB  0
 #define tamSB  1
-//#define tamMB = 13
-//#define tamAI = 3125
-// El tamaño total de metadatos = la suma de los tamaños = 3139
+
 #define INODOSIZE 128   // bytes
 #define NPUNTEROS (BLOCKSIZE / sizeof(unsigned int)) // 256 punteros por bloque
 #define DIRECTOS 12

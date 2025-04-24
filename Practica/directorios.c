@@ -206,7 +206,7 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
                        entrada.ninodo, 'd', permisos, inicial);
             } else {
                 // Directorio intermedio no existe
-                //fprintf(stderr, "[buscar_entrada()→ No existe directorio intermedio]\n");
+                // fprintf(stderr, "[buscar_entrada()→ No existe directorio intermedio]\n");
                 return ERROR_NO_EXISTE_DIRECTORIO_INTERMEDIO;
             }
         } else {
