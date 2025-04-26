@@ -228,3 +228,61 @@ int mi_creat(const char *camino, unsigned char permisos) {
     // Si no hay error, devuelve 0 (éxito).
     return 0;
 }
+
+
+/* 
+ * mi_chmod - Cambia los permisos de un fichero o directorio especificados
+ *
+ * Precondiciones: 
+ *  - El dispositivo virtual debe estar montado (bmount).
+ *  - El parámetro 'camino' debe ser una cadena válida que apunte a un fichero o directorio existente.
+ *  - El parámetro 'permisos' debe ser un valor entre 0 y 7 (inclusive).
+ *
+ * Postcondiciones:
+ *  - Si la operación tiene éxito, los permisos del inodo correspondiente al 'camino' habrán sido actualizados.
+ *  - El tiempo de cambio (ctime) del inodo se actualizará.
+ *  - Se devuelve 0 en caso de éxito, o un código de error negativo si falla (error de buscar_entrada o de mi_chmod_f).
+ */
+int mi_chmod(const char *camino, unsigned char permisos) {
+
+    unsigned int p_inodo_dir = 0; // inodo del directorio raíz
+    unsigned int p_inodo = 0;     
+    unsigned int p_entrada = 0;   
+
+    // Buscar la entrada correspondiente al camino
+    int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 0);
+    if (error < 0) {
+        return error;
+    }
+
+    // Cambiar los permisos
+    return mi_chmod_f(p_inodo, permisos);
+}
+
+/*
+* mi_stat - Llama a buscar_entrada(), luego a mi_stat_f() para rellenar STAT
+*
+* Precondición: 
+* - El camino debe ser una ruta válida en el sistema de ficheros montado.
+*
+* Postcondición: 
+* - Se rellena la estructura struct STAT con los datos del inodo asociado.
+*/
+
+int mi_stat(const char *camino, struct STAT *p_stat) {
+    unsigned int p_inodo_dir = 0; // inodo del directorio raíz
+    unsigned int p_inodo;
+    unsigned int p_entrada;
+
+    int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 0);
+    if (error < 0) {
+        return error;
+    }
+
+    if (mi_stat_f(p_inodo, p_stat) == -1) {
+        fprintf(stderr, RED"Error: mi_stat_f()\n"RESET);
+        return FALLO;
+    }
+
+    return p_inodo; // Devolvemos también el número de inodo como pide el enunciado
+}
