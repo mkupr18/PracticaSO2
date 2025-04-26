@@ -21,8 +21,7 @@ void mostrar_buscar_entrada(char *camino, char reservar){
     return;
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     if (argc != 2)
     {
         fprintf(stderr, RED "Uso: %s <nombre_dispositivo>\n" RESET, argv[0]);
