@@ -11,12 +11,12 @@ int bwrites = 0;
 
 /**
  * @brief Calcula el tamaño en bloques necesario para el mapa de bits.
- * 
+ *
  * @param nbloques Número total de bloques del sistema de archivos.
- * 
+ *
  * @pre nbloques debe ser un número positivo.
  * @post Retorna el número de bloques necesarios para almacenar el mapa de bits.
- * 
+ *
  * @return Número de bloques necesarios para el mapa de bits.
  */
 
@@ -32,12 +32,12 @@ int tamMB(unsigned int nbloques)
 
 /**
  * @brief Calcula el tamaño en bloques del array de inodos.
- * 
+ *
  * @param ninodos Número total de inodos del sistema de archivos.
- * 
+ *
  * @pre `ninodos` debe ser un número positivo.
  * @post Retorna el número de bloques necesarios para almacenar la estructura de inodos.
- * 
+ *
  * @return Número de bloques necesarios para el array de inodos.
  */
 int tamAI(unsigned int ninodos)
@@ -52,10 +52,10 @@ int tamAI(unsigned int ninodos)
 
 /**
  * @brief Inicializa el superbloque con la información del sistema de archivos.
- * 
+ *
  * @param nbloques Número total de bloques del sistema de archivos.
  * @param ninodos Número total de inodos del sistema de archivos.
- * 
+ *
  * @pre `nbloques` y `ninodos` deben ser valores positivos.
  *      Debe ser posible leer el superbloque desde el almacenamiento (`bread(posSB, &SB) != -1`).
  *      Las constantes como `posSB`, `tamSB`, `BLOCKSIZE`, `INODOSIZE` deben estar definidas.
@@ -65,7 +65,7 @@ int tamAI(unsigned int ninodos)
  *       Se establecen los contadores de bloques e inodos libres.
  *       Se escribe la estructura del superbloque en almacenamiento (`bwrite(posSB, &SB)`).
  *       Retorna `EXITO` si la operación es exitosa, o `FALLO` si ocurre un error.
- * 
+ *
  * @return `EXITO` si la inicialización fue correcta, `FALLO` en caso de error.
  */
 int initSB(unsigned int nbloques, unsigned int ninodos)
@@ -92,14 +92,14 @@ int initSB(unsigned int nbloques, unsigned int ninodos)
 
 /**
  * @brief Inicializa el mapa de bits, marcando como ocupados los bloques de metadatos.
- * 
+ *
  * @pre El superbloque debe estar inicializado y accesible.
  *      `bread(posSB, &SB) != -1` debe ser verdadero.
  *      `bwrite()` debe ser capaz de escribir en el almacenamiento.
  * @post Los bloques de metadatos estarán marcados como ocupados en el mapa de bits.
  *       Se actualizará el superbloque y se guardará en almacenamiento.
  *       Retorna `EXITO` si la operación es exitosa, `FALLO` en caso de error.
- * 
+ *
  * @return `EXITO` si la inicialización fue correcta, `FALLO` en caso de error.
  */
 int initMB()
@@ -157,7 +157,7 @@ int initMB()
 
 /**
  * @brief Inicializa el array de inodos, marcándolos como libres y enlazándolos en lista.
- * 
+ *
  * @pre El superbloque debe estar inicializado y accesible.
  *      `bread(posSB, &SB) != -1` debe ser verdadero.
  *      `bwrite()` debe ser capaz de escribir en el almacenamiento.
@@ -166,7 +166,7 @@ int initMB()
  *       Se enlazarán los inodos libres en una lista enlazada.
  *       Se escribirán en el almacenamiento los bloques de inodos inicializados.
  *       Retorna `EXITO` si la operación es exitosa, `FALLO` en caso de error.
- * 
+ *
  * @return `EXITO` si la inicialización fue correcta, `FALLO` en caso de error.
  */
 int initAI()
@@ -730,17 +730,17 @@ int traducir_bloque_inodo(unsigned int ninodo, unsigned int nblogico, unsigned c
             if (nivel_punteros == nRangoBL)
             {
                 inodo.punterosIndirectos[nRangoBL - 1] = ptr;
-                #if DEBUGN0
-                    fprintf(stdout, GRAY "[traducir_bloque_inodo()\u2192 inodo.punterosIndirectos[%d] = %d (reservado BF %d para punteros_nivel%d)]\n" RESET, nRangoBL - 1, ptr, ptr, nRangoBL);
-                #endif
+#if DEBUGN0
+                fprintf(stdout, GRAY "[traducir_bloque_inodo()\u2192 inodo.punterosIndirectos[%d] = %d (reservado BF %d para punteros_nivel%d)]\n" RESET, nRangoBL - 1, ptr, ptr, nRangoBL);
+#endif
             }
             else
             {
                 buffer[indice] = ptr;
                 bwrite(ptr_ant, buffer);
-                #if DEBUGN0
-                    fprintf(stdout, GRAY "[traducir_bloque_inodo()\u2192 punteros_nivel%d [%d] = %d (reservado BF %d para punteros_nivel%d)]\n" RESET, nivel_punteros + 1, indice, ptr, ptr, nivel_punteros);
-                #endif
+#if DEBUGN0
+                fprintf(stdout, GRAY "[traducir_bloque_inodo()\u2192 punteros_nivel%d [%d] = %d (reservado BF %d para punteros_nivel%d)]\n" RESET, nivel_punteros + 1, indice, ptr, ptr, nivel_punteros);
+#endif
             }
             memset(buffer, 0, BLOCKSIZE); // Limpia el buffer
         }
@@ -768,17 +768,17 @@ int traducir_bloque_inodo(unsigned int ninodo, unsigned int nblogico, unsigned c
         if (nRangoBL == 0)
         {
             inodo.punterosDirectos[nblogico] = ptr;
-            #if DEBUGN0
-                fprintf(stdout,GRAY "[traducir_bloque_inodo()\u2192 inodo.punterosDirectos[%d] = %d (reservado BF %d para BL %d)]\n" RESET, nblogico, ptr, ptr, nblogico);
-            #endif
+#if DEBUGN0
+            fprintf(stdout, GRAY "[traducir_bloque_inodo()\u2192 inodo.punterosDirectos[%d] = %d (reservado BF %d para BL %d)]\n" RESET, nblogico, ptr, ptr, nblogico);
+#endif
         }
         else
         {
             buffer[indice] = ptr;
             bwrite(ptr_ant, buffer);
-            #if DEBUGN0
-                fprintf(stdout,GRAY "[traducir_bloque_inodo()\u2192 punteros_nivel1 [%d] = %d (reservado BF %d para BL %d)]\n" RESET, indice, ptr, ptr, nblogico);
-            #endif
+#if DEBUGN0
+            fprintf(stdout, GRAY "[traducir_bloque_inodo()\u2192 punteros_nivel1 [%d] = %d (reservado BF %d para BL %d)]\n" RESET, indice, ptr, ptr, nblogico);
+#endif
         }
     }
 
@@ -803,15 +803,10 @@ int traducir_bloque_inodo(unsigned int ninodo, unsigned int nblogico, unsigned c
  *
  * @return `ninodo` si la operación fue exitosa, `FALLO` en caso de error.
  */
-int liberar_inodo(unsigned int ninodo){
+int liberar_inodo(unsigned int ninodo)
+{
     struct superbloque sb;
     struct inodo inodo;
-
-    // Lee el superbloque
-    if (bread(posSB, &sb) == -1)
-    {
-        return FALLO;
-    }
 
     // Lee el inodo a liberar
     if (leer_inodo(ninodo, &inodo) == -1)
@@ -830,7 +825,13 @@ int liberar_inodo(unsigned int ninodo){
     inodo.numBloquesOcupados -= bloques_liberados;
     inodo.tipo = 'l'; // Tipo libre
     inodo.tamEnBytesLog = 0;
-    
+
+    // Lee el superbloque
+    if (bread(posSB, &sb) == -1)
+    {
+        return FALLO;
+    }
+
     // Actualiza la lista de inodos libres
     inodo.punterosDirectos[0] = sb.posPrimerInodoLibre;
     sb.posPrimerInodoLibre = ninodo;
@@ -853,83 +854,114 @@ int liberar_inodo(unsigned int ninodo){
     return ninodo;
 }
 
-
-
-int liberar_directos(unsigned int *nBL, unsigned int ultimoBL, struct inodo *inodo, int *eof) {
+int liberar_directos(unsigned int *nBL, unsigned int ultimoBL, struct inodo *inodo, int *eof)
+{
     int liberados = 0;
-    for (unsigned int d = *nBL; d < DIRECTOS && !(*eof); d++) {
-        if (inodo->punterosDirectos[d] != 0) {
+    for (unsigned int d = *nBL; d < DIRECTOS && !(*eof); d++)
+    {
+        if (inodo->punterosDirectos[d] != 0)
+        {
             liberar_bloque(inodo->punterosDirectos[d]);
             fprintf(stderr, GRAY "[liberar_bloques_inodo()→[ liberado BF %u de datos para BL %u]\n" RESET, inodo->punterosDirectos[d], d);
             inodo->punterosDirectos[d] = 0;
             liberados++;
         }
         (*nBL)++;
-        if (*nBL > ultimoBL) *eof = 1;
+        if (*nBL > ultimoBL)
+            *eof = 1;
     }
     return liberados;
 }
 
-int liberar_indirectos_recursivo(unsigned int *nBL, unsigned int primerBL, unsigned int ultimoBL, struct inodo *inodo, int nRangoBL, unsigned int nivel_punteros, unsigned int *ptr, int *eof) {
+int liberar_indirectos_recursivo(unsigned int *nBL, unsigned int primerBL, unsigned int ultimoBL, struct inodo *inodo, int nRangoBL, unsigned int nivel_punteros, unsigned int *ptr, int *eof)
+{
     int liberados = 0, indice_inicial;
-    unsigned int bloquePunteros[NPUNTEROS], bloquePunteros_Aux[NPUNTEROS], bufferCeros[NPUNTEROS] = {0};
-    
-    if (*ptr) {
+    unsigned int bloquePunteros[NPUNTEROS], bloquePunteros_Aux[NPUNTEROS], bufferCeros[NPUNTEROS];
+    memset(bufferCeros, 0, BLOCKSIZE);
+
+    if (*ptr)
+    {
         indice_inicial = obtener_indice(*nBL, nivel_punteros);
-        if (indice_inicial == 0 || *nBL == primerBL) {
-            if (bread(*ptr, bloquePunteros) == -1) return FALLO;
+        if (indice_inicial == 0 || *nBL == primerBL)
+        {
+            if (bread(*ptr, bloquePunteros) == -1)
+                return FALLO;
             breads++;
             memcpy(bloquePunteros_Aux, bloquePunteros, BLOCKSIZE);
         }
-        for (int i = indice_inicial; i < NPUNTEROS && !(*eof); i++) {
-            if (bloquePunteros[i] != 0) {
-                if (nivel_punteros == 1) {
+        for (int i = indice_inicial; i < NPUNTEROS && !(*eof); i++)
+        {
+            if (bloquePunteros[i] != 0)
+            {
+                if (nivel_punteros == 1)
+                {
                     fprintf(stdout, GRAY "[liberar_bloques_inodo()→ liberado BF %d de datos para BL %d]\n" RESET, bloquePunteros[i], *nBL);
                     liberar_bloque(bloquePunteros[i]);
                     bloquePunteros[i] = 0;
                     liberados++;
                     (*nBL)++;
-                } else {
+                }
+                else
+                {
                     liberados += liberar_indirectos_recursivo(nBL, primerBL, ultimoBL, inodo, nRangoBL, nivel_punteros - 1, &bloquePunteros[i], eof);
                 }
-            } else {
+            }
+            else
+            {
                 unsigned int salto_inicio = *nBL;
-                switch (nivel_punteros) {
-                    case 1: *nBL += 1; 
+                switch (nivel_punteros)
+                {
+                case 1:
+                    *nBL += 1;
                     break;
-                    case 2: *nBL += NPUNTEROS;
-                    //fprintf(stdout, LBLUE "[liberar_bloques_inodo()→ Estamos en el BL %d y saltamos hasta el BL %d]\n" RESET, salto_inicio, *nBL); 
+                case 2:
+                    *nBL += NPUNTEROS;
+                    // fprintf(stdout, LBLUE "[liberar_bloques_inodo()→ Estamos en el BL %d y saltamos hasta el BL %d]\n" RESET, salto_inicio, *nBL);
                     break;
-                    case 3: *nBL += NPUNTEROS * NPUNTEROS; 
+                case 3:
+                    *nBL += NPUNTEROS * NPUNTEROS;
                     fprintf(stdout, LBLUE "[liberar_bloques_inodo()→ Estamos en el BL %d y saltamos hasta el BL %d]\n" RESET, salto_inicio, *nBL);
                     break;
                 }
-                
             }
-            if (*nBL > ultimoBL) *eof = 1;
+            if (*nBL > ultimoBL)
+                *eof = 1;
         }
-        if (memcmp(bloquePunteros, bloquePunteros_Aux, BLOCKSIZE) != 0) {
-            if (memcmp(bloquePunteros, bufferCeros, BLOCKSIZE) != 0) {
+        if (memcmp(bloquePunteros, bloquePunteros_Aux, BLOCKSIZE) != 0)
+        {
+            if (memcmp(bloquePunteros, bufferCeros, BLOCKSIZE) != 0)
+            {
                 bwrite(*ptr, bloquePunteros);
                 bwrites++;
-                fprintf(stdout, ORANGE "[liberar_bloques_inodo()→ salvado BF %d de punteros_nivel%d correspondiente al BL %d]\n" RESET, *ptr, nivel_punteros, *nBL-1);
-            } else {
-                fprintf(stdout, GRAY "[liberar_bloques_inodo()→ liberado BF %d de punteros_nivel%d correspondiente al BL %d]\n" RESET, *ptr, nivel_punteros, *nBL-1);
+                fprintf(stdout, ORANGE "[liberar_bloques_inodo()→ salvado BF %d de punteros_nivel%d correspondiente al BL %d]\n" RESET, *ptr, nivel_punteros, *nBL - 1);
+            }
+            else
+            {
+                fprintf(stdout, GRAY "[liberar_bloques_inodo()→ liberado BF %d de punteros_nivel%d correspondiente al BL %d]\n" RESET, *ptr, nivel_punteros, *nBL - 1);
                 liberar_bloque(*ptr);
                 *ptr = 0;
-                if (nRangoBL == nivel_punteros) {
+                if (nRangoBL == nivel_punteros)
+                {
                     inodo->punterosIndirectos[nRangoBL - 1] = 0;
                 }
                 liberados++;
             }
         }
-    } else {
-        switch (nRangoBL) {
-            case 1: *nBL = INDIRECTOS0; break;
-            case 2: *nBL = INDIRECTOS1; break;
-            case 3: *nBL = INDIRECTOS2; break;
+    }
+    else
+    {
+        switch (nRangoBL)
+        {
+        case 1:
+            *nBL = INDIRECTOS0;
+            break;
+        case 2:
+            *nBL = INDIRECTOS1;
+            break;
+        case 3:
+            *nBL = INDIRECTOS2;
+            break;
         }
-        
     }
     return liberados;
 }
@@ -948,22 +980,30 @@ int liberar_indirectos_recursivo(unsigned int *nBL, unsigned int primerBL, unsig
  *
  * @return `EXITO` si la operación se realiza correctamente, `FALLO` en caso de error.
  */
-int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo) {
-    if (inodo->tamEnBytesLog == 0) return 0;
-    
+int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo)
+{
+    if (inodo->tamEnBytesLog == 0)
+        return 0;
+
     unsigned int nivel_punteros = 0, nBL = primerBL, ultimoBL;
     unsigned int ptr = 0;
     int nRangoBL = 0, liberados = 0, eof = 0;
-    
-    ultimoBL = (inodo->tamEnBytesLog % BLOCKSIZE == 0) ? (inodo->tamEnBytesLog / BLOCKSIZE - 1) : (inodo->tamEnBytesLog / BLOCKSIZE);
+
+    if (inodo->tamEnBytesLog % BLOCKSIZE == 0) {
+        ultimoBL = inodo->tamEnBytesLog / BLOCKSIZE - 1;
+    } else {
+        ultimoBL = inodo->tamEnBytesLog / BLOCKSIZE;
+    }
     
     nRangoBL = obtener_nRangoBL(inodo, nBL, &ptr);
     fprintf(stdout, LBLUE "[liberar_bloques_inodo()→ primer BL: %d, último BL: %d]\n" RESET, primerBL, ultimoBL);
 
-    if (nRangoBL == 0) {
+    if (nRangoBL == 0)
+    {
         liberados += liberar_directos(&nBL, ultimoBL, inodo, &eof);
     }
-    while (!eof) {
+    while (!eof)
+    {
         nRangoBL = obtener_nRangoBL(inodo, nBL, &ptr);
         nivel_punteros = nRangoBL;
         liberados += liberar_indirectos_recursivo(&nBL, primerBL, ultimoBL, inodo, nRangoBL, nivel_punteros, &ptr, &eof);
