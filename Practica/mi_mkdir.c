@@ -7,7 +7,7 @@
 int main(int argc, char **argv) {
     // Verificación de número de argumentos
     if (argc != 4) {
-        fprintf(stderr, "Sintaxis: %s <disco> <permisos> </ruta_directorio/>\n", argv[0]);
+        fprintf(stderr, RED "Sintaxis: %s <disco> <permisos> </ruta_directorio/>\n" RESET, argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -20,14 +20,14 @@ int main(int argc, char **argv) {
     // Validar que los permisos están en el rango [0-7]
     int permisos = atoi(argv[2]);
     if (permisos < 0 || permisos > 7) {
-        fprintf(stderr, "Error: modo inválido: <<%d>>\n", permisos);
+        fprintf(stderr, RED "Error: modo inválido: <<%d>>\n" RESET, permisos);
         bumount();
         return EXIT_FAILURE;
     }
 
     // Validar que la ruta termina en '/' para asegurarnos que es un directorio
     if (argv[3][strlen(argv[3]) - 1] != '/') {
-        fprintf(stderr, "Error: la ruta no termina en '/'. Use mi_touch para crear ficheros.\n");
+        fprintf(stderr, RED "Error: la ruta no termina en '/'. Use mi_touch para crear ficheros.\n" RESET);
         bumount();
         return EXIT_FAILURE;
     }

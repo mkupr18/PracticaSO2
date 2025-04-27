@@ -112,6 +112,10 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir,
 
     if (strcmp(camino_parcial, "/") == 0) {
         struct superbloque SB;
+        if (bread(posSB, &SB) == FALLO) {
+            fprintf(stdout, "Error al leer el superbloque");
+            return FALLO;
+        }
         *p_inodo = SB.posInodoRaiz;
         *p_entrada = 0;
         return 0;
@@ -285,4 +289,120 @@ int mi_stat(const char *camino, struct STAT *p_stat) {
     }
 
     return p_inodo; // Devolvemos también el número de inodo como pide el enunciado
+}
+
+/**
+ * mi_dir - Lista el contenido de un directorio o muestra información de un fichero.
+ *
+ * Precondiciones:
+ * - camino debe ser una cadena de texto válida y no nula.
+ * - buffer debe ser una cadena de texto con espacio suficiente (TAMBUFFER).
+ * - El sistema de ficheros debe estar montado.
+ *
+ * Postcondiciones:
+ * - Si se trata de un directorio, llena el buffer con la información de sus entradas.
+ * - Si se trata de un fichero, llena el buffer con la información de ese fichero.
+ * - Devuelve el número de entradas listadas o un código de error negativo si falla.
+ */
+ int mi_dir(const char *camino, char *buffer, char flag) {
+    unsigned int p_inodo_dir = 0, p_inodo, p_entrada;
+    struct inodo inodo;
+    int error, nentradas = 0;
+    struct entrada entradas[BLOCKSIZE / sizeof(struct entrada)];
+    int offset = 0;
+    char tmp[TAMFILA];
+
+    // Buscar la entrada correspondiente al camino
+    error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 0);
+    if (error < 0) return error;
+
+    // Leer el inodo correspondiente
+    if (leer_inodo(p_inodo, &inodo) < 0) return -1;
+
+    // Comprobar permisos de lectura
+    if (!(inodo.permisos & 4)) return -1; // Permiso de lectura (r)
+
+    // Si es un directorio
+    if (inodo.tipo == 'd') {
+        int nbytes;
+        do {
+            nbytes = mi_read_f(p_inodo, entradas, offset, sizeof(entradas));
+            if (nbytes < 0) return nbytes;
+
+            int total = nbytes / sizeof(struct entrada);
+
+            for (int i = 0; i < total; i++) {
+                if (entradas[i].nombre[0] == '\0') continue; // entrada vacía
+
+                if (flag == 'l') { // Formato largo
+                    struct inodo inodo_aux;
+                    if (leer_inodo(entradas[i].ninodo, &inodo_aux) < 0) return -1;
+
+                    struct tm *tm_info = localtime(&inodo_aux.mtime);
+
+                    sprintf(tmp, "%c\t", (inodo_aux.tipo == 'd') ? 'd' : 'f');
+                    strcat(buffer, tmp);
+
+                    strcat(buffer, (inodo_aux.permisos & 4) ? "r" : "-");
+                    strcat(buffer, (inodo_aux.permisos & 2) ? "w" : "-");
+                    strcat(buffer, (inodo_aux.permisos & 1) ? "x\t" : "-\t");
+
+                    strftime(tmp, sizeof(tmp), "%Y-%m-%d %H:%M:%S\t", tm_info);
+                    strcat(buffer, tmp);
+
+                    sprintf(tmp, "%d\t\t", inodo_aux.tamEnBytesLog);
+                    strcat(buffer, tmp);
+
+                    strcat(buffer, entradas[i].nombre);
+                    strcat(buffer, "\n");
+                } else { // Formato simple
+                    strcat(buffer, entradas[i].nombre);
+                    strcat(buffer, "\t");
+                }
+
+                nentradas++;
+            }
+
+            offset += nbytes; // Avanzar el offset para la próxima lectura
+        } while (nbytes > 0);
+    }
+    // Si es un fichero
+    else if (inodo.tipo == 'f') {
+        if (flag == 'l') {
+            struct tm *tm_info = localtime(&inodo.mtime);
+
+            sprintf(tmp, "f\t");
+            strcat(buffer, tmp);
+
+            strcat(buffer, (inodo.permisos & 4) ? "r" : "-");
+            strcat(buffer, (inodo.permisos & 2) ? "w" : "-");
+            strcat(buffer, (inodo.permisos & 1) ? "x\t" : "-\t");
+
+            strftime(tmp, sizeof(tmp), "%Y-%m-%d %H:%M:%S\t", tm_info);
+            strcat(buffer, tmp);
+
+            sprintf(tmp, "%d\t\t", inodo.tamEnBytesLog);
+            strcat(buffer, tmp);
+
+            const char *nombre = strrchr(camino, '/');
+            if (nombre != NULL) {
+                strcat(buffer, nombre + 1);
+            } else {
+                strcat(buffer, camino);
+            }
+            strcat(buffer, "\n");
+        } else { // Formato simple
+            const char *nombre = strrchr(camino, '/');
+            if (nombre != NULL) {
+                strcat(buffer, nombre + 1);
+            } else {
+                strcat(buffer, camino);
+            }
+            strcat(buffer, "\n");
+        }
+
+        nentradas = 1; // Solo una entrada (el fichero)
+    }
+
+    return nentradas;
 }
