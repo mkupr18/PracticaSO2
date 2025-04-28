@@ -417,19 +417,17 @@ int mi_stat(const char *camino, struct STAT *p_stat) {
 
     return nentradas;
 }
-/* mi_write():
- * Escribe 'nbytes' desde 'buf' en el fichero indicado por 'camino' a partir del 'offset'.
- * Devuelve los bytes escritos, o -1 en caso de error.
- */
- int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned int nbytes) {
-    int p_inodo;
+
+int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned int nbytes) {
+    unsigned int p_inodo_dir, p_inodo;
     int error;
 
     if (strcmp(UltimaEntradaEscritura.camino, camino) == 0) {
         p_inodo = UltimaEntradaEscritura.p_inodo;
         fprintf(stderr, "[mi_write() → Utilizamos la caché de escritura]\n");
     } else {
-        error = buscar_entrada(camino, (unsigned int *)&p_inodo, NULL, 0, 0, 0);
+        p_inodo_dir = 0;
+        error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, NULL, 0, 0);
         if (error < 0) {
             return error;
         }
@@ -438,7 +436,6 @@ int mi_stat(const char *camino, struct STAT *p_stat) {
         fprintf(stderr, "[mi_write() → Actualizamos la caché de escritura]\n");
     }
 
-    // Nueva comprobación: asegurarnos de que es un fichero
     struct STAT stat;
     if (mi_stat_f(p_inodo, &stat) < 0) {
         return -1;
@@ -452,30 +449,23 @@ int mi_stat(const char *camino, struct STAT *p_stat) {
 }
 
 
-/* mi_read():
- * Lee 'nbytes' desde el fichero indicado por 'camino', a partir del 'offset' y copia en 'buf'.
- * Devuelve los bytes leídos, o -1 en caso de error.
- */
 int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nbytes) {
-    int p_inodo;
+    unsigned int p_inodo_dir, p_inodo;
     int error;
 
-    // Comprobamos si podemos usar la caché
     if (strcmp(UltimaEntradaLectura.camino, camino) == 0) {
         p_inodo = UltimaEntradaLectura.p_inodo;
         fprintf(stderr, "[mi_read() → Utilizamos la caché de lectura]\n");
     } else {
-        // No coincide, tenemos que buscar la entrada
-        error = buscar_entrada(camino, (unsigned int *) &p_inodo, NULL, 0, 0, 0);
+        p_inodo_dir = 0;
+        error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, NULL, 0, 0);
         if (error < 0) {
             return error;
         }
-        // Actualizamos la caché
         strcpy(UltimaEntradaLectura.camino, camino);
         UltimaEntradaLectura.p_inodo = p_inodo;
         fprintf(stderr, "[mi_read() → Actualizamos la caché de lectura]\n");
     }
 
-    // Llamamos a mi_read_f() pasando el inodo encontrado
     return mi_read_f(p_inodo, buf, offset, nbytes);
 }
