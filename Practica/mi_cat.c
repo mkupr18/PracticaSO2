@@ -1,8 +1,4 @@
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 #include "directorios.h"
 
 #define TAM_BUFFER 1500  // Tamaño configurable del buffer

@@ -19,6 +19,7 @@ struct entrada {
 };
 
 
+#define TAMNOMBRE 60 //Tamaño del nombre de directorio o fichero
 #define PROFUNDIDAD 32 //profundidad máxima del árbol de directorios
 #define USARCACHE 3 //0:sin caché, 1: última L/E, 2:tabla FIFO, 3:tabla LRU
 
@@ -31,10 +32,10 @@ struct UltimaEntrada{
   #endif
 };
 //tabla caché directorios
-#if (USARCACHE==2 || USARCACHE==3)
-   #define CACHE_SIZE 3 // cantidad de entradas para la caché
-   static struct UltimaEntrada UltimasEntradas[CACHE_SIZE];
-#endif
+//#if (USARCACHE==2 || USARCACHE==3)
+   //#define CACHE_SIZE 3 // cantidad de entradas para la caché
+   //static struct UltimaEntrada UltimasEntradas[CACHE_SIZE];
+//#endif
 
 
 
