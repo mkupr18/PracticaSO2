@@ -2,6 +2,8 @@
 #include <string.h>
 #include "directorios.h"
 
+static struct UltimaEntrada UltimaEntradaEscritura;  //  Variable global que guarde la última entrada para escritura:
+
 /**
  * @brief Muestra un mensaje de error según el código de error proporcionado.
  *
@@ -132,6 +134,7 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir,
     }
 
     if (!(inodo_dir.permisos & 4)) { // Permiso lectura
+        fprintf(stderr, GRAY "[buscar_entrada()→ El inodo %d no tiene permisos de lectura]\n" RESET, *p_inodo_dir) ; 
         return ERROR_PERMISO_LECTURA;
     }
 
@@ -405,4 +408,11 @@ int mi_stat(const char *camino, struct STAT *p_stat) {
     }
 
     return nentradas;
+}
+int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned int nbytes){
+
+
+}
+int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nbytes){
+    
 }

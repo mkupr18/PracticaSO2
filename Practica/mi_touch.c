@@ -3,7 +3,7 @@
 int main(int argc, char **argv) {
     if (argc != 4) {
         fprintf(stderr, "Sintaxis: ./mi_touch <disco> <permisos> </ruta_fichero>\n");
-        return -1;
+        return FALLO;
     }
 
     char *disco = argv[1];
@@ -12,12 +12,12 @@ int main(int argc, char **argv) {
 
     if (permisos > 7) {
         fprintf(stderr, "Error: modo inválido: <<%d>>\n", permisos);
-        return -1;
+        return FALLO;
     }
 
     if (bmount(disco) < 0) {
         perror("Error montando disco");
-        return -1;
+        return FALLO;
     }
 
     // Llamada a mi_creat()

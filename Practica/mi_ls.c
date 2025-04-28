@@ -6,8 +6,8 @@
 int main(int argc, char **argv) {
     //si la sintaxis es correcta
     if (argc != 3 && argc != 4) {
-        fprintf(stderr, "Sintaxis: ./mi_ls [-l] <nombre_dispositivo> </ruta>\n");
-        return -1;
+        fprintf(stderr, RED "Sintaxis: ./mi_ls [-l] <nombre_dispositivo> </ruta>\n" RESET);
+        return FALLO;
     }
 
     //
@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
     } else if (argc == 4) {
         if (strcmp(argv[1], "-l") != 0) {
             fprintf(stderr, RED "Error: opción no válida.\n" RESET);
-            return -1;
+            return FALLO;
         }
         formato_largo = 1;
         disco = argv[2];
@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
 
     if (bmount(disco) == -1) {
         fprintf(stderr, RED "Error al montar el dispositivo.\n" RESET);
-        return -1;
+        return FALLO;
     }
 
     char buffer[TAMBUFFER];
@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
     if (entradas < 0) {
         fprintf(stderr, RED "Error: No existe el archivo o el directorio.\n" RESET);
         bumount();
-        return -1;
+        return FALLO;
     }
 
     if (formato_largo) {
@@ -61,5 +61,5 @@ int main(int argc, char **argv) {
     }
 
     bumount();
-    return 0;
+    return EXITO;
 }

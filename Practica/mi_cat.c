@@ -1,0 +1,71 @@
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include "directorios.h"
+
+#define TAM_BUFFER 1500  // Tamaño configurable del buffer
+
+int main(int argc, char **argv) {
+    if (argc != 3) {
+        fprintf(stderr, RED "Sintaxis: ./mi_cat <nombre_dispositivo> </ruta_fichero>\n" RESET);
+        return FALLO;
+    }
+
+    const char *nombre_dispositivo = argv[1];
+    const char *ruta_fichero = argv[2];
+
+    if (bmount(nombre_dispositivo) == -1) {
+        fprintf(stderr, RED "Error al montar el dispositivo\n" RESET);
+        return FALLO;
+    }
+
+    // Comprobar que la ruta NO es un directorio
+    if (ruta_fichero[strlen(ruta_fichero) - 1] == '/') {
+        fprintf(stderr, RED "Error: la ruta corresponde a un directorio, no a un fichero\n" RESET);
+        bumount();
+        return FALLO;
+    }
+
+    char buffer[TAM_BUFFER];
+    int leidos, total_leidos = 0;
+    unsigned int offset = 0;
+
+    // Leer hasta EOF
+    memset(buffer, 0, TAM_BUFFER);
+    leidos = mi_read(ruta_fichero, buffer, offset, TAM_BUFFER);
+
+    while (leidos > 0) {
+        write(1, buffer, leidos);
+        total_leidos += leidos;
+        offset += leidos;
+        memset(buffer, 0, TAM_BUFFER);
+        leidos = mi_read(ruta_fichero, buffer, offset, TAM_BUFFER);
+    }
+
+    if (leidos < 0) {
+        mostrar_error_buscar_entrada(leidos);
+        bumount();
+        return FALLO;
+    }
+
+    // Obtener tamaño lógico real del fichero
+    struct STAT stat;
+    if (mi_stat(ruta_fichero, &stat) == -1) {
+        fprintf(stderr, RED "Error al obtener stat del fichero\n" RESET);
+        bumount();
+        return FALLO;
+    }
+
+    char mensaje[256];
+    sprintf(mensaje, "total_leidos %d\ntamEnBytesLog %u\n", total_leidos, stat.tamEnBytesLog);
+    write(2, mensaje, strlen(mensaje));
+
+    if (bumount() == -1) {
+        fprintf(stderr, RED "Error al desmontar el dispositivo\n" RESET);
+        return FALLO;
+    }
+
+    return EXITO;
+}
