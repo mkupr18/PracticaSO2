@@ -420,20 +420,22 @@ int mi_stat(const char *camino, struct STAT *p_stat) {
 
 int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned int nbytes) {
     unsigned int p_inodo_dir, p_inodo;
+    unsigned int p_entrada;
     int error;
 
     if (strcmp(UltimaEntradaEscritura.camino, camino) == 0) {
         p_inodo = UltimaEntradaEscritura.p_inodo;
-        fprintf(stderr, "[mi_write() → Utilizamos la caché de escritura]\n");
+        fprintf(stderr, ORANGE"[mi_write() → Utilizamos la caché de escritura]\n"RESET);
     } else {
         p_inodo_dir = 0;
-        error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, NULL, 0, 0);
+        error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 0);
+       //error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, NULL, 0, 0);
         if (error < 0) {
             return error;
         }
         strcpy(UltimaEntradaEscritura.camino, camino);
         UltimaEntradaEscritura.p_inodo = p_inodo;
-        fprintf(stderr, "[mi_write() → Actualizamos la caché de escritura]\n");
+        fprintf(stderr, ORANGE"[mi_write() → Actualizamos la caché de escritura]\n"RESET);
     }
 
     struct STAT stat;
@@ -451,20 +453,21 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
 
 int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nbytes) {
     unsigned int p_inodo_dir, p_inodo;
+    unsigned int p_entrada;
     int error;
 
     if (strcmp(UltimaEntradaLectura.camino, camino) == 0) {
         p_inodo = UltimaEntradaLectura.p_inodo;
-        fprintf(stderr, "[mi_read() → Utilizamos la caché de lectura]\n");
+        fprintf(stderr, LBLUE"[mi_read() → Utilizamos la caché de lectura]\n"RESET);
     } else {
         p_inodo_dir = 0;
-        error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, NULL, 0, 0);
+        error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 0);
         if (error < 0) {
             return error;
         }
         strcpy(UltimaEntradaLectura.camino, camino);
         UltimaEntradaLectura.p_inodo = p_inodo;
-        fprintf(stderr, "[mi_read() → Actualizamos la caché de lectura]\n");
+        fprintf(stderr, LBLUE "[mi_read() → Actualizamos la caché de lectura]\n"RESET);
     }
 
     return mi_read_f(p_inodo, buf, offset, nbytes);
