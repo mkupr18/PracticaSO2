@@ -427,7 +427,7 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
         fprintf(stderr, "[mi_write() → Utilizamos la caché de escritura]\n");
     } else {
         p_inodo_dir = 0;
-        error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, NULL, 0, 0);
+        error = buscar_entrada(camino, (unsigned int *)&p_inodo_dir,  (unsigned int *)&p_inodo, NULL, 0, 0);
         if (error < 0) {
             return error;
         }
@@ -458,7 +458,7 @@ int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nby
         fprintf(stderr, "[mi_read() → Utilizamos la caché de lectura]\n");
     } else {
         p_inodo_dir = 0;
-        error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, NULL, 0, 0);
+        error = buscar_entrada(camino,  (unsigned int *)&p_inodo_dir,  (unsigned int *)&p_inodo, NULL, 0, 0);
         if (error < 0) {
             return error;
         }
