@@ -1,7 +1,7 @@
 
 #include "directorios.h"
 
-#define TAM_BUFFER 1500  // Tamaño configurable del buffer
+#define TAM_BUFFER 4000  // Tamaño configurable del buffer
 
 int main(int argc, char **argv) {
     if (argc != 3) {
@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
     }
 
     char mensaje[256];
-    sprintf(mensaje, "total_leidos %d\ntamEnBytesLog %u\n", total_leidos, stat.tamEnBytesLog);
+    sprintf(mensaje, "total_leidos %d\n", total_leidos);
     write(2, mensaje, strlen(mensaje));
 
     if (bumount() == -1) {
