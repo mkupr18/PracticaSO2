@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
         return FALLO;
     }
 
-    // Comprobar que el camino es de un fichero, no un directorio
+    // Comprueba que el camino es de un fichero, no un directorio
     if (ruta_fichero[strlen(ruta_fichero) - 1] == '/') {
         fprintf(stderr, RED "Error: la ruta corresponde a un directorio, no a un fichero\n" RESET);
         bumount();
