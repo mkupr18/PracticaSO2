@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <string.h>
 #include "directorios.h"
+
 #define DEBUGN6 0
 
-static struct UltimaEntrada UltimaEntradaEscritura;  //  Variable global que guarde la última entrada para escritura
+static struct UltimaEntrada UltimaEntradaEscritura[CACHESIZE];  //  Tabla global de la caché para escrituras FIFO
 static struct UltimaEntrada UltimaEntradaLectura; // Variable global para la caché de lectura
+static int ultima_pos_escritura = -1; // Índice de la última posición utilizada en la caché (FIFO circular)
 
 /**
  * @brief Muestra un mensaje de error según el código de error proporcionado.
@@ -418,38 +420,113 @@ int mi_stat(const char *camino, struct STAT *p_stat) {
     return nentradas;
 }
 
+/**
+ * @brief Escribe datos en un fichero especificado por su ruta lógica.
+ *        Utiliza una caché FIFO para evitar búsquedas repetidas.
+ *
+ * @param camino Ruta del fichero.
+ * @param buf Puntero al buffer con los datos a escribir.
+ * @param offset Desplazamiento desde el inicio del fichero.
+ * @param nbytes Número de bytes a escribir.
+ *
+ * @return Número de bytes escritos si éxito, código de error si falla.
+ */
 int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned int nbytes) {
     unsigned int p_inodo_dir, p_inodo;
     unsigned int p_entrada;
     int error;
 
-    if (strcmp(UltimaEntradaEscritura.camino, camino) == 0) {
-        p_inodo = UltimaEntradaEscritura.p_inodo;
-        fprintf(stderr, ORANGE"[mi_write() → Utilizamos la caché de escritura]\n"RESET);
-    } else {
-        p_inodo_dir = 0;
-        error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 0);
-        if (error < 0) {
-            return error;
+    // Variable que indica si el inodo fue encontrado en la caché
+    int encontrado = 0;
+
+    // Buscamos en la caché FIFO de escritura
+    for (int i = 0; i < CACHESIZE; i++) {
+        // Comparamos el camino actual con el camino almacenado en la caché
+        if (strcmp(UltimaEntradaEscritura[i].camino, camino) == 0)
+        {
+            p_inodo = UltimaEntradaEscritura[i].p_inodo; // Recuperamos el inodo desde la caché
+            encontrado = 1;
+            fprintf(stderr, ORANGE "[mi_write() → Utilizamos la caché de escritura en posición %d]\n" RESET, i);
+            //break;
         }
-        strcpy(UltimaEntradaEscritura.camino, camino);
-        UltimaEntradaEscritura.p_inodo = p_inodo;
-        fprintf(stderr, ORANGE"[mi_write() → Actualizamos la caché de escritura]\n"RESET);
     }
 
+    // Si no está en la caché, lo buscamos y lo añadimos
+    if (!encontrado)
+    {
+        p_inodo_dir = 0; // La búsqueda empieza desde el directorio raíz
+        error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 0);
+        if (error < 0)
+        {
+            return error; // Devolvemos el código de error correspondiente
+        }
+
+        // Insertamos en la caché FIFO de manera circular
+        ultima_pos_escritura = (ultima_pos_escritura + 1) % CACHESIZE; // Siguiente posición circular
+        strcpy(UltimaEntradaEscritura[ultima_pos_escritura].camino, camino); // Guardamos el camino
+        UltimaEntradaEscritura[ultima_pos_escritura].p_inodo = p_inodo; // Guardamos el inodo
+
+        fprintf(stderr, ORANGE "[mi_write() → Actualizamos la caché de escritura en posición %d]\n" RESET, ultima_pos_escritura);
+    }
+
+    // Obtenemos el tipo del inodo para asegurarnos de que no sea un directorio
     struct STAT stat;
-    if (mi_stat_f(p_inodo, &stat) < 0) {
-        return -1;
-    }
-    if (stat.tipo != 'f') {
-        fprintf(stderr, "Error: el camino se corresponde a un directorio.\n");
-        return -1;
+    if (mi_stat_f(p_inodo, &stat) < 0)
+    {
+        return FALLO;
     }
 
+    // Si el camino apunta a un directorio, devolvemos error
+    if (stat.tipo != 'f')
+    {
+        fprintf(stderr, "Error: el camino se corresponde a un directorio.\n");
+        return FALLO;
+    }
+
+    // Llamamos a la función de escritura a bajo nivel
     return mi_write_f(p_inodo, buf, offset, nbytes);
+
+
+    //     if (strcmp(UltimaEntradaEscritura.camino, camino) == 0)
+    //     {
+    //         p_inodo = UltimaEntradaEscritura.p_inodo;
+    //         fprintf(stderr, ORANGE "[mi_write() → Utilizamos la caché de escritura]\n" RESET);
+    //     }
+    //     else
+    //     {
+    //         p_inodo_dir = 0;
+    //         error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 0);
+    //         if (error < 0)
+    //         {
+    //             return error;
+    //         }
+    //         strcpy(UltimaEntradaEscritura.camino, camino);
+    //         UltimaEntradaEscritura.p_inodo = p_inodo;
+    //         fprintf(stderr, ORANGE "[mi_write() → Actualizamos la caché de escritura]\n" RESET);
+    //     }
+
+    // struct STAT stat;
+    // if (mi_stat_f(p_inodo, &stat) < 0) {
+    //     return -1;
+    // }
+    // if (stat.tipo != 'f') {
+    //     fprintf(stderr, "Error: el camino se corresponde a un directorio.\n");
+    //     return -1;
+    // }
+
+    // return mi_write_f(p_inodo, buf, offset, nbytes);
 }
 
-
+/**
+ * @brief Lee datos de un fichero a partir de una ruta, usando offset y tamaño.
+ *
+ * @param camino Ruta del fichero (debe ser un fichero, no un directorio).
+ * @param buf Puntero al buffer donde se almacenarán los datos leídos.
+ * @param offset Desplazamiento inicial desde el que comenzar a leer.
+ * @param nbytes Cantidad de bytes a leer.
+ *
+ * @return Número de bytes leídos si éxito, o un código de error si fallo.
+ */
 int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nbytes) {
     unsigned int p_inodo_dir, p_inodo;
     unsigned int p_entrada;

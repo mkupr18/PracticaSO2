@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
         return FALLO;
     }
 
-    // Comprobar que la ruta NO es un directorio
+    // Comprueba que la ruta NO es un directorio
     if (ruta_fichero[strlen(ruta_fichero) - 1] == '/') {
         fprintf(stderr, RED "Error: la ruta corresponde a un directorio, no a un fichero\n" RESET);
         bumount();
@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
     int leidos, total_leidos = 0;
     unsigned int offset = 0;
 
-    // Leer hasta EOF
+    // Lee hasta EOF
     memset(buffer, 0, TAM_BUFFER);
     leidos = mi_read(ruta_fichero, buffer, offset, TAM_BUFFER);
 
@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
         return FALLO;
     }
 
-    // Obtener tamaño lógico real del fichero
+    // Obtiene el tamaño lógico real del fichero
     struct STAT stat;
     if (mi_stat(ruta_fichero, &stat) == -1) {
         fprintf(stderr, RED "Error al obtener stat del fichero\n" RESET);

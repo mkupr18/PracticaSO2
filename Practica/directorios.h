@@ -19,20 +19,19 @@ struct entrada {
 };
 
 
-#define TAMNOMBRE 60 //Tamaño del nombre de directorio o fichero
-#define PROFUNDIDAD 32 //profundidad máxima del árbol de directorios
-#define USARCACHE 3 //0:sin caché, 1: última L/E, 2:tabla FIFO, 3:tabla LRU
-
+#define TAMNOMBRE 60 // Tamaño del nombre de directorio o fichero
+#define PROFUNDIDAD 32 // Profundidad máxima del árbol de directorios
+#define CACHESIZE 3 // Tamaño de la caché para escrituras FIFO
 
 struct UltimaEntrada{
    char camino [TAMNOMBRE*PROFUNDIDAD];
    int p_inodo;
-  #if USARCACHE==3 // tabla LRU
-      struct timeval ultima_consulta;
-  #endif
+  //#if CACHESIZE==3 // tabla LRU
+  //    struct timeval ultima_consulta;
+  //#endif
 };
 //tabla caché directorios
-//#if (USARCACHE==2 || USARCACHE==3)
+//#if (CACHESIZE==2 || CACHESIZE==3)
    //#define CACHE_SIZE 3 // cantidad de entradas para la caché
    //static struct UltimaEntrada UltimasEntradas[CACHE_SIZE];
 //#endif
