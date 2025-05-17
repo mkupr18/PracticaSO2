@@ -3,6 +3,7 @@
 #include "directorios.h"
 
 #define DEBUGN6 0
+#define DEBUGN9 0
 
 static struct UltimaEntrada UltimaEntradaEscritura[CACHESIZE];  //  Tabla global de la caché para escrituras FIFO
 static struct UltimaEntrada UltimaEntradaLectura; // Variable global para la caché de lectura
@@ -446,7 +447,9 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
         {
             p_inodo = UltimaEntradaEscritura[i].p_inodo; // Recuperamos el inodo desde la caché
             encontrado = 1;
-            fprintf(stderr, ORANGE "[mi_write() → Utilizamos la caché de escritura en posición %d]\n" RESET, i);
+            #if DEBUGN9
+                fprintf(stderr, ORANGE "[mi_write() → Utilizamos la caché de escritura en posición %d]\n" RESET, i);
+            #endif
             //break;
         }
     }
@@ -465,8 +468,9 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
         ultima_pos_escritura = (ultima_pos_escritura + 1) % CACHESIZE; // Siguiente posición circular
         strcpy(UltimaEntradaEscritura[ultima_pos_escritura].camino, camino); // Guardamos el camino
         UltimaEntradaEscritura[ultima_pos_escritura].p_inodo = p_inodo; // Guardamos el inodo
-
-        fprintf(stderr, ORANGE "[mi_write() → Actualizamos la caché de escritura en posición %d]\n" RESET, ultima_pos_escritura);
+        #if DEBUGN9
+            fprintf(stderr, ORANGE "[mi_write() → Actualizamos la caché de escritura en posición %d]\n" RESET, ultima_pos_escritura);
+        #endif
     }
 
     // Obtenemos el tipo del inodo para asegurarnos de que no sea un directorio
@@ -534,7 +538,9 @@ int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nby
 
     if (strcmp(UltimaEntradaLectura.camino, camino) == 0) {
         p_inodo = UltimaEntradaLectura.p_inodo;
-        fprintf(stderr, LBLUE"[mi_read() → Utilizamos la caché de lectura]\n"RESET);
+        #if DEBUGN9  
+            fprintf(stderr, LBLUE"[mi_read() → Utilizamos la caché de lectura]\n"RESET);
+        #endif
     } else {
         p_inodo_dir = 0;
         error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 0);
@@ -543,8 +549,65 @@ int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nby
         }
         strcpy(UltimaEntradaLectura.camino, camino);
         UltimaEntradaLectura.p_inodo = p_inodo;
-        fprintf(stderr, LBLUE "[mi_read() → Actualizamos la caché de lectura]\n"RESET);
+        #if DEBUGN9  
+            fprintf(stderr, LBLUE "[mi_read() → Actualizamos la caché de lectura]\n"RESET);
+        #endif
     }
 
     return mi_read_f(p_inodo, buf, offset, nbytes);
+}
+
+/**
+ * @brief Crea un enlace físico entre dos rutas de fichero dentro del sistema de ficheros.
+ *
+ * Este enlace hace que ambas rutas apunten al mismo inodo (contenido), incrementando el contador
+ * de enlaces (`nlinks`) del fichero original. No se permite realizar enlaces a directorios.
+ *
+ * @param camino1 Ruta del fichero original (debe existir y ser un fichero).
+ * @param camino2 Ruta del nuevo enlace (no debe existir previamente).
+ *
+ * @return 0 si éxito, o un código de error si fallo (valor negativo).
+ */
+int mi_link(const char *camino1, const char *camino2) {
+    unsigned int p_inodo_dir1, p_inodo1, p_entrada1;
+    struct inodo inodo1;
+
+    // Buscar el inodo del fichero original
+    int error = buscar_entrada(camino1, &p_inodo_dir1, &p_inodo1, &p_entrada1, 0, 0);
+    if (error < 0) return error;
+
+    // Leer el inodo para comprobar tipo y permisos
+    if (leer_inodo(p_inodo1, &inodo1) < 0) return -1;
+
+    // Verificar permisos de lectura y que es un fichero regular
+    if ((inodo1.permisos & 4) != 4 || inodo1.tipo != 'f') return -1;
+
+    // Crear la nueva entrada camino2, se reservará un inodo automáticamente
+    unsigned int p_inodo_dir2, p_inodo2, p_entrada2;
+    error = buscar_entrada(camino2, &p_inodo_dir2, &p_inodo2, &p_entrada2, 1, 6);
+    if (error < 0) return error;
+
+    //printf("INFO DEBUG: Entrada %s creada con inodo %d\n", camino2, p_inodo2);
+
+    // Leer la entrada recién creada
+    struct entrada entrada;
+    if (mi_read_f(p_inodo_dir2, &entrada, p_entrada2 * sizeof(struct entrada), sizeof(struct entrada)) < 0)
+        return -1;
+
+    // Liberar el inodo que fue creado automáticamente, ya que no se va a usar
+    if (liberar_inodo(entrada.ninodo) == -1) return -1;
+
+    // Sobrescribir el campo ninodo de la entrada con el del fichero original
+    entrada.ninodo = p_inodo1;
+
+    // Guardar la entrada modificada en su posición
+    if (mi_write_f(p_inodo_dir2, &entrada, p_entrada2 * sizeof(struct entrada), sizeof(struct entrada)) < 0)
+        return -1;
+
+    // Actualizar el inodo original aumentando el número de enlaces
+    inodo1.nlinks++;
+    inodo1.ctime = time(NULL);
+    if (escribir_inodo(p_inodo1, &inodo1) < 0) return -1;
+
+    return 0;
 }
