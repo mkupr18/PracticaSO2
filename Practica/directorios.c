@@ -437,15 +437,13 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
     unsigned int p_entrada;
     int error;
 
-    // Variable que indica si el inodo fue encontrado en la caché
     int encontrado = 0;
 
-    // Buscamos en la caché FIFO de escritura
     for (int i = 0; i < CACHESIZE; i++) {
-        // Comparamos el camino actual con el camino almacenado en la caché
+        
         if (strcmp(UltimaEntradaEscritura[i].camino, camino) == 0)
         {
-            p_inodo = UltimaEntradaEscritura[i].p_inodo; // Recuperamos el inodo desde la caché
+            p_inodo = UltimaEntradaEscritura[i].p_inodo; 
             encontrado = 1;
             #if DEBUGN9
                 fprintf(stderr, ORANGE "[mi_write() → Utilizamos la caché de escritura en posición %d]\n" RESET, i);
@@ -454,33 +452,31 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
         }
     }
 
-    // Si no está en la caché, lo buscamos y lo añadimos
+  
     if (!encontrado)
     {
-        p_inodo_dir = 0; // La búsqueda empieza desde el directorio raíz
+        p_inodo_dir = 0; 
         error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 0);
         if (error < 0)
         {
-            return error; // Devolvemos el código de error correspondiente
+            return error; 
         }
 
-        // Insertamos en la caché FIFO de manera circular
-        ultima_pos_escritura = (ultima_pos_escritura + 1) % CACHESIZE; // Siguiente posición circular
-        strcpy(UltimaEntradaEscritura[ultima_pos_escritura].camino, camino); // Guardamos el camino
-        UltimaEntradaEscritura[ultima_pos_escritura].p_inodo = p_inodo; // Guardamos el inodo
+       
+        ultima_pos_escritura = (ultima_pos_escritura + 1) % CACHESIZE; 
+        strcpy(UltimaEntradaEscritura[ultima_pos_escritura].camino, camino);
+        UltimaEntradaEscritura[ultima_pos_escritura].p_inodo = p_inodo; 
         #if DEBUGN9
             fprintf(stderr, ORANGE "[mi_write() → Actualizamos la caché de escritura en posición %d]\n" RESET, ultima_pos_escritura);
         #endif
     }
 
-    // Obtenemos el tipo del inodo para asegurarnos de que no sea un directorio
     struct STAT stat;
     if (mi_stat_f(p_inodo, &stat) < 0)
     {
         return FALLO;
     }
 
-    // Si el camino apunta a un directorio, devolvemos error
     if (stat.tipo != 'f')
     {
         fprintf(stderr, "Error: el camino se corresponde a un directorio.\n");
@@ -572,39 +568,31 @@ int mi_link(const char *camino1, const char *camino2) {
     unsigned int p_inodo_dir1, p_inodo1, p_entrada1;
     struct inodo inodo1;
 
-    // Buscar el inodo del fichero original
     int error = buscar_entrada(camino1, &p_inodo_dir1, &p_inodo1, &p_entrada1, 0, 0);
     if (error < 0) return error;
 
-    // Leer el inodo para comprobar tipo y permisos
     if (leer_inodo(p_inodo1, &inodo1) < 0) return -1;
 
-    // Verificar permisos de lectura y que es un fichero regular
     if ((inodo1.permisos & 4) != 4 || inodo1.tipo != 'f') return -1;
 
-    // Crear la nueva entrada camino2, se reservará un inodo automáticamente
     unsigned int p_inodo_dir2, p_inodo2, p_entrada2;
     error = buscar_entrada(camino2, &p_inodo_dir2, &p_inodo2, &p_entrada2, 1, 6);
     if (error < 0) return error;
 
     //printf("INFO DEBUG: Entrada %s creada con inodo %d\n", camino2, p_inodo2);
 
-    // Leer la entrada recién creada
     struct entrada entrada;
     if (mi_read_f(p_inodo_dir2, &entrada, p_entrada2 * sizeof(struct entrada), sizeof(struct entrada)) < 0)
         return -1;
 
-    // Liberar el inodo que fue creado automáticamente, ya que no se va a usar
     if (liberar_inodo(entrada.ninodo) == -1) return -1;
 
-    // Sobrescribir el campo ninodo de la entrada con el del fichero original
     entrada.ninodo = p_inodo1;
-
-    // Guardar la entrada modificada en su posición
-    if (mi_write_f(p_inodo_dir2, &entrada, p_entrada2 * sizeof(struct entrada), sizeof(struct entrada)) < 0)
+   
+    if (mi_write_f(p_inodo_dir2, &entrada, p_entrada2 * sizeof(struct entrada), sizeof(struct entrada)) < 0){
         return -1;
-
-    // Actualizar el inodo original aumentando el número de enlaces
+    }
+        
     inodo1.nlinks++;
     inodo1.ctime = time(NULL);
     if (escribir_inodo(p_inodo1, &inodo1) < 0) return -1;
