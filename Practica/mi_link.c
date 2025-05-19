@@ -1,3 +1,4 @@
+// Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
 #include <stdio.h>
 #include <string.h>
 #include "directorios.h" 
