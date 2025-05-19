@@ -10,7 +10,7 @@ int main(int argc, char **argv) {
     if (bmount(argv[1]) < 0) return FALLO;
 
     if (mi_unlink(argv[2]) < 0) {
-        fprintf(stderr, RED "Error al eliminar.\n" RESET);
+        fprintf(stderr, RED "Error: No existe el archivo o el directorio.\n" RESET);
         bumount();
         return FALLO;
     }

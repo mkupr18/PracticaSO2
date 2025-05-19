@@ -36,9 +36,11 @@ int main(int argc, char **argv) {
     fprintf(stdout, "longitud texto: %d\n", tamTexto);
 
     int bytes_escritos = mi_write(ruta_fichero, texto, offset, tamTexto);
+    int bytes_zero = 0;
 
     if (bytes_escritos < 0) {
         mostrar_error_buscar_entrada(bytes_escritos);
+        fprintf(stdout, "Bytes escritos: %d\n", bytes_zero);
         bumount();
         return FALLO;
     }

@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
     }
 
     char mensaje[256];
-    sprintf(mensaje, "total_leidos %d\n", total_leidos);
+    sprintf(mensaje, "\n\nTotal_leidos %d\n", total_leidos);
     write(2, mensaje, strlen(mensaje));
 
     if (bumount() == -1) {
