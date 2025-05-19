@@ -569,50 +569,48 @@ int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nby
  * @return 0 si éxito, o un código de error si fallo (valor negativo).
  */
 int mi_link(const char *camino1, const char *camino2) {
-    
     unsigned int p_inodo_dir1, p_inodo1, p_entrada1;
     struct inodo inodo1;
 
-    // Busca el inodo del fichero original
+    // Buscar el inodo del fichero original
     int error = buscar_entrada(camino1, &p_inodo_dir1, &p_inodo1, &p_entrada1, 0, 0);
     if (error < 0) return error;
 
-    // Lee el inodo para comprobar el tipo y los permisos
+    // Leer el inodo para comprobar tipo y permisos
     if (leer_inodo(p_inodo1, &inodo1) < 0) return -1;
 
-    // Verifica los permisos de lectura y que es un fichero regular
+    // Verificar permisos de lectura y que es un fichero regular
     if ((inodo1.permisos & 4) != 4 || inodo1.tipo != 'f') return -1;
 
-    // Crea la nueva entrada camino2, se reservará un inodo automáticamente
+    // Crear la nueva entrada camino2, se reservará un inodo automáticamente
     unsigned int p_inodo_dir2, p_inodo2, p_entrada2;
     error = buscar_entrada(camino2, &p_inodo_dir2, &p_inodo2, &p_entrada2, 1, 6);
     if (error < 0) return error;
 
     //printf("INFO DEBUG: Entrada %s creada con inodo %d\n", camino2, p_inodo2);
 
-    // Lee la entrada recién creada
+    // Leer la entrada recién creada
     struct entrada entrada;
     if (mi_read_f(p_inodo_dir2, &entrada, p_entrada2 * sizeof(struct entrada), sizeof(struct entrada)) < 0)
         return -1;
 
-    // Libera el inodo que fue creado automáticamente, ya que no se va a usar
+    // Liberar el inodo que fue creado automáticamente, ya que no se va a usar
     if (liberar_inodo(entrada.ninodo) == -1) return -1;
 
-    // Sobrescribe el campo ninodo de la entrada con el del fichero original
+    // Sobrescribir el campo ninodo de la entrada con el del fichero original
     entrada.ninodo = p_inodo1;
 
-    // Guarda la entrada modificada en su posición
+    // Guardar la entrada modificada en su posición
     if (mi_write_f(p_inodo_dir2, &entrada, p_entrada2 * sizeof(struct entrada), sizeof(struct entrada)) < 0)
         return -1;
 
-    // Actualiza el inodo original aumentando el número de enlaces
+    // Actualizar el inodo original aumentando el número de enlaces
     inodo1.nlinks++;
     inodo1.ctime = time(NULL);
     if (escribir_inodo(p_inodo1, &inodo1) < 0) return -1;
 
     return 0;
 }
-
 /**
  * @brief Elimina una entrada de directorio, y si el inodo asociado queda sin enlaces, lo libera.
  *
@@ -693,6 +691,3 @@ int mi_unlink(const char *camino)
 
     return EXITO;
 }
-
-
-

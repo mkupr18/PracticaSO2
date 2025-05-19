@@ -57,7 +57,9 @@ int main(int argc, char **argv) {
         printf("%s", buffer);
     } else {
         printf("Total: %d\n", entradas);
-        printf("%s", buffer);
+        if(entradas != 0){
+            printf("%s", buffer);}
+        
     }
 
     bumount();
