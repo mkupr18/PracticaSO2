@@ -306,6 +306,7 @@ int mi_stat_f(unsigned int ninodo, struct STAT *p_stat)
     p_stat->tamEnBytesLog = inodo.tamEnBytesLog;
     p_stat->mtime = inodo.mtime;
     p_stat->ctime = inodo.ctime;
+    p_stat->btime = inodo.btime;
     p_stat->numBloquesOcupados = inodo.numBloquesOcupados;
     return EXITO;
 }

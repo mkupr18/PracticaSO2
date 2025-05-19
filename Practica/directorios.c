@@ -565,17 +565,20 @@ int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nby
  * @return 0 si éxito, o un código de error si fallo (valor negativo).
  */
 int mi_link(const char *camino1, const char *camino2) {
-    
     unsigned int p_inodo_dir1, p_inodo1, p_entrada1;
     struct inodo inodo1;
 
+    // Buscar el inodo del fichero original
     int error = buscar_entrada(camino1, &p_inodo_dir1, &p_inodo1, &p_entrada1, 0, 0);
     if (error < 0) return error;
 
+    // Leer el inodo para comprobar tipo y permisos
     if (leer_inodo(p_inodo1, &inodo1) < 0) return -1;
 
+    // Verificar permisos de lectura y que es un fichero regular
     if ((inodo1.permisos & 4) != 4 || inodo1.tipo != 'f') return -1;
 
+    // Crear la nueva entrada camino2, se reservará un inodo automáticamente
     unsigned int p_inodo_dir2, p_inodo2, p_entrada2;
     error = buscar_entrada(camino2, &p_inodo_dir2, &p_inodo2, &p_entrada2, 1, 6);
     if (error < 0) return error;
@@ -600,7 +603,6 @@ int mi_link(const char *camino1, const char *camino2) {
 
     return 0;
 }
-
 /**
  * @brief Elimina una entrada de directorio, y si el inodo asociado queda sin enlaces, lo libera.
  *
@@ -681,6 +683,3 @@ int mi_unlink(const char *camino)
 
     return EXITO;
 }
-
-
-

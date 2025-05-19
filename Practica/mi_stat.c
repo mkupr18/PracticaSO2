@@ -42,7 +42,10 @@ int main(int argc, char **argv) {
         tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
         tm->tm_hour, tm->tm_min, tm->tm_sec);
 
-    tm = localtime(&stat.ctime); // opcional si quieres duplicar para creación (btime)
+    tm = localtime(&stat.btime);
+    fprintf(stderr, "btime: %02d-%02d-%02d %02d:%02d:%02d\n",
+        tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+        tm->tm_hour, tm->tm_min, tm->tm_sec);
 
     fprintf(stderr, "nlinks: %d\n", stat.nlinks);
     fprintf(stderr, "tamEnBytesLog: %d\n", stat.tamEnBytesLog);
