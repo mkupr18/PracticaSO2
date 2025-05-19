@@ -565,6 +565,7 @@ int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nby
  * @return 0 si éxito, o un código de error si fallo (valor negativo).
  */
 int mi_link(const char *camino1, const char *camino2) {
+    
     unsigned int p_inodo_dir1, p_inodo1, p_entrada1;
     struct inodo inodo1;
 
@@ -599,3 +600,87 @@ int mi_link(const char *camino1, const char *camino2) {
 
     return 0;
 }
+
+/**
+ * @brief Elimina una entrada de directorio, y si el inodo asociado queda sin enlaces, lo libera.
+ *
+ * @param camino Ruta del fichero o directorio a eliminar.
+ *
+ * @return 0 si éxito, o código de error si falla.
+ */
+int mi_unlink(const char *camino)
+{
+    if (strcmp(camino, "/") == 0)
+    {
+        fprintf(stderr, RED "Error: No se puede eliminar el directorio raíz.\n" RESET);
+        return FALLO;
+    }
+
+    unsigned int p_inodo_dir = 0, p_inodo = 0, p_entrada = 0;
+    //struct entrada entrada;
+    struct inodo inodo, inodo_dir;
+
+    // Buscamos la entrada a eliminar en el sistema de ficheros
+    int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 0);
+    if (error < 0)
+        return error;
+
+    // Leemos el inodo asociado al camino
+    if (leer_inodo(p_inodo, &inodo) < 0)
+        return FALLO;
+
+    // Si es un directorio no vacío, no se puede eliminar
+    if (inodo.tipo == 'd' && inodo.tamEnBytesLog > 0)
+    {
+        fprintf(stderr, RED "Error: No se puede eliminar un directorio no vacío.\n" RESET);
+        return FALLO;
+    }
+
+    // Leemos el inodo del directorio padre
+    if (leer_inodo(p_inodo_dir, &inodo_dir) < 0)
+        return FALLO;
+    int n_entradas = inodo_dir.tamEnBytesLog / sizeof(struct entrada);
+
+    // Si no es la última entrada, la intercambiamos con la última
+    if (p_entrada != n_entradas - 1)
+    {
+        // Leemos la última entrada
+        struct entrada ultima;
+        if (mi_read_f(p_inodo_dir, &ultima, (n_entradas - 1) * sizeof(struct entrada), sizeof(struct entrada)) < 0)
+            return FALLO;
+
+        // Sobrescribimos la entrada a eliminar con la última
+        if (mi_write_f(p_inodo_dir, &ultima, p_entrada * sizeof(struct entrada), sizeof(struct entrada)) < 0)
+            return FALLO;
+    }
+
+    // Truncamos el inodo del directorio padre
+    if (mi_truncar_f(p_inodo_dir, inodo_dir.tamEnBytesLog - sizeof(struct entrada)) < 0)
+        return FALLO;
+
+    // Leemos inodo del fichero/directorio eliminado
+    if (leer_inodo(p_inodo, &inodo) < 0)
+        return FALLO;
+
+    // Disminuimos el número de enlaces
+    inodo.nlinks--;
+
+    if (inodo.nlinks == 0)
+    {
+        // Si ya no quedan enlaces, liberamos el inodo y sus bloques
+        if (liberar_inodo(p_inodo) < 0)
+            return FALLO;
+    }
+    else
+    {
+        // Si aún hay enlaces, actualizamos el ctime y escribimos el inodo
+        inodo.ctime = time(NULL);
+        if (escribir_inodo(p_inodo, &inodo) < 0)
+            return FALLO;
+    }
+
+    return EXITO;
+}
+
+
+
