@@ -7,7 +7,7 @@ int main(int argc, char **argv) {
         return FALLO;
     }
 
-    // Montar el dispositivo
+    // Monta el dispositivo
     if (bmount(argv[1]) == -1) {
         fprintf(stderr, RED"Error al montar el dispositivo.\n"RESET);
         return FALLO;
@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "tamEnBytesLog: %d\n", stat.tamEnBytesLog);
     fprintf(stderr, "numBloquesOcupados: %d\n", stat.numBloquesOcupados);
 
-    // Desmontar el dispositivo
+    // Desmonta el dispositivo
     bumount();
 
     return EXITO;

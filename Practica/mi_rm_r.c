@@ -11,41 +11,41 @@ static int eliminar_recursivo(const char *camino) {
     char buffer[TAMBUFFER];
     char ruta_absoluta[strlen(camino) + TAMNOMBRE + 2];
     
-    // Buscar la entrada
+    // Busca la entrada
     p_inodo_dir = 0;
     int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 0);
     if (error < 0) return error;
     
-    // Leer el inodo
+    // Lee el inodo
     if (leer_inodo(p_inodo, &inodo) < 0) return FALLO;
     
-    // Si es un directorio y no está vacío, eliminar su contenido primero
+    // Si es un directorio y no está vacío, elimina su contenido primero
     if (inodo.tipo == 'd' && inodo.tamEnBytesLog > 0) {
-        // Listar contenido del directorio
+        // Lista el contenido del directorio
         int n = mi_dir(camino, buffer, 's');
         if (n < 0) return n;
         
-        // Procesar cada entrada
+        // Procesa cada entrada
         char *token = strtok(buffer, "\t");
         while (token != NULL) {
-            // Construir ruta absoluta
+            // Construye una ruta absoluta
             sprintf(ruta_absoluta, "%s%s", camino, token);
             
-            // Si es directorio, añadir '/'
+            // Si es un directorio, añade '/'
             struct STAT stat;
             if (mi_stat(ruta_absoluta, &stat) < 0) return FALLO;
             if (stat.tipo == 'd') {
                 strcat(ruta_absoluta, "/");
             }
             
-            // Eliminar recursivamente
+            // Elimina recursivamente
             if (eliminar_recursivo(ruta_absoluta) < 0) return FALLO;
             
             token = strtok(NULL, "\t");
         }
     }
     
-    // Eliminar la entrada actual
+    // Elimina la entrada actual
     return mi_unlink(camino);
 }
 
@@ -55,20 +55,20 @@ int main(int argc, char **argv) {
         return FALLO;
     }
 
-    // Montar el dispositivo
+    // Monta el dispositivo
     if (bmount(argv[1]) == FALLO) {
         fprintf(stderr, "Error al montar el dispositivo\n");
         return FALLO;
     }
 
-    // Verificar que no se intenta borrar el directorio raíz
+    // Verifica que no se intenta borrar el directorio raíz
     if (strcmp(argv[2], "/") == 0) {
         fprintf(stderr, "Error: no se puede borrar el directorio raíz\n");
         bumount();
         return FALLO;
     }
 
-    // Eliminar recursivamente
+    // Elimina recursivamente
     int error = eliminar_recursivo(argv[2]);
     if (error < 0) {
         mostrar_error_buscar_entrada(error);
@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
         return FALLO;
     }
 
-    // Desmontar el dispositivo
+    // Desmonta el dispositivo
     if (bumount() == FALLO) {
         fprintf(stderr, "Error al desmontar el dispositivo\n");
         return FALLO;

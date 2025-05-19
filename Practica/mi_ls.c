@@ -11,7 +11,7 @@ int main(int argc, char **argv) {
         return FALLO;
     }
 
-    //
+    
     char *disco;
     char *camino;
     int formato_largo = 0;
