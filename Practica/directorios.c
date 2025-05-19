@@ -1,3 +1,4 @@
+// Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
 #include <stdio.h>
 #include <string.h>
 #include "directorios.h"
@@ -244,7 +245,7 @@ int mi_creat(const char *camino, unsigned char permisos) {
     if (error < 0) return error;
 
     // Si no hay error, devuelve 0 (éxito).
-    return 0;
+    return EXITO;
 }
 
 
@@ -331,10 +332,10 @@ int mi_stat(const char *camino, struct STAT *p_stat) {
     if (error < 0) return error;
 
     // Leer el inodo correspondiente
-    if (leer_inodo(p_inodo, &inodo) < 0) return -1;
+    if (leer_inodo(p_inodo, &inodo) < 0) return FALLO;
 
     // Comprobar permisos de lectura
-    if (!(inodo.permisos & 4)) return -1; // Permiso de lectura (r)
+    if (!(inodo.permisos & 4)) return FALLO; // Permiso de lectura (r)
 
     // Si es un directorio
     if (inodo.tipo == 'd') {
@@ -573,10 +574,10 @@ int mi_link(const char *camino1, const char *camino2) {
     if (error < 0) return error;
 
     // Leer el inodo para comprobar tipo y permisos
-    if (leer_inodo(p_inodo1, &inodo1) < 0) return -1;
+    if (leer_inodo(p_inodo1, &inodo1) < 0) return FALLO;
 
     // Verificar permisos de lectura y que es un fichero regular
-    if ((inodo1.permisos & 4) != 4 || inodo1.tipo != 'f') return -1;
+    if ((inodo1.permisos & 4) != 4 || inodo1.tipo != 'f') return FALLO;
 
     // Crear la nueva entrada camino2, se reservará un inodo automáticamente
     unsigned int p_inodo_dir2, p_inodo2, p_entrada2;
@@ -587,21 +588,21 @@ int mi_link(const char *camino1, const char *camino2) {
 
     struct entrada entrada;
     if (mi_read_f(p_inodo_dir2, &entrada, p_entrada2 * sizeof(struct entrada), sizeof(struct entrada)) < 0)
-        return -1;
+        return FALLO;
 
-    if (liberar_inodo(entrada.ninodo) == -1) return -1;
+    if (liberar_inodo(entrada.ninodo) == -1) return FALLO;
 
     entrada.ninodo = p_inodo1;
    
     if (mi_write_f(p_inodo_dir2, &entrada, p_entrada2 * sizeof(struct entrada), sizeof(struct entrada)) < 0){
-        return -1;
+        return FALLO;
     }
         
     inodo1.nlinks++;
     inodo1.ctime = time(NULL);
-    if (escribir_inodo(p_inodo1, &inodo1) < 0) return -1;
+    if (escribir_inodo(p_inodo1, &inodo1) < 0) return FALLO;
 
-    return 0;
+    return EXITO;
 }
 /**
  * @brief Elimina una entrada de directorio, y si el inodo asociado queda sin enlaces, lo libera.

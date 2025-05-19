@@ -1,4 +1,5 @@
 
+// Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
 #include "directorios.h"
 
 #define TAM_BUFFER 4000  // Tamaño configurable del buffer

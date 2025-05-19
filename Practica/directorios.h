@@ -1,3 +1,4 @@
+// Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
 #include "ficheros.h"
 
 #define TAMNOMBRE 60 // Tamaño del nombre de directorio o fichero, en Ext2 = 256

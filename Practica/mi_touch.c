@@ -1,3 +1,4 @@
+// Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
 #include "directorios.h"
 
 int main(int argc, char **argv) {
