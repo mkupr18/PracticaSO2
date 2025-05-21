@@ -4,7 +4,11 @@
 #include <string.h>
 #include "directorios.h"
 
+/**
+ * Escribe texto en una posición de un fichero
+ */
 int main(int argc, char **argv) {
+    // Verifica la sintaxis
     if (argc != 5) {
         fprintf(stderr, RED "Sintaxis: ./mi_escribir <disco> </ruta_fichero> <texto> <offset>\n" RESET);
         return FALLO;
@@ -21,12 +25,13 @@ int main(int argc, char **argv) {
         return FALLO;
     }
 
+    // Monta el dispositivo
     if (bmount(nombre_dispositivo) == -1) {
         fprintf(stderr, RED "Error al montar el dispositivo\n" RESET);
         return FALLO;
     }
 
-    // Comprueba que el camino es de un fichero, no un directorio
+    // Comprueba que el camino es de un fichero, no de un directorio
     if (ruta_fichero[strlen(ruta_fichero) - 1] == '/') {
         fprintf(stderr, RED "Error: la ruta corresponde a un directorio, no a un fichero\n" RESET);
         bumount();
@@ -35,6 +40,7 @@ int main(int argc, char **argv) {
 
     fprintf(stdout, "longitud texto: %d\n", tamTexto);
 
+    // Realiza la escritura
     int bytes_escritos = mi_write(ruta_fichero, texto, offset, tamTexto);
     int bytes_zero = 0;
 
@@ -47,6 +53,7 @@ int main(int argc, char **argv) {
 
     fprintf(stdout, "Bytes escritos: %d\n", bytes_escritos);
 
+    // Desmonta el dispositivo
     if (bumount() == -1) {
         fprintf(stderr, RED "Error al desmontar el dispositivo\n" RESET);
         return FALLO;

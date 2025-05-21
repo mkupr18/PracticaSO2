@@ -1,4 +1,5 @@
 // Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,8 +11,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, RED "Sintaxis: ./mi_ls [-l] <nombre_dispositivo> </ruta>\n" RESET);
         return FALLO;
     }
-
-    
+ 
     char *disco;
     char *camino;
     int formato_largo = 0;

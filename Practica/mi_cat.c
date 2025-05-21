@@ -1,10 +1,15 @@
 
 // Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
+
 #include "directorios.h"
 
 #define TAM_BUFFER 4000  // Tamaño configurable del buffer
 
+/**
+ * Programa que muestra todo el contenido de un fichero.
+ */
 int main(int argc, char **argv) {
+    // Verifica la sintaxis
     if (argc != 3) {
         fprintf(stderr, RED "Sintaxis: ./mi_cat <nombre_dispositivo> </ruta_fichero>\n" RESET);
         return FALLO;
@@ -13,6 +18,7 @@ int main(int argc, char **argv) {
     const char *nombre_dispositivo = argv[1];
     const char *ruta_fichero = argv[2];
 
+    // Monta el dispositivo
     if (bmount(nombre_dispositivo) == -1) {
         fprintf(stderr, RED "Error al montar el dispositivo\n" RESET);
         return FALLO;
@@ -59,6 +65,7 @@ int main(int argc, char **argv) {
     sprintf(mensaje, "\n\nTotal_leidos %d\n", total_leidos);
     write(2, mensaje, strlen(mensaje));
 
+    // Desmonta el dispositivo
     if (bumount() == -1) {
         fprintf(stderr, RED "Error al desmontar el dispositivo\n" RESET);
         return FALLO;

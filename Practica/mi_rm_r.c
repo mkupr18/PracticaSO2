@@ -1,4 +1,5 @@
 // Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -21,11 +22,11 @@ static int eliminar_recursivo(const char *camino) {
     
     // Si es un directorio y no está vacío, elimina su contenido primero
     if (inodo.tipo == 'd' && inodo.tamEnBytesLog > 0) {
-        // Lista el contenido del directorio
+        // Lista el contenido del directorio, guardando los nombres de las entradas del directorio
         int n = mi_dir(camino, buffer, 's');
         if (n < 0) return n;
         
-        // Procesa cada entrada
+        // Procesa cada entrada dividiendo el buffer para extraer los nombres del directorio
         char *token = strtok(buffer, "\t");
         while (token != NULL) {
             // Construye una ruta absoluta
@@ -49,7 +50,11 @@ static int eliminar_recursivo(const char *camino) {
     return mi_unlink(camino);
 }
 
+/**
+ * Programa que borra todo el contenido de un directorio no vacío.
+ */
 int main(int argc, char **argv) {
+    // Verifica la sintaxis
     if (argc != 3) {
         fprintf(stderr, "Sintaxis: ./mi_rm_r disco /ruta\n");
         return FALLO;

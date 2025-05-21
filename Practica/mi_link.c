@@ -1,4 +1,5 @@
 // Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
+
 #include <stdio.h>
 #include <string.h>
 #include "directorios.h" 
@@ -16,7 +17,7 @@ int main(int argc, char **argv) {
         return FALLO;
     }
 
-    // Llamamos a la función de la capa de directorios que mira si las rutas existen
+    // Llamamos a la función que crea un enlace a un fichero
     int resultado = mi_link(argv[2], argv[3]);
 
     if (resultado < 0) {
@@ -25,6 +26,7 @@ int main(int argc, char **argv) {
         return FALLO;
     }
 
+    // Desmontamos el dispositivo
     bumount();
     return EXITO;
 }

@@ -1,7 +1,12 @@
 // Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
+
 #include "directorios.h"
 
+/**
+ * Programa que muestra la información acerca del inodo de un fichero o directorio, llamando a la función mi_stat().
+ */
 int main(int argc, char **argv) {
+    // Valida los argumentos
     if (argc != 3) {
         fprintf(stderr, RED"Sintaxis: ./mi_stat <disco> </ruta>\n"RESET);
         return FALLO;
@@ -13,6 +18,7 @@ int main(int argc, char **argv) {
         return FALLO;
     }
 
+    // Muestra la información del inodo correspondiente
     struct STAT stat;
     int err = mi_stat(argv[2], &stat);
 

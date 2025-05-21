@@ -1,9 +1,14 @@
 // Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
+
 #include <stdio.h>
 #include <string.h>
 #include "directorios.h"
 
+/**
+ * Programa que borra un directorio.
+ */
 int main(int argc, char **argv) {
+    // Verifica la sintaxis
     if (argc != 3) {
         fprintf(stderr, RED"Sintaxis: ./mi_rmdir disco /ruta\n"RESET);
         return FALLO;

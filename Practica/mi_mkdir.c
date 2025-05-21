@@ -1,10 +1,14 @@
 // Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include "directorios.h" 
 
+/**
+ * Programa que crea un directorio, llamando a la función mi_creat().
+ */
 int main(int argc, char **argv) {
     // Verifica el número de argumentos
     if (argc != 4) {
@@ -12,7 +16,7 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
-    // Monta el sistema de ficheros
+    // Monta el disco
     if (bmount(argv[1]) < 0) {
         perror("Error montando el disco");
         return EXIT_FAILURE;
@@ -36,12 +40,12 @@ int main(int argc, char **argv) {
     // Crea el directorio
     int error = mi_creat(argv[3], (unsigned char) permisos);
     if (error < 0) {
-        mostrar_error_buscar_entrada(error); // Función de ayuda que imprime errores amigables
+        mostrar_error_buscar_entrada(error); // Función de ayuda que imprime errores
         bumount();
         return EXIT_FAILURE;
     }
 
-    // Desmonta el sistema de ficheros
+    // Desmonta el sistema
     bumount();
     return EXIT_SUCCESS;
 }
