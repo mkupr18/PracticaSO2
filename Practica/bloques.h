@@ -7,15 +7,13 @@
 #include <unistd.h>     // SEEK_SET, read(), write(), open(), close(), lseek()
 #include <errno.h>      // errno
 #include <string.h>     // strerror()
-
-
+ 
 #define BLOCKSIZE 1024  // bytes
 
 // Para gestión errores
 #define EXITO 0
-#define FALLO -1
-
-
+#define FALLO -1 
+ 
 // Definimos colores
 #define BLACK      "\x1B[30m"
 #define RED        "\x1b[31m"
@@ -41,3 +39,6 @@ int bumount();
 int bwrite(unsigned int nbloque, const void *buf);
 int bread(unsigned int nbloque, void *buf);
 
+// Llamada a las funciones de los semáforos
+void mi_waitSem();
+void mi_signalSem();

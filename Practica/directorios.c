@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <string.h>
+
 #include "directorios.h"
 
 #define DEBUGN6 0
@@ -251,16 +252,21 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir,
  * - Si se crea correctamente, devuelve 0.
  */
 int mi_creat(const char *camino, unsigned char permisos) {
+    mi_waitSem(); // Entrada sección crítica
     unsigned int p_inodo_dir = 0, p_inodo, p_entrada;
 
     // Llama a buscar_entrada con reservar=1 para que cree la entrada si no existe.
     int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 1, permisos);
 
     // Si hay error, se retorna el código de error.
-    if (error < 0) return error;
+    if (error < 0){
+        mostrar_error_buscar_entrada(error);
+        mi_signalSem(); // Salida sección crítica
+        return FALLO;
+    }
 
-    // Si no hay error, devuelve 0 (éxito).
-    return EXITO;
+    mi_signalSem(); // Salida sección crítica
+    return EXITO; // Si no hay error, devuelve 0 (éxito).
 }
 
 
@@ -561,46 +567,70 @@ int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nby
  * @return 0 si éxito, o un código de error si fallo (valor negativo).
  */
 int mi_link(const char *camino1, const char *camino2) {
+    mi_waitSem(); // Entrada sección crítica
+
     unsigned int p_inodo_dir1, p_inodo1, p_entrada1;
     struct inodo inodo1;
 
     // Busca el inodo del fichero original
     int error = buscar_entrada(camino1, &p_inodo_dir1, &p_inodo1, &p_entrada1, 0, 0);
-    if (error < 0) return error;
+    if (error < 0){
+        mi_signalSem(); // Salida sección crítica
+        return error;
+    }
 
     // Lee el inodo para comprobar el tipo y los permisos
-    if (leer_inodo(p_inodo1, &inodo1) < 0) return FALLO;
+    if (leer_inodo(p_inodo1, &inodo1) < 0){
+        mi_signalSem(); // Salida sección crítica
+        return FALLO;
+    }
 
     // Verifica los permisos de lectura y que es un fichero regular
-    if ((inodo1.permisos & 4) != 4 || inodo1.tipo != 'f') return FALLO;
+    if ((inodo1.permisos & 4) != 4 || inodo1.tipo != 'f'){
+        mi_signalSem(); // Salida sección crítica
+        return FALLO;
+    } 
 
     // Crea la nueva entrada camino2, se reservará un inodo automáticamente
     unsigned int p_inodo_dir2, p_inodo2, p_entrada2;
     error = buscar_entrada(camino2, &p_inodo_dir2, &p_inodo2, &p_entrada2, 1, 6);
-    if (error < 0) return error;
+    if (error < 0){
+        mi_signalSem(); // Salida sección crítica
+        return error;
+    }
 
     //printf("INFO DEBUG: Entrada %s creada con inodo %d\n", camino2, p_inodo2);
 
     // Lee la entrada creada de camino2
     struct entrada entrada;
-    if (mi_read_f(p_inodo_dir2, &entrada, p_entrada2 * sizeof(struct entrada), sizeof(struct entrada)) < 0)
+    if (mi_read_f(p_inodo_dir2, &entrada, p_entrada2 * sizeof(struct entrada), sizeof(struct entrada)) < 0){
+        mi_signalSem(); // Salida sección crítica
         return FALLO;
+    }
 
-    if (liberar_inodo(entrada.ninodo) == -1) return FALLO;
+    if (liberar_inodo(entrada.ninodo) == -1){
+        mi_signalSem(); // Salida sección crítica
+        return FALLO;
+    } 
 
     // Crea el enlace
     entrada.ninodo = p_inodo1;
    
     // Escribe la entrada modificada
     if (mi_write_f(p_inodo_dir2, &entrada, p_entrada2 * sizeof(struct entrada), sizeof(struct entrada)) < 0){
+        mi_signalSem(); // Salida sección crítica
         return FALLO;
     }
     
     // Incrementa la cantidad de enlaces, actualiza el ctime y lo guarda
     inodo1.nlinks++;
     inodo1.ctime = time(NULL);
-    if (escribir_inodo(p_inodo1, &inodo1) < 0) return FALLO;
+    if (escribir_inodo(p_inodo1, &inodo1) < 0){
+        mi_signalSem(); // Salida sección crítica
+        return FALLO;
+    }
 
+    mi_signalSem(); // Salida sección crítica
     return EXITO;
 }
 
@@ -613,10 +643,13 @@ int mi_link(const char *camino1, const char *camino2) {
  */
 int mi_unlink(const char *camino)
 {
+    mi_waitSem(); // Entrada sección crítica
+
     // Comprueba que no sea el directorio raíz
     if (strcmp(camino, "/") == 0)
     {
         fprintf(stderr, RED "Error: No se puede eliminar el directorio raíz.\n" RESET);
+        mi_signalSem(); // Salida sección crítica
         return FALLO;
     }
 
@@ -626,23 +659,33 @@ int mi_unlink(const char *camino)
 
     // Buscamos la entrada a eliminar en el sistema de ficheros
     int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 0);
-    if (error < 0)
+    if (error < 0){
+        mi_signalSem(); // Salida sección crítica
         return error;
+    }
+        
 
     // Leemos el inodo asociado al camino
-    if (leer_inodo(p_inodo, &inodo) < 0)
+    if (leer_inodo(p_inodo, &inodo) < 0){
+        mi_signalSem(); // Salida sección crítica
         return FALLO;
+    }
+        
 
     // Si es un directorio no vacío, no se puede eliminar
     if (inodo.tipo == 'd' && inodo.tamEnBytesLog > 0)
     {
         fprintf(stderr, RED "Error: No se puede eliminar un directorio no vacío.\n" RESET);
+        mi_signalSem(); // Salida sección crítica
         return FALLO;
     }
 
     // Leemos el inodo del directorio padre
-    if (leer_inodo(p_inodo_dir, &inodo_dir) < 0)
+    if (leer_inodo(p_inodo_dir, &inodo_dir) < 0){
+        mi_signalSem(); // Salida sección crítica
         return FALLO;
+    }
+        
     int n_entradas = inodo_dir.tamEnBytesLog / sizeof(struct entrada);
 
     // Si no es la última entrada, la intercambiamos con la última
@@ -650,21 +693,33 @@ int mi_unlink(const char *camino)
     {
         // Leemos la última entrada
         struct entrada ultima;
-        if (mi_read_f(p_inodo_dir, &ultima, (n_entradas - 1) * sizeof(struct entrada), sizeof(struct entrada)) < 0)
+        if (mi_read_f(p_inodo_dir, &ultima, (n_entradas - 1) * sizeof(struct entrada), sizeof(struct entrada)) < 0){
+            mi_signalSem(); // Salida sección crítica
             return FALLO;
+        }
+            
 
         // Sobrescribimos la entrada a eliminar con la última
-        if (mi_write_f(p_inodo_dir, &ultima, p_entrada * sizeof(struct entrada), sizeof(struct entrada)) < 0)
+        if (mi_write_f(p_inodo_dir, &ultima, p_entrada * sizeof(struct entrada), sizeof(struct entrada)) < 0) {
+            mi_signalSem(); // Salida sección crítica
             return FALLO;
+        }
+            
     }
 
     // Truncamos el inodo del directorio padre
-    if (mi_truncar_f(p_inodo_dir, inodo_dir.tamEnBytesLog - sizeof(struct entrada)) < 0)
+    if (mi_truncar_f(p_inodo_dir, inodo_dir.tamEnBytesLog - sizeof(struct entrada)) < 0) {
+        mi_signalSem(); // Salida sección crítica
         return FALLO;
+    }
+        
 
     // Leemos inodo del directorio eliminado
-    if (leer_inodo(p_inodo, &inodo) < 0)
+    if (leer_inodo(p_inodo, &inodo) < 0) {
+        mi_signalSem(); // Salida sección crítica
         return FALLO;
+    }
+        
 
     // Disminuimos el número de enlaces
     inodo.nlinks--;
@@ -672,16 +727,24 @@ int mi_unlink(const char *camino)
     if (inodo.nlinks == 0)
     {
         // Si ya no quedan enlaces, liberamos el inodo y sus bloques
-        if (liberar_inodo(p_inodo) < 0)
+        if (liberar_inodo(p_inodo) < 0) {
+            mi_signalSem(); // Salida sección crítica
             return FALLO;
+        }
+            
     }
     else
     {
         // Si aún hay enlaces, actualizamos el ctime y escribimos el inodo
         inodo.ctime = time(NULL);
-        if (escribir_inodo(p_inodo, &inodo) < 0)
+        if (escribir_inodo(p_inodo, &inodo) < 0) {
+            mi_signalSem(); // Salida sección crítica
             return FALLO;
+        }
+            
     }
-
+    mi_signalSem(); // Salida sección crítica
     return EXITO;
 }
+
+

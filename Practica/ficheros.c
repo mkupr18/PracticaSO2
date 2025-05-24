@@ -1,7 +1,9 @@
 // Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
-#include "ficheros.h"
+
 #include <stdio.h>
 #include <string.h>
+
+#include "ficheros.h"
 
 /**
  * @brief Escribe datos en un inodo en la posición y tamaño especificados.
@@ -47,17 +49,23 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
 
     if (primerBL == ultimoBL)
     {
+        mi_waitSem(); // Entrada sección crítica
         // Caso 1: Todo cabe en un solo bloque
         nbfisico = traducir_bloque_inodo(ninodo, primerBL, 1);
+        mi_signalSem(); // Salida sección crítica
+
         if (nbfisico == FALLO)
         {
             return FALLO;
         }
+
         if (bread(nbfisico, buf_bloque) == FALLO)
         {
             return FALLO;
         }
+
         memcpy(buf_bloque + desp1, buf_original, nbytes);
+
         if (bwrite(nbfisico, buf_bloque) == FALLO)
         {
             return FALLO;
@@ -66,18 +74,24 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
     }
     else
     {
+        mi_waitSem(); // Entrada sección crítica
         // Caso 2: Escritura en múltiples bloques
         // Primer bloque
         nbfisico = traducir_bloque_inodo(ninodo, primerBL, 1);
+        mi_signalSem(); // Salida sección crítica
+
         if (nbfisico == FALLO)
         {
             return FALLO;
         }
+
         if (bread(nbfisico, buf_bloque) == FALLO)
         {
             return FALLO;
         }
+
         memcpy(buf_bloque + desp1, buf_original, BLOCKSIZE - desp1);
+
         if (bwrite(nbfisico, buf_bloque) == FALLO)
         {
             return FALLO;
@@ -87,7 +101,10 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
         // Bloques intermedios
         for (unsigned int bl = primerBL + 1; bl < ultimoBL; bl++)
         {
+            mi_waitSem(); // Entrada sección crítica
             nbfisico = traducir_bloque_inodo(ninodo, bl, 1);
+            mi_signalSem(); // Salida sección crítica
+
             if (nbfisico == FALLO)
             {
                 return FALLO;
@@ -99,8 +116,11 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
             bytes_escritos += BLOCKSIZE;
         }
 
+        mi_waitSem(); // Entrada sección crítica
         // Último bloque
         nbfisico = traducir_bloque_inodo(ninodo, ultimoBL, 1);
+        mi_signalSem(); // Salida sección crítica
+
         if (nbfisico == FALLO)
         {
             return FALLO;
@@ -109,7 +129,9 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
         {
             return FALLO;
         }
+
         memcpy(buf_bloque, buf_original + (nbytes - (desp2 + 1)), desp2 + 1);
+
         if (bwrite(nbfisico, buf_bloque) == FALLO)
         {
             return FALLO;
@@ -117,22 +139,29 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
         bytes_escritos += desp2 + 1;
     }
 
+    mi_waitSem(); // Entrada sección crítica
     // Actualiza la metainformación del inodo
     if (leer_inodo(ninodo, &inodo) == FALLO)
     {
+        //mi_signalSem(); // Salida sección crítica
         return FALLO;
     }
+
     if (offset + nbytes > inodo.tamEnBytesLog)
     {
         inodo.tamEnBytesLog = offset + nbytes;
     }
+
     inodo.mtime = time(NULL);
     inodo.ctime = time(NULL);
+
     if (escribir_inodo(ninodo, &inodo) == FALLO)
     {
+        //mi_signalSem(); // Salida sección crítica
         return FALLO;
     }
 
+    mi_signalSem(); // Salida sección crítica
     return bytes_escritos;
 }
 
@@ -156,8 +185,11 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
  */
 int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsigned int nbytes)
 {
+    mi_waitSem(); // Entrada sección crítica
 
     struct inodo inodo;
+
+    // Lee el inodo
     if (leer_inodo(ninodo, &inodo) == -1)
     {
         // fprintf(stderr, RED "Error al leer el inodo %u\n" RESET, ninodo);
@@ -173,8 +205,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
 
     // Verifica si el offset está más allá del tamaño del archivo
     if (offset >= inodo.tamEnBytesLog)
-    {
-        ;
+    { 
         return 0; // No hay nada que leer
     }
 
@@ -272,11 +303,13 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
 
     // Actualizar atime del inodo
     inodo.atime = time(NULL);
+
     if (escribir_inodo(ninodo, &inodo) == FALLO)
     {
+        //mi_signalSem(); // Salida sección crítica PREGUNTAR
         return FALLO;
     }
-
+    mi_signalSem(); // Salida sección crítica
     return bytes_leidos;
 }
 
@@ -328,13 +361,19 @@ int mi_stat_f(unsigned int ninodo, struct STAT *p_stat)
  */
 int mi_chmod_f(unsigned int ninodo, unsigned char permisos)
 {
+    mi_waitSem(); // Entrada sección crítica
 
     struct inodo inodo;
-    if (leer_inodo(ninodo, &inodo) == -1)
+
+    if (leer_inodo(ninodo, &inodo) == -1){
+        mi_signalSem(); // Salida sección crítica
         return FALLO;
+    }
+        
     inodo.permisos = permisos;
     inodo.ctime = time(NULL);
 
+    mi_signalSem(); // Salida sección crítica
     return escribir_inodo(ninodo, &inodo);
 }
 
