@@ -2,6 +2,7 @@
 
 #include "ficheros.h"
 
+#define TAMNOMBRE 60 // Tamaño del nombre de directorio o fichero
 
 #define ERROR_CAMINO_INCORRECTO (-2)
 #define ERROR_PERMISO_LECTURA (-3)
