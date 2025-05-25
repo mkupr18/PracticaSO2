@@ -96,7 +96,10 @@ int main(int argc, char *argv[]) {
 
              // Crear fichero prueba.dat
             char fichero[256];
-            sprintf(fichero,"%s/prueba.dat", proceso_dir);
+            //sprintf(fichero,"%s/prueba.dat", proceso_dir);
+
+            printf("%s", fichero);
+
             if (mi_creat(fichero, 6) < 0) {
                 fprintf(stderr, RED"Hijo %d: Error creando fichero prueba.dat\n" RESET, getpid());
                 bumount();

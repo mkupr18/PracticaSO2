@@ -252,6 +252,8 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir,
  * - Si se crea correctamente, devuelve 0.
  */
 int mi_creat(const char *camino, unsigned char permisos) {
+
+    
     mi_waitSem(); // Entrada sección crítica
     unsigned int p_inodo_dir = 0, p_inodo, p_entrada;
 
