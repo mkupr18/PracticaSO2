@@ -1,4 +1,4 @@
-# Adelaida
+# Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
 # scripte2.sh
 
 clear

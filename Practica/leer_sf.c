@@ -13,6 +13,7 @@ void mostrar_buscar_entrada(char *camino, char reservar){
     unsigned int p_inodo = 0;
     unsigned int p_entrada = 0;
     int error;
+
     printf("\ncamino: %s, reservar: %d\n", camino, reservar);
     if ((error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, reservar, 6)) < 0) {
       mostrar_error_buscar_entrada(error);
@@ -22,6 +23,7 @@ void mostrar_buscar_entrada(char *camino, char reservar){
 }
 
 int main(int argc, char **argv) {
+    // Verifica los argumentos
     if (argc != 2)
     {
         fprintf(stderr, RED "Uso: %s <nombre_dispositivo>\n" RESET, argv[0]);
@@ -35,6 +37,7 @@ int main(int argc, char **argv) {
         return FALLO;
     }
 
+    // Lee el SB
     struct superbloque SB;
     if (bread(posSB, &SB) == FALLO)
     {
@@ -118,7 +121,7 @@ int main(int argc, char **argv) {
         ts = localtime(&inodo.btime);
         strftime(btime, sizeof(btime), "%a %Y-%m-%d %H:%M:%S", ts);
 
-        // Mostramos datos
+        // Mostramos los datos
         fprintf(stdout, "\nDATOS DEL DIRECTORIO RAIZ\n");
         fprintf(stdout, "tipo: %c\n", (inodo.tipo == 'd') ? 'd' : '-');
         fprintf(stdout, "permisos: %d\n", inodo.permisos);
@@ -202,7 +205,7 @@ int main(int argc, char **argv) {
     #endif
 
     #if DEBUGN7
-        //Mostrar creación directorios y errores
+        //Muestra la creación directorios y errores
         mostrar_buscar_entrada("pruebas/", 1); //ERROR_CAMINO_INCORRECTO
         mostrar_buscar_entrada("/pruebas/", 0); //ERROR_NO_EXISTE_ENTRADA_CONSULTA
         mostrar_buscar_entrada("/pruebas/docs/", 1); //ERROR_NO_EXISTE_DIRECTORIO_INTERMEDIO

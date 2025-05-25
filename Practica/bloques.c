@@ -1,7 +1,31 @@
 // Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
 
 #include "bloques.h"
+#include "semaforo_mutex_posix.h"
+
 static int descriptor = 0;
+static sem_t *mutex; // Semáforo mutex
+static unsigned int inside_sc = 0; // Contador para controlar el semáforo
+
+/**
+ * Protege las entradas de secciones críticas anidadas.
+ */
+void mi_waitSem()
+{
+    if (!inside_sc)
+        waitSem(mutex);
+    inside_sc++;
+}
+
+/**
+ * Protege las salidas de secciones críticas anidadas.
+ */
+void mi_signalSem()
+{
+    inside_sc--;
+    if (!inside_sc)
+        signalSem(mutex);
+}
 
 /**
  * @brief Abre un archivo que actúa como disco lógico.
@@ -15,6 +39,14 @@ static int descriptor = 0;
 int bmount(const char *camino) {
     if (descriptor > 0) {
         close(descriptor); // Lo cierra si ya está abierto
+    }
+
+    // Inicializa el semáforo
+    if (!mutex)
+    {
+        mutex = initSem();
+        if (mutex == SEM_FAILED)
+            return FALLO;
     }
 
     // Abrimos el descriptor
@@ -39,6 +71,9 @@ int bmount(const char *camino) {
  * @return `EXITO` si el cierre fue exitoso, `FALLO` si hubo un error.
  */
 int bumount() {
+    // Elimina el semáforo
+    deleteSem();
+
     // Devuelve un -1 si hay fallo
     if (close(descriptor) == -1) {
         // Mostramos por la pantalla que hay fallo
@@ -126,4 +161,7 @@ int bread(unsigned int nbloque, void *buf) {
     // Devolvemos el número de bytes leídos o -1
     return bytes_leidos;
 }
+
+
+
 

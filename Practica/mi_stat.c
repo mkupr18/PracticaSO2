@@ -1,17 +1,24 @@
+// Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
+
 #include "directorios.h"
 
+/**
+ * Programa que muestra la información acerca del inodo de un fichero o directorio, llamando a la función mi_stat().
+ */
 int main(int argc, char **argv) {
+    // Valida los argumentos
     if (argc != 3) {
         fprintf(stderr, RED"Sintaxis: ./mi_stat <disco> </ruta>\n"RESET);
         return FALLO;
     }
 
-    // Montar el dispositivo
+    // Monta el dispositivo
     if (bmount(argv[1]) == -1) {
         fprintf(stderr, RED"Error al montar el dispositivo.\n"RESET);
         return FALLO;
     }
 
+    // Muestra la información del inodo correspondiente
     struct STAT stat;
     int err = mi_stat(argv[2], &stat);
 
@@ -51,7 +58,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "tamEnBytesLog: %d\n", stat.tamEnBytesLog);
     fprintf(stderr, "numBloquesOcupados: %d\n", stat.numBloquesOcupados);
 
-    // Desmontar el dispositivo
+    // Desmonta el dispositivo
     bumount();
 
     return EXITO;
