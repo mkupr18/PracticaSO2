@@ -471,6 +471,7 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
         #endif
     }
 
+    
     struct STAT stat;
     if (mi_stat_f(p_inodo, &stat) < 0)
     {
