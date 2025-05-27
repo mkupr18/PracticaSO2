@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
 
     // Llama a mi_unlink
     if (mi_unlink(argv[2]) < 0) {
-        fprintf(stderr, RED "Error: No existe el archivo o el directorio.\n" RESET);
+        fprintf(stderr, RED "Error de mi unlink: No existe el archivo o el directorio.\n" RESET);
         bumount();
         return FALLO;
     }
