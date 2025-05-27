@@ -134,18 +134,23 @@ int initMB()
         }
         else
         {
-            // Manejo del último bloque con bits restantes
+            // Copiamos los bytes completos ocupados
             unsigned char bufferAux[BLOCKSIZE];
             memset(bufferAux, 0, BLOCKSIZE);
             memcpy(bufferAux, bufferMB, bytesOcupados % BLOCKSIZE);
-            memcpy(bufferMB, bufferAux, BLOCKSIZE);
 
-            if (bitsRestantes > 0)
+            // Establecer los bits restantes de forma individual
+            unsigned int bitAbsoluto = bloquesOcupados;
+            for (unsigned int b = 0; b < bitsRestantes; b++)
             {
-                bufferMB[bytesOcupados % BLOCKSIZE] = (unsigned char)(~(0xFF >> bitsRestantes));
+                unsigned int bit = (bitAbsoluto % 8);
+                unsigned int byte = (bitAbsoluto / 8) % BLOCKSIZE;
+
+                bufferAux[byte] |= (1 << (7 - bit));
+                bitAbsoluto++;
             }
 
-            if (bwrite(SB.posPrimerBloqueMB + i, bufferMB) == -1)
+            if (bwrite(SB.posPrimerBloqueMB + i, bufferAux) == -1)
             {
                 return FALLO;
             }
@@ -156,6 +161,7 @@ int initMB()
     // SB.cantBloquesLibres -= bloquesOcupados;
     return bwrite(posSB, &SB) == -1 ? FALLO : EXITO;
 }
+
 
 /**
  * @brief Inicializa el array de inodos, marcándolos como libres y enlazándolos en lista.

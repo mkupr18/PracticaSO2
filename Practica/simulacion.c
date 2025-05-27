@@ -30,7 +30,6 @@ void reaper() {
 // Formato: simul_aaaammddhhmmss 
 // donde aaaa es el año, mm es el mes, dd es el día, 
 // hh es la hora, mm es el minuto y ss es el segundo de creación.
-
 void generar_nombre_directorio(char *nombre) {
     time_t ahora = time(NULL);
     struct tm *tm_info = localtime(&ahora);
@@ -60,8 +59,6 @@ int main(int argc, char *argv[]) {
        return FALLO;
     }
 
-
-    // Verify directory was created
     struct STAT stat;
     if (mi_stat(simul_dir, &stat) < 0) {
         fprintf(stderr, "No se pudo verificar creación del directorio\n");
@@ -92,7 +89,7 @@ int main(int argc, char *argv[]) {
             if (mi_creat(proceso_dir, 6) < 0) {
                 fprintf(stderr, RED"Hijo %d: Error creando directorio de proceso\n"RESET, getpid());
                 bumount();
-                return FALLO;
+                exit(1);
             }
 
              // Crear fichero prueba.dat
@@ -105,7 +102,7 @@ int main(int argc, char *argv[]) {
             if (mi_creat(fichero, 6) < 0) {
                 fprintf(stderr, RED"Hijo %d: Error creando fichero prueba.dat\n" RESET, getpid());
                 bumount();
-                return FALLO;
+                exit(1);
             }
 
             // Inicializar semilla aleatoria
@@ -118,17 +115,20 @@ int main(int argc, char *argv[]) {
                 reg.pid = getpid();
                 reg.nEscritura = j;
                 reg.nRegistro = rand() % REGMAX;
+                //reg.nRegistro = j;
 
                 // Escribir el registro en el fichero
                 if (mi_write(fichero, &reg, reg.nRegistro * sizeof(struct REGISTRO), sizeof(struct REGISTRO)) < 0) {
                     fprintf(stderr, RED"Error escribiendo registro\n"RESET);
+                    return FALLO;
                 }
 
+                //fprintf(stderr, "[Proceso %d: completadas %d escrituras en %s]\n", getpid(), NUMESCRITURAS, fichero);
                 // Esperar entre escrituras
                 usleep(50000);  // 0.05 seg
             }
 
-            printf("[Proceso %d: Completadas %d escrituras en %s]\n", getpid(), NUMESCRITURAS, fichero);
+            fprintf(stderr,"[Proceso %d: Completadas %d escrituras en %s]\n", getpid(), NUMESCRITURAS, fichero);
             // Desmontar el dispositivo hijo y salir
             bumount(); 
             return EXITO;
