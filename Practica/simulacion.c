@@ -86,7 +86,8 @@ int main(int argc, char *argv[]) {
 
             // Crear directorio para este proceso
             char proceso_dir[128];
-            sprintf(proceso_dir,"%sproceso_%d", simul_dir, getpid());
+            sprintf(proceso_dir,"%sproceso_%d/", simul_dir, getpid());
+            //printf("DEBUG: proceso_dir = %s\n", proceso_dir);
             // Usar mi_creat para crear una entrada en el directorio
             if (mi_creat(proceso_dir, 6) < 0) {
                 fprintf(stderr, RED"Hijo %d: Error creando directorio de proceso\n"RESET, getpid());
@@ -96,7 +97,9 @@ int main(int argc, char *argv[]) {
 
              // Crear fichero prueba.dat
             char fichero[256];
-            sprintf(fichero,"%s/prueba.dat", proceso_dir);
+            sprintf(fichero,"%sprueba.dat", proceso_dir);
+            //printf("DEBUG: fichero = %s\n", fichero);
+
             //printf("%s", fichero);
 
             if (mi_creat(fichero, 6) < 0) {
