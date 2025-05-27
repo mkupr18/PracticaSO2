@@ -1,12 +1,10 @@
 // Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
-#ifndef SIMULACION_H
-#define SIMULACION_H
 #include <time.h>
 #include <sys/types.h>
 
 #define REGMAX 500000
-#define NUMPROCESOS 100
-#define NUMESCRITURAS 50
+#define NUMPROCESOS 20
+#define NUMESCRITURAS 10
 
 struct REGISTRO { //sizeof(struct REGISTRO): 24 bytes
    time_t fecha; //Precisión segundos [opcionalmente microsegundos con struct timeval]
@@ -15,4 +13,5 @@ struct REGISTRO { //sizeof(struct REGISTRO): 24 bytes
    int nRegistro; //Entero con el nº del registro dentro del fichero: [0..REGMAX-1] (orden por posición)
 };
 
-#endif // SIMULACION_H
+
+

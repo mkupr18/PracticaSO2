@@ -143,7 +143,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
     // Actualiza la metainformación del inodo
     if (leer_inodo(ninodo, &inodo) == FALLO)
     {
-        //mi_signalSem(); // Salida sección crítica
+        mi_signalSem(); // Salida sección crítica
         return FALLO;
     }
 
@@ -157,7 +157,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
 
     if (escribir_inodo(ninodo, &inodo) == FALLO)
     {
-        //mi_signalSem(); // Salida sección crítica
+        mi_signalSem(); // Salida sección crítica
         return FALLO;
     }
 
