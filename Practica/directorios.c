@@ -577,6 +577,7 @@ int mi_link(const char *camino1, const char *camino2) {
     // Busca el inodo del fichero original
     int error = buscar_entrada(camino1, &p_inodo_dir1, &p_inodo1, &p_entrada1, 0, 0);
     if (error < 0){
+        printf("Fallo al buscar inodo del fichero original");
         mi_signalSem(); // Salida sección crítica
         return error;
     }
@@ -597,6 +598,7 @@ int mi_link(const char *camino1, const char *camino2) {
     unsigned int p_inodo_dir2, p_inodo2, p_entrada2;
     error = buscar_entrada(camino2, &p_inodo_dir2, &p_inodo2, &p_entrada2, 1, 6);
     if (error < 0){
+        printf("Fallo al crear la nueva entrada camino2");
         mi_signalSem(); // Salida sección crítica
         return error;
     }
@@ -662,6 +664,7 @@ int mi_unlink(const char *camino)
     // Buscamos la entrada a eliminar en el sistema de ficheros
     int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 0);
     if (error < 0){
+        printf("Error al buscar la entrada a eliminar");
         mi_signalSem(); // Salida sección crítica
         return error;
     }
