@@ -137,14 +137,13 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
     memset(final, 0, strlen(camino_parcial)+1);
     if (extraer_camino(camino_parcial, inicial, final, &tipo) < 0)
         return ERROR_CAMINO_INCORRECTO;
-
     #if DEBUGN7
     fprintf (stderr, GREEN "[buscar_entrada()→ inicial: %s, final: %s, reservar: %d]\n" RESET, inicial, final, reservar);
     #endif
 
     if (leer_inodo(*p_inodo_dir, &inodo_dir) == -1) return FALLO;
     if ((inodo_dir.permisos & 4) != 4) { 
-        #if DEBUGN7
+        #if DEBUGN7    
         fprintf(stderr, GREEN "[buscar_entrada()→ El inodo %d no tiene permisos de lectura]\n" RESET, *p_inodo_dir);
         #endif
         return ERROR_PERMISO_LECTURA;
@@ -670,7 +669,7 @@ int mi_unlink(const char *camino)
     // Buscamos la entrada a eliminar en el sistema de ficheros
     int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 0);
     if (error < 0){
-        printf("Error al buscar la entrada a eliminar");
+        mostrar_error_buscar_entrada(error);
         mi_signalSem(); // Salida sección crítica
         return error;
     }
@@ -686,7 +685,7 @@ int mi_unlink(const char *camino)
     // Si es un directorio no vacío, no se puede eliminar
     if (inodo.tipo == 'd' && inodo.tamEnBytesLog > 0)
     {
-        fprintf(stderr, RED "Error: No se puede eliminar un directorio no vacío.\n" RESET);
+        fprintf(stderr, RED "Error: El directorio %s no está vacío.\n" RESET, camino);
         mi_signalSem(); // Salida sección crítica
         return FALLO;
     }
