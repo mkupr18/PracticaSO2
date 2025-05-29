@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
     int resultado = mi_link(argv[2], argv[3]);
 
     if (resultado < 0) {
-        mostrar_error_buscar_entrada(resultado);
+        //mostrar_error_buscar_entrada(resultado);
         bumount();
         return FALLO;
     }
