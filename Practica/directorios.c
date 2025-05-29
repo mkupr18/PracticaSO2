@@ -240,8 +240,7 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
  * - Si se crea correctamente, devuelve 0.
  */
 int mi_creat(const char *camino, unsigned char permisos) {
-
-    
+ 
     mi_waitSem(); // Entrada sección crítica
     unsigned int p_inodo_dir = 0, p_inodo, p_entrada;
 
@@ -576,7 +575,7 @@ int mi_link(const char *camino1, const char *camino2) {
         return FALLO;
     }
 
-/*     // Verifica los permisos de lectura y que es un fichero regular
+    /* // Verifica los permisos de lectura y que es un fichero regular
     if ((inodo1.permisos & 4) != 4 || inodo1.tipo != 'f'){
         mi_signalSem(); // Salida sección crítica
         return FALLO;
@@ -584,17 +583,17 @@ int mi_link(const char *camino1, const char *camino2) {
 
     if (inodo1.tipo != 'f') {
         fprintf(stderr, RED "mi_link: %s ha de ser un fichero\n" RESET, camino1);
-        #if SEMAFOROS
+        //#if SEMAFOROS
         mi_signalSem();
-        #endif
+        //#endif
         return FALLO;
     }
     // comprobamos que camino1 tiene permisos de lectura
     if ((inodo1.permisos & 4) != 4) {
         fprintf(stderr, "mi_link: %s no tiene permisos de lectura\033[0m\n", camino1);
-        #if SEMAFOROS
+        //#if SEMAFOROS
         mi_signalSem();
-        #endif
+        //#endif
         return ERROR_PERMISO_LECTURA;
     }
 

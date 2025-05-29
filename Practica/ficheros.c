@@ -192,6 +192,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
     // Lee el inodo
     if (leer_inodo(ninodo, &inodo) == -1)
     {
+        mi_signalSem();
         // fprintf(stderr, RED "Error al leer el inodo %u\n" RESET, ninodo);
         return FALLO;
     }
@@ -200,13 +201,15 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
     if ((inodo.permisos & 4) != 4)
     {
         fprintf(stderr, RED "No hay permisos de lectura\n" RESET);
+        mi_signalSem();
         return FALLO;
     }
 
     // Verifica si el offset está más allá del tamaño del archivo
     if (offset >= inodo.tamEnBytesLog)
-    { 
-        return 0; // No hay nada que leer
+    {
+        mi_signalSem();
+        return EXITO; // No hay nada que leer
     }
 
     // Ajusta nbytes si se intenta leer más allá del EOF
@@ -229,12 +232,14 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
         int nbfisico = traducir_bloque_inodo(ninodo, primerBL, 0);
         if (nbfisico == FALLO)
         {
+            mi_signalSem();
             // Bloque no asignado, devolver 0 bytes leídos para esta parte
-            return 0;
+            return EXITO;
         }
 
         if (bread(nbfisico, buf_bloque) == FALLO)
         {
+            mi_signalSem();
             return FALLO;
         }
 
@@ -250,6 +255,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
         {
             if (bread(nbfisico, buf_bloque) == FALLO)
             {
+                mi_signalSem();
                 return FALLO;
             }
             unsigned int bytes_a_leer = BLOCKSIZE - desp1;
@@ -270,6 +276,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
             {
                 if (bread(nbfisico, buf_bloque) == FALLO)
                 {
+                    mi_signalSem();
                     return FALLO;
                 }
                 memcpy(buf_original + bytes_leidos, buf_bloque, BLOCKSIZE);
@@ -288,6 +295,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
         {
             if (bread(nbfisico, buf_bloque) == FALLO)
             {
+                mi_signalSem();
                 return FALLO;
             }
             unsigned int bytes_a_leer = desp2 + 1;
@@ -306,7 +314,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
 
     if (escribir_inodo(ninodo, &inodo) == FALLO)
     {
-        //mi_signalSem(); // Salida sección crítica PREGUNTAR
+        mi_signalSem(); // Salida sección crítica PREGUNTAR
         return FALLO;
     }
     mi_signalSem(); // Salida sección crítica

@@ -3,10 +3,10 @@
 #include <sys/types.h>
 
 #define REGMAX 500000
-#define NUMPROCESOS 20
-#define NUMESCRITURAS 10
+#define NUMPROCESOS 100
+#define NUMESCRITURAS 50
 
-struct REGISTRO { //sizeof(struct REGISTRO): 24 bytes
+struct REGISTRO { // sizeof(struct REGISTRO): 24 bytes
    time_t fecha; //Precisión segundos [opcionalmente microsegundos con struct timeval]
    pid_t pid; //PID del proceso que lo ha creado
    int nEscritura; //Entero con el nº de escritura, de 1 a 50 (orden por tiempo)
