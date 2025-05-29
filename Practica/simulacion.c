@@ -128,7 +128,7 @@ int main(int argc, char *argv[]) {
                 usleep(50000);  // 0.05 seg
             }
 
-            fprintf(stderr,"[Proceso %d: Completadas %d escrituras en %s]\n", getpid(), NUMESCRITURAS, fichero);
+            fprintf(stderr,"[Proceso %d: Completadas %d escrituras en %s]\n", i+1, NUMESCRITURAS, fichero);
             // Desmontar el dispositivo hijo y salir
             bumount(); 
             return EXITO;

@@ -5,7 +5,7 @@
 #include "directorios.h"
 #define DEBUGN1 0
 #define DEBUGN2 0
-#define DEBUGN7 1
+#define DEBUGN7 0
 
 void mostrar_buscar_entrada(char *camino, char reservar){
 
