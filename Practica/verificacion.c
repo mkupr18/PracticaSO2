@@ -50,6 +50,9 @@ int main(int argc, char **argv) {
         return FALLO;
     }
 
+    printf("dir_sim: %s\n", directorio_simulacion);
+    printf("numentradas: %d NUMPROCESOS: %d\n", numentradas, NUMPROCESOS);
+
     // Crear informe.txt
     char informe_path[200];
     sprintf(informe_path, "%sinforme.txt", directorio_simulacion);
