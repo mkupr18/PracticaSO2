@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
     unsigned int offsets[NUM_OFFSETS] = {9000, 209000, 30725000, 409605000, 480000000};
     int tamTexto = strlen(texto);
 
-    //Miramos si existe tal dispositivo a escribir
+    // Miramos si existe tal dispositivo a escribir
     if (bmount(nombre_dispositivo) == -1) {
         fprintf(stderr, RED "Error al montar el dispositivo\n" RESET);
         return FALLO;
@@ -54,8 +54,7 @@ int main(int argc, char **argv) {
         // Entramos aqui en cas de querer inodos diferentes, cada inodo tendra su propia referencia a inodo.
         // Los inodos se definen en el array declarado anteriormente
         for (int i = 0; i < NUM_OFFSETS; i++) {
-            //printf("Estamos dentro de dif 1");
-            ninodos[i] = reservar_inodo('f', 6);
+            ninodos[i] = reservar_inodo('f', 6); 
             if (ninodos[i] == -1) {
                 fprintf(stderr, RED "Error al reservar inodo %d\n" RESET, i);
                 bumount();
@@ -80,7 +79,7 @@ int main(int argc, char **argv) {
         // Bytes escritos
         fprintf(stdout,"Bytes escritos: %d\n", bytes_escritos);
 
-        //Mostramos datos del inodo mediante stat
+        // Mostramos los datos del inodo mediante stat
         struct STAT stat;
         if (mi_stat_f(ninodos[i], &stat) == -1) {
             fprintf(stderr, RED "Error al obtener stat del inodo %d\n" RESET, ninodos[i]);

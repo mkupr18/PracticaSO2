@@ -20,8 +20,7 @@ struct entrada {
   char nombre[TAMNOMBRE];
   unsigned int ninodo;
 };
-
-
+ 
 #define TAMNOMBRE 60 // Tamaño del nombre de directorio o fichero
 #define PROFUNDIDAD 32 // Profundidad máxima del árbol de directorios
 #define CACHESIZE 3 // Tamaño de la caché para escrituras FIFO
@@ -31,10 +30,7 @@ struct UltimaEntrada{
    int p_inodo;
 
 };
-
-
-
-
+ 
 void mostrar_error_buscar_entrada(int error);
 int extraer_camino(const char *camino, char *inicial, char *final, char *tipo);
 int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsigned int *p_inodo, unsigned int *p_entrada, char reservar, unsigned char permisos);

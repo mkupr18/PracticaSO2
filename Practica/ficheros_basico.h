@@ -7,7 +7,7 @@
 #define posSB  0
 #define tamSB  1
 
-#define INODOSIZE 128   // bytes
+#define INODOSIZE 128   // Bytes
 #define NPUNTEROS (BLOCKSIZE / sizeof(unsigned int)) // 256 punteros por bloque
 #define DIRECTOS 12
 #define INDIRECTOS0 (NPUNTEROS + DIRECTOS)                            // 268
