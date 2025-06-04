@@ -125,7 +125,7 @@ int main(int argc, char **argv) {
         offset_informe += strlen(linea);
 
         struct REGISTRO registros[4] = {info.PrimeraEscritura, info.UltimaEscritura, info.MenorPosicion, info.MayorPosicion};
-        const char *etiquetas[4] = {"Primera Escritura", "Ultima Escritura", "Menor Posicion", "Mayor Posicion"};
+        const char *etiquetas[4] = {"Primera Escritura", "Ultima Escritura", "Menor Posicion\t", "Mayor Posicion\t"};
         char fecha[80];
 
         for (int k = 0; k < 4; k++) {
