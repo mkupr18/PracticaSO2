@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
-    // Desmonta el sistema
+    // Desmonta el dispositivo
     bumount();
     return EXIT_SUCCESS;
 }

@@ -89,6 +89,7 @@ int main(int argc, char **argv) {
         fprintf(stdout, LBLUE "stat.tamEnBytesLog=%u\n" RESET, stat.tamEnBytesLog);
         fprintf(stdout, LBLUE"stat.numBloquesOcupados=%u\n"RESET ,stat.numBloquesOcupados);
     }
+    // Desmontar el dispositivo
     if (bumount() == -1) {
         fprintf(stderr, RED "Error al desmontar el dispositivo\n" RESET);
         return FALLO;

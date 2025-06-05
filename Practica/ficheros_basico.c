@@ -88,8 +88,12 @@ int initSB(unsigned int nbloques, unsigned int ninodos)
     SB.cantInodosLibres = ninodos;
     SB.totBloques = nbloques;
     SB.totInodos = ninodos;
+    
+    if(bwrite(posSB, &SB) == -1){
+        return FALLO;
+    }
 
-    return bwrite(posSB, &SB) == -1 ? FALLO : EXITO;
+    return EXITO;
 }
 
 /**
@@ -106,27 +110,36 @@ int initSB(unsigned int nbloques, unsigned int ninodos)
  */
 int initMB()
 {
+     // Leemos el superbloque para obtener información
     struct superbloque SB;
     if (bread(posSB, &SB) == -1)
     {
         return FALLO;
     }
 
+    // Buffer para simular el mapa de bits por bloques
     unsigned char bufferMB[BLOCKSIZE];
+    // Inicializamos a 0 (todos libres)
     memset(bufferMB, 0, BLOCKSIZE);
 
-    unsigned int tamMB_bloques = tamMB(SB.totBloques);
+    // Bloques necesarios para el MB
+    unsigned int tamMB_bloques = tamMB(SB.totBloques); 
+    // Bloques reservados para metadatos
     unsigned int bloquesOcupados = SB.posPrimerBloqueDatos;
+    // Bytes completos a marcar
     unsigned int bytesOcupados = bloquesOcupados / 8;
+    // Bits restantes en último byte
     unsigned int bitsRestantes = bloquesOcupados % 8;
 
     // Inicializamos con 1 todos los bloques ocupados
     memset(bufferMB, 255, BLOCKSIZE);
 
+    // Procesamos cada bloque del mapa de bits
     for (unsigned int i = 0; i < tamMB_bloques; i++)
     {
         if (i < bytesOcupados / BLOCKSIZE)
         {
+            // Bloques completamente ocupados (metadatos)
             if (bwrite(SB.posPrimerBloqueMB + i, bufferMB) == -1)
             {
                 return FALLO;
@@ -134,18 +147,23 @@ int initMB()
         }
         else
         {
-            // Copiamos los bytes completos ocupados
+            // Último bloque con datos parciales
             unsigned char bufferAux[BLOCKSIZE];
             memset(bufferAux, 0, BLOCKSIZE);
+
+            // Copiamos los bytes completos ocupados
             memcpy(bufferAux, bufferMB, bytesOcupados % BLOCKSIZE);
 
             // Establece los bits restantes de forma individual
             unsigned int bitAbsoluto = bloquesOcupados;
             for (unsigned int b = 0; b < bitsRestantes; b++)
             {
+                 // Posición dentro del byte
                 unsigned int bit = (bitAbsoluto % 8);
+                // Byte dentro del bloque
                 unsigned int byte = (bitAbsoluto / 8) % BLOCKSIZE;
 
+                 // Marcamos el bit como ocupado (1)
                 bufferAux[byte] |= (1 << (7 - bit));
                 bitAbsoluto++;
             }
@@ -154,11 +172,14 @@ int initMB()
             {
                 return FALLO;
             }
-            break;
+            break; // Salimos del bucle después del último bloque parcial
         }
     }
  
-    return bwrite(posSB, &SB) == -1 ? FALLO : EXITO;
+ if (bwrite(posSB, &SB) == -1) {
+    return FALLO;
+}
+return EXITO;
 }
 
 

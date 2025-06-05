@@ -644,6 +644,7 @@ int mi_unlink(const char *camino)
         return FALLO;
     }
 
+    // Inicializar a 0 antes de llamar a buscar_entrada()
     unsigned int p_inodo_dir = 0, p_inodo = 0, p_entrada = 0;
     struct inodo inodo, inodo_dir; 
 
@@ -676,7 +677,8 @@ int mi_unlink(const char *camino)
         mi_signalSem(); // Salida sección crítica
         return FALLO;
     }
-        
+       
+    // Obetenemos el número de entradas
     int n_entradas = inodo_dir.tamEnBytesLog / sizeof(struct entrada);
 
     // Si no es la última entrada, la intercambiamos con la última

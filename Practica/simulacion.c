@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
 
     struct STAT stat;
     if (mi_stat(simul_dir, &stat) < 0) {
-        fprintf(stderr, "No se pudo verificar creación del directorio\n");
+        fprintf(stderr, "No se pudo verificar creación del directorio padre\n");
         bumount();
         return FALLO;
     }
@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
             // Crear directorio para este proceso
             char proceso_dir[128];
             sprintf(proceso_dir,"%sproceso_%d/", simul_dir, getpid());
-            //printf("DEBUG: proceso_dir = %s\n", proceso_dir);
+
             // Usar mi_creat para crear una entrada en el directorio
             if (mi_creat(proceso_dir, 6) < 0) {
                 fprintf(stderr, RED"Hijo %d: Error creando directorio de proceso\n"RESET, getpid());
@@ -95,9 +95,6 @@ int main(int argc, char *argv[]) {
              // Crear fichero prueba.dat
             char fichero[256];
             sprintf(fichero,"%sprueba.dat", proceso_dir);
-            //printf("DEBUG: fichero = %s\n", fichero);
-
-            //printf("%s", fichero);
 
             if (mi_creat(fichero, 6) < 0) {
                 fprintf(stderr, RED"Hijo %d: Error creando fichero prueba.dat\n" RESET, getpid());
@@ -114,8 +111,7 @@ int main(int argc, char *argv[]) {
                 reg.fecha = time(NULL);
                 reg.pid = getpid();
                 reg.nEscritura = j;
-                reg.nRegistro = rand() % REGMAX;
-                //reg.nRegistro = j;
+                reg.nRegistro = rand() % REGMAX; // Posición aleatoria donde se escribe el registro
 
                 // Escribir el registro en el fichero
                 if (mi_write(fichero, &reg, reg.nRegistro * sizeof(struct REGISTRO), sizeof(struct REGISTRO)) < 0) {
@@ -123,7 +119,6 @@ int main(int argc, char *argv[]) {
                     return FALLO;
                 }
 
-                //fprintf(stderr, "[Proceso %d: completadas %d escrituras en %s]\n", getpid(), NUMESCRITURAS, fichero);
                 // Esperar entre escrituras
                 usleep(50000);  // 0.05 seg
             }

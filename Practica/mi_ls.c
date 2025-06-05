@@ -16,10 +16,10 @@ int main(int argc, char **argv) {
     char *camino;
     int formato_largo = 0;
 
-    if (argc == 3) {
+    if (argc == 3) { // Modo simple
         disco = argv[1];
         camino = argv[2];
-    } else if (argc == 4) {
+    } else if (argc == 4) { // Modo largo
         if (strcmp(argv[1], "-l") != 0) {
             fprintf(stderr, RED "Error: opción no válida.\n" RESET);
             return FALLO;
@@ -29,16 +29,19 @@ int main(int argc, char **argv) {
         camino = argv[3];
     }
 
+    // Montamos el dispositivo
     if (bmount(disco) == -1) {
         fprintf(stderr, RED "Error al montar el dispositivo.\n" RESET);
         return FALLO;
     }
 
+    // Buffer para almacenar resultados
     char buffer[TAMBUFFER];
     memset(buffer, 0, sizeof(buffer));
 
-    int entradas;
 
+    // Obtenemos entradas del directorio
+    int entradas;
     if (formato_largo) {
         entradas = mi_dir(camino, buffer, 'l'); // modo largo
     } else {
@@ -51,6 +54,7 @@ int main(int argc, char **argv) {
         return FALLO;
     }
 
+    // Imprimir resultados
     if (formato_largo) {
         printf("Total: %d\n", entradas);
         printf("Tipo\tModo\tmTime\t\tTamaño\t\tNombre\n");
