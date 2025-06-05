@@ -18,8 +18,7 @@ int main(int argc, char **argv) {
     if (bmount(argv[1]) < 0) return FALLO;
 
     // Llama a mi_unlink
-    if (mi_unlink(argv[2]) < 0) {
-        //fprintf(stderr, RED "Error de mi unlink: No existe el archivo o el directorio.\n" RESET);
+    if (mi_unlink(argv[2]) < 0) { 
         bumount();
         return FALLO;
     }

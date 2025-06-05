@@ -5,6 +5,7 @@
 #define CANT_REGISTROS_BUFFER 256
 
 int main(int argc, char **argv) {
+    // Valida la sintaxis
     if (argc != 3) {
         fprintf(stderr, "Uso: %s <nombre_dispositivo> <directorio_simulacion>\n", argv[0]);
         return EXIT_FAILURE;
@@ -18,14 +19,14 @@ int main(int argc, char **argv) {
     struct REGISTRO buffer[CANT_REGISTROS_BUFFER];
     char buffer_dir[TAMBUFFER];
 
-    // Montar dispositivo
+    // Monta el dispositivo
     if (bmount(nombre_dispositivo) == -1) {
         fprintf(stderr, RED "Error montando el dispositivo" RESET);
         return FALLO;
     }
 
     memset(buffer_dir, 0, sizeof(buffer_dir));
-    // Obtener lista de entradas del directorio
+    // Obtiene la lista de entradas del directorio
     int numentradas = mi_dir(directorio_simulacion, buffer_dir, 's');
 
     if (numentradas < 0) {
@@ -34,7 +35,7 @@ int main(int argc, char **argv) {
         return FALLO;
     }
 
-    // Extraer nombres del buffer
+    // Extrae los nombres del buffer
     char *nombres[NUMPROCESOS];
     int num_procesos = 0;
 
@@ -53,7 +54,7 @@ int main(int argc, char **argv) {
     printf("dir_sim: %s\n", directorio_simulacion);
     printf("numentradas: %d NUMPROCESOS: %d\n", numentradas, NUMPROCESOS);
 
-    // Crear informe.txt
+    // Crea el informe.txt
     char informe_path[200];
     sprintf(informe_path, "%sinforme.txt", directorio_simulacion);
     if (mi_creat(informe_path, 6) < 0) {
@@ -62,22 +63,22 @@ int main(int argc, char **argv) {
         return FALLO;
     }
 
-    // Recorrer cada directorio de proceso
+    // Recorre cada directorio de proceso
     for (int i = 0; i < num_procesos; i++) {
-        // Extraer PID
+        // Extrae el PID
         char *ptr = strchr(nombres[i], '_');
         if (!ptr) continue;
         int pid = atoi(ptr + 1);
         info.pid = pid;
         info.nEscrituras = 0;
 
-        // Inicializar estructuras
+        // Inicializa las estructuras
         memset(&info.PrimeraEscritura, 0, sizeof(struct REGISTRO));
         memset(&info.UltimaEscritura, 0, sizeof(struct REGISTRO));
         memset(&info.MenorPosicion, 0, sizeof(struct REGISTRO));
         memset(&info.MayorPosicion, 0, sizeof(struct REGISTRO));
 
-        // Abrir prueba.dat
+        // Abre prueba.dat
         sprintf(camino_fichero, "%s%s/prueba.dat", directorio_simulacion, nombres[i]);
         offset = 0;
         int bytes_leidos;
@@ -88,8 +89,7 @@ int main(int argc, char **argv) {
 
             if (bytes_leidos <= 0) break;
             int registros_leidos = bytes_leidos / sizeof(struct REGISTRO);
-            for (int j = 0; j < registros_leidos; j++) {
-                //if (j < 3) printf("Esperado PID: %d | Leido PID: %d\n", pid, buffer[j].pid);
+            for (int j = 0; j < registros_leidos; j++) { 
                 if (buffer[j].pid == pid) {
                     if (info.nEscrituras == 0) {
                         info.PrimeraEscritura = buffer[j];
@@ -112,11 +112,11 @@ int main(int argc, char **argv) {
             offset += bytes_leidos;
         }
 
-       // Escribir en informe.txt
+       // Escribe en informe.txt
         char linea[300];
         struct STAT st;
 
-        // Calcular offset final para escribir al final
+        // Calcula el offset final para escribir al final
         mi_stat(informe_path, &st);
         unsigned int offset_informe = st.tamEnBytesLog;
 
@@ -136,7 +136,7 @@ int main(int argc, char **argv) {
             offset_informe += strlen(linea);
         }
 
-        // Escribir salto de línea al final
+        // Escribe el salto de línea al final
         mi_write(informe_path, "\n", offset_informe, 1);
 
 
@@ -145,7 +145,7 @@ int main(int argc, char **argv) {
         free(nombres[i]);
     }
 
-    // Desmontar dispositivo
+    // Desmonta el dispositivo
     bumount();
     return EXIT_SUCCESS;
 }

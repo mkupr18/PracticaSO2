@@ -1,33 +1,32 @@
 // Autores: Kalyarat Asawapoom, Rupak Guni, Maria Kupriyenko
 
 #include "directorios.h"
-
-
+ 
 int main(int argc, char **argv){
 
-  //Comprobamos sintaxis
+  // Comprobamos la sintaxis
   if (argc!=5) {
     fprintf(stderr, RED "Sintaxis: mi_escribir <nombre_dispositivo> </ruta_fichero> <texto> <offset>\n" RESET);
     exit(-1);
    }
-
-  //struct STAT stat;
-
-  //montamos el dispositivo
+    
+  // Montamos el dispositivo
   if(bmount(argv[1])<0) return -1;
-  //obtenemos el texto y su longitud
+
+  // Obtenemos el texto y su longitud
   char *buffer_texto = argv[3];
   int longitud=strlen(buffer_texto);
 
-  //obtenemos la ruta y comprobamos que no se refiera a un directorio
+  // Obtenemos la ruta y comprobamos que no se refiera a un directorio
   if (argv[2][strlen(argv[2])-1]=='/') {
     fprintf(stderr, RED "Error: la ruta se corresponde a un directorio.\n" RESET);
     exit(-1);
   }
   char *camino = argv[2];
-  //obtenemos el offset
+
+  // Obtenemos el offset
   unsigned int offset=atoi(argv[4]);
-  //escribimos el texto
+  // Escribimos el texto
   //fprintf(stderr, MAGENTA "camino: %s\n" RESET, camino);
   //fprintf(stderr, MAGENTA "buffer_texto: %s\n" RESET, buffer_texto);
   //fprintf(stderr, MAGENTA "offset: %d\n" RESET, offset);
@@ -44,6 +43,6 @@ int main(int argc, char **argv){
   printf("stat.tamEnBytesLog=%d\n",stat.tamEnBytesLog);
   printf("stat.numBloquesOcupados=%d\n",stat.numBloquesOcupados);
   */
-
+ 
   bumount();
 }

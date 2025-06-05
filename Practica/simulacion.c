@@ -44,14 +44,14 @@ int main(int argc, char *argv[]) {
 
     signal(SIGCHLD, reaper);
 
-    // Montar dispositivo padre
+    // Monta el dispositivo padre
     if (bmount(argv[1]) < 0) {
         fprintf(stderr, "Error al montar el dispositivo\n");
         return FALLO;
     }
 
     char simul_dir[100];
-    // Crear directorio de simulacion
+    // Crea el directorio de simulacion
     generar_nombre_directorio(simul_dir);
     if (mi_creat(simul_dir, 6) < 0) {
         fprintf(stderr, "Error creando directorio simulación\n");
@@ -70,29 +70,29 @@ int main(int argc, char *argv[]) {
     printf("*** SIMULACIÓN DE %d PROCESOS REALIZANDO CADA UNO %d ESCRITURAS ***\n", NUMPROCESOS, NUMESCRITURAS);
     printf("Directorio de simulación: %s\n", simul_dir);
 
-     // Crear procesos hijos
+     // Crea los procesos hijos
     for (int i = 0; i < NUMPROCESOS; i++) {
         pid_t pid = fork();
         
         if (pid == 0) { // Proceso hijo
-            // Montar dispositivo en el hijo
+            // Monta el dispositivo en el hijo
             if (bmount(argv[1]) < 0) {
                 fprintf(stderr, RED"Hijo %d: Error al montar dispositivo hijo\n"RESET,getpid());
                 return FALLO;
             }
 
-            // Crear directorio para este proceso
+            // Crea el directorio para este proceso
             char proceso_dir[128];
             sprintf(proceso_dir,"%sproceso_%d/", simul_dir, getpid());
 
-            // Usar mi_creat para crear una entrada en el directorio
+            // Usa mi_creat para crear una entrada en el directorio
             if (mi_creat(proceso_dir, 6) < 0) {
                 fprintf(stderr, RED"Hijo %d: Error creando directorio de proceso\n"RESET, getpid());
                 bumount();
                 exit(1);
             }
 
-             // Crear fichero prueba.dat
+             // Crea el fichero prueba.dat
             char fichero[256];
             sprintf(fichero,"%sprueba.dat", proceso_dir);
 
@@ -102,10 +102,10 @@ int main(int argc, char *argv[]) {
                 exit(1);
             }
 
-            // Inicializar semilla aleatoria
+            // Inicializa la semilla aleatoria
             srand(time(NULL) + getpid());
 
-            // Realizar escrituras
+            // Realiza las escrituras
             for (int j = 1; j <= NUMESCRITURAS; j++) {
                 struct REGISTRO reg;
                 reg.fecha = time(NULL);
@@ -113,31 +113,31 @@ int main(int argc, char *argv[]) {
                 reg.nEscritura = j;
                 reg.nRegistro = rand() % REGMAX; // Posición aleatoria donde se escribe el registro
 
-                // Escribir el registro en el fichero
+                // Escribe el registro en el fichero
                 if (mi_write(fichero, &reg, reg.nRegistro * sizeof(struct REGISTRO), sizeof(struct REGISTRO)) < 0) {
                     fprintf(stderr, RED"Error escribiendo registro\n"RESET);
                     return FALLO;
                 }
 
-                // Esperar entre escrituras
+                // Espera entre escrituras
                 usleep(50000);  // 0.05 seg
             }
 
             fprintf(stderr,"[Proceso %d: Completadas %d escrituras en %s]\n", i+1, NUMESCRITURAS, fichero);
-            // Desmontar el dispositivo hijo y salir
+            // Desmonta el dispositivo hijo y sale
             bumount(); 
             return EXITO;
         }
-        // Esperar entre creación de procesos
+        // Espera entre las creación de procesos
         usleep(150000);  // 0.15 seg
     }
 
-    // Esperar a que terminen todos los hijos
+    // Espera a que terminen todos los hijos
     while (acabados < NUMPROCESOS) {
         pause();
     }
 
-    // Desmontar el dispositivo padre
+    // Desmonta el dispositivo padre
     bumount();
     return EXITO;
 }
