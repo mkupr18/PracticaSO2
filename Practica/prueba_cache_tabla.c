@@ -10,7 +10,7 @@ int main(int argc, char **argv){
     // Monta el dispositivo virtual
     bmount(argv[1]);
 
-    //obtenemos el texto y su longitud
+    // Obtenemos el texto y su longitud
     char *buffer_texto = argv[2];
     int nbytes=strlen(buffer_texto);
     int offset=0;

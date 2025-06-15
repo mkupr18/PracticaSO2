@@ -6,7 +6,7 @@
 #include "directorios.h"
 
 int main(int argc, char **argv) {
-    //si la sintaxis es correcta
+    // Si la sintaxis es correcta
     if (argc != 3 && argc != 4) {
         fprintf(stderr, RED "Sintaxis: ./mi_ls [-l] <nombre_dispositivo> </ruta>\n" RESET);
         return FALLO;
@@ -43,9 +43,9 @@ int main(int argc, char **argv) {
     // Obtenemos entradas del directorio
     int entradas;
     if (formato_largo) {
-        entradas = mi_dir(camino, buffer, 'l'); // modo largo
+        entradas = mi_dir(camino, buffer, 'l'); // Modo largo
     } else {
-        entradas = mi_dir(camino, buffer, 's'); // modo simple
+        entradas = mi_dir(camino, buffer, 's'); // Modo simple
     }
 
     if (entradas < 0) {
@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
         return FALLO;
     }
 
-    // Imprimir resultados
+    // Imprime los resultados
     if (formato_largo) {
         printf("Total: %d\n", entradas);
         printf("Tipo\tModo\tmTime\t\tTamaño\t\tNombre\n");
