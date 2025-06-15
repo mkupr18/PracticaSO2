@@ -3,6 +3,7 @@
 #include "verificacion.h"
 
 #define CANT_REGISTROS_BUFFER 256
+#define TAM_BUFFER 4096
 
 int main(int argc, char **argv) {
     if (argc != 3) {
@@ -16,7 +17,7 @@ int main(int argc, char **argv) {
     char camino_fichero[200];
     unsigned int offset = 0;
     struct REGISTRO buffer[CANT_REGISTROS_BUFFER];
-    char buffer_dir[TAMBUFFER];
+    char buffer_dir[TAM_BUFFER];
 
     // Montar dispositivo
     if (bmount(nombre_dispositivo) == -1) {
